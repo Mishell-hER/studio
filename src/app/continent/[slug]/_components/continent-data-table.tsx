@@ -38,10 +38,13 @@ interface TableConfig {
 }
 
 const tableConfigs: TableConfig[] = [
-  { title: "Ficha País", header: "Información General", description: "Enlace a la ficha del país con datos sobre idioma, moneda, y cultura.", dataKey: "fichaPaisLink", isLink: true },
+  { title: "Ficha País", header: "Información General", description: "Enlace a la ficha del país con datos generales.", dataKey: "fichaPaisLink", isLink: true },
+  { title: "Idioma", header: "Idioma Oficial", description: "Idioma principal utilizado en el país.", dataKey: "language", isLink: false },
+  { title: "Moneda", header: "Moneda Local", description: "Moneda oficial y su código.", dataKey: "currency", isLink: false },
+  { title: "Cultura", header: "Rasgos Culturales", description: "Aspectos clave de la cultura y etiqueta en los negocios.", dataKey: "culture", isLink: false },
   { title: "Acuerdo Comercial", header: "Acuerdo Vigente", description: "Acuerdo comercial de Perú con el país/bloque y su descripción.", dataKey: "tradeAgreement", isLink: false },
   { title: "Aduanas", header: "Autoridad Aduanera", description: "Enlace a la autoridad aduanera local o descripción de controles.", dataKey: "customsInfo", isLink: true },
-  { title: "Link de Ruta", header: "Ruta Terrestre", description: "Enlace a la ruta de transporte o detalles de la vía principal.", dataKey: "detailsLink", isLink: true },
+  { title: "Ruta Terrestre", header: "Ruta Terrestre", description: "Enlace a la ruta de transporte o detalles de la vía principal.", dataKey: "detailsLink", isLink: true },
   { title: "Cómo Negociar", header: "Tips de Negociación", description: "Estilo de negociación, puntualidad y vestimenta recomendada.", dataKey: "logisticalInfo", isLink: false },
   { title: "Indicadores de Desarrollo", header: "Datos Macroeconómicos", description: "Enlace a indicadores económicos clave (PBI, etc.).", dataKey: "indicadoresLink", isLink: true },
 ];
