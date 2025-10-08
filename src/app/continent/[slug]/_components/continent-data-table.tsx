@@ -31,32 +31,57 @@ type DataKey = keyof CountryData;
 
 interface TableConfig {
   title: string;
-  header: string;
   description: string;
-  dataKey: DataKey;
-  isLink: boolean;
+  // Use a more flexible structure for headers
+  headers: { label: string; dataKey: DataKey; isLink?: boolean }[];
 }
 
 const tableConfigs: TableConfig[] = [
-  { title: "Ficha País", header: "Información General", description: "Enlace a la ficha del país con datos generales.", dataKey: "fichaPaisLink", isLink: true },
-  { title: "Idioma", header: "Idioma Oficial", description: "Idioma principal utilizado en el país.", dataKey: "language", isLink: false },
-  { title: "Moneda", header: "Moneda Local", description: "Moneda oficial y su código.", dataKey: "currency", isLink: false },
-  { title: "Cultura", header: "Rasgos Culturales", description: "Aspectos clave de la cultura y etiqueta en los negocios.", dataKey: "culture", isLink: false },
-  { title: "Acuerdo Comercial", header: "Acuerdo Vigente", description: "Acuerdo comercial de Perú con el país/bloque y su descripción.", dataKey: "tradeAgreement", isLink: false },
-  { title: "Aduanas", header: "Autoridad Aduanera", description: "Enlace a la autoridad aduanera local o descripción de controles.", dataKey: "customsInfo", isLink: true },
-  { title: "Ruta Terrestre", header: "Ruta Terrestre", description: "Enlace a la ruta de transporte o detalles de la vía principal.", dataKey: "detailsLink", isLink: true },
-  { title: "Cómo Negociar", header: "Tips de Negociación", description: "Estilo de negociación, puntualidad y vestimenta recomendada.", dataKey: "logisticalInfo", isLink: false },
-  { title: "Indicadores de Desarrollo", header: "Datos Macroeconómicos", description: "Enlace a indicadores económicos clave (PBI, etc.).", dataKey: "indicadoresLink", isLink: true },
+  { 
+    title: "Información General", 
+    description: "Datos generales, culturales y económicos de cada país.",
+    headers: [
+      { label: "Ficha País", dataKey: "fichaPaisLink", isLink: true },
+      { label: "Idioma Oficial", dataKey: "language" },
+      { label: "Moneda Local", dataKey: "currency" },
+      { label: "Rasgos Culturales", dataKey: "culture" },
+    ]
+  },
+  { 
+    title: "Acuerdo Comercial", 
+    description: "Acuerdo comercial de Perú con el país/bloque y su descripción.",
+    headers: [{ label: "Acuerdo Vigente", dataKey: "tradeAgreement" }]
+  },
+  { 
+    title: "Aduanas", 
+    description: "Enlace a la autoridad aduanera local o descripción de controles.",
+    headers: [{ label: "Autoridad Aduanera", dataKey: "customsInfo", isLink: true }]
+  },
+  { 
+    title: "Ruta Terrestre", 
+    description: "Enlace a la ruta de transporte o detalles de la vía principal.",
+    headers: [{ label: "Ruta Terrestre", dataKey: "detailsLink", isLink: true }]
+  },
+  { 
+    title: "Cómo Negociar", 
+    description: "Estilo de negociación, puntualidad y vestimenta recomendada.",
+    headers: [{ label: "Tips de Negociación", dataKey: "logisticalInfo" }]
+  },
+  { 
+    title: "Indicadores de Desarrollo", 
+    description: "Enlace a indicadores económicos clave (PBI, etc.).",
+    headers: [{ label: "Datos Macroeconómicos", dataKey: "indicadoresLink", isLink: true }]
+  },
 ];
 
-const renderCellContent = (item: CountryData, config: TableConfig) => {
-  const value = item[config.dataKey] as string;
+const renderCellContent = (item: CountryData, dataKey: DataKey, isLink?: boolean) => {
+  const value = item[dataKey] as string;
 
   if (!value || value === '#') {
     return <span className="text-muted-foreground/70">No disponible</span>;
   }
   
-  if (config.isLink) {
+  if (isLink) {
      const isUrl = value.startsWith('http') || value.startsWith('www');
      if (isUrl) {
          return (
@@ -111,9 +136,11 @@ export function ContinentDataTable({ data }: { data: CountryData[] }) {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                        <TableHead className="w-[200px]">País</TableHead>
-                                        <TableHead className="hidden sm:table-cell w-[200px]">Ciudad</TableHead>
-                                        <TableHead>{config.header}</TableHead>
+                                          <TableHead className="w-[200px]">País</TableHead>
+                                          <TableHead className="hidden sm:table-cell w-[150px]">Ciudad</TableHead>
+                                          {config.headers.map(header => (
+                                            <TableHead key={header.dataKey}>{header.label}</TableHead>
+                                          ))}
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -132,7 +159,11 @@ export function ContinentDataTable({ data }: { data: CountryData[] }) {
                                                 </div>
                                             </TableCell>
                                             <TableCell className="hidden sm:table-cell">{item.capital}</TableCell>
-                                            <TableCell>{renderCellContent(item, config)}</TableCell>
+                                            {config.headers.map(header => (
+                                              <TableCell key={`${item.id}-${header.dataKey}`}>
+                                                {renderCellContent(item, header.dataKey, header.isLink)}
+                                              </TableCell>
+                                            ))}
                                         </TableRow>
                                         ))}
                                     </TableBody>
