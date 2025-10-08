@@ -24,20 +24,22 @@ export default function Home() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
         {continents.map((continent) => (
-          <Link href={`/continent/${continent.slug}`} key={continent.slug} legacyBehavior>
-            <a className="block transform transition-transform duration-300 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-lg">
-              <Card className="h-full bg-card/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary border-2 border-transparent transition-colors duration-300 group">
-                <CardHeader className="flex flex-col items-center justify-center text-center p-8 h-full">
-                  <continent.icon className="w-16 h-16 mb-4 text-primary transition-colors" />
-                  <CardTitle className="text-xl font-semibold text-foreground">
-                    {continent.name}
-                  </CardTitle>
-                  <div className="flex items-center text-sm text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Explorar <ArrowRight className="w-4 h-4 ml-2" />
-                  </div>
-                </CardHeader>
-              </Card>
-            </a>
+          <Link
+            href={`/continent/${continent.slug}`}
+            key={continent.slug}
+            className="block transform transition-transform duration-300 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-lg"
+          >
+            <Card className="h-full bg-card/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary border-2 border-transparent transition-colors duration-300 group">
+              <CardHeader className="flex flex-col items-center justify-center text-center p-8 h-full">
+                <continent.icon className="w-16 h-16 mb-4 text-primary transition-colors" />
+                <CardTitle className="text-xl font-semibold text-foreground">
+                  {continent.name}
+                </CardTitle>
+                <div className="flex items-center text-sm text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  Explorar <ArrowRight className="w-4 h-4 ml-2" />
+                </div>
+              </CardHeader>
+            </Card>
           </Link>
         ))}
       </div>
