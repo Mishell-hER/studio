@@ -1,54 +1,49 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ContinentDataTable } from '@/app/continent/[slug]/_components/continent-data-table';
-import { logisticData } from '@/lib/data';
+import Link from 'next/link';
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
 import { continents } from '@/lib/continents';
-import { PeruTransportInfo } from '@/components/transport/peru-transport-info';
-import { DocumentsPage } from '@/components/sections/documents-page';
-import { CostsPage } from '@/components/sections/costs-page';
-import { NegotiationPage } from '@/components/sections/negotiation-page';
-import { Globe } from 'lucide-react';
 
 export default function Home() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-       <div className="flex items-center gap-2 text-2xl font-bold text-primary mb-4">
-          <Globe className="h-7 w-7" />
-          <h1>Plataforma de Exportación Global</h1>
-        </div>
-      <Tabs defaultValue="north-america" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 h-auto">
-          {continents.map((continent) => (
-            <TabsTrigger key={continent.slug} value={continent.slug}>
-              {continent.name}
-            </TabsTrigger>
-          ))}
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
-          <TabsTrigger value="costs">Costos</TabsTrigger>
-          <TabsTrigger value="negotiation">Negociación</TabsTrigger>
-        </TabsList>
+  // Exclude 'Otros' from the main grid
+  const mainContinents = continents.filter(c => c.slug !== 'otros');
 
-        {continents.map((continent) => (
-          <TabsContent key={continent.slug} value={continent.slug}>
-            <div className="py-4">
-              <h2 className="text-3xl font-bold tracking-tighter text-foreground sm:text-4xl mb-4">
-                {continent.name} Logistics
-              </h2>
-              {continent.slug === 'south-america' && <PeruTransportInfo />}
-              <ContinentDataTable data={logisticData[continent.slug] || []} />
-            </div>
-          </TabsContent>
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+      <div className="text-center max-w-2xl mx-auto mb-12">
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground mb-4">
+          Logística global, simplificada.
+        </h1>
+        <p className="text-lg md:text-xl text-muted-foreground">
+          Navegue fácilmente por el comercio internacional. Seleccione un
+          continente para explorar datos detallados de exportación, información
+          aduanera y logística.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+        {mainContinents.map((continent) => (
+          <Link href={`/continent/${continent.slug}`} key={continent.slug} legacyBehavior>
+            <a className="block transform transition-transform duration-300 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-lg">
+              <Card className="h-full bg-card/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary border-2 border-transparent transition-colors duration-300 group">
+                <CardHeader className="flex flex-col items-center justify-center text-center p-8 h-full">
+                  <continent.icon className="w-16 h-16 mb-4 text-primary transition-colors" />
+                  <CardTitle className="text-xl font-semibold text-foreground">
+                    {continent.name}
+                  </CardTitle>
+                  <div className="flex items-center text-sm text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Explorar <ArrowRight className="w-4 h-4 ml-2" />
+                  </div>
+                </CardHeader>
+              </Card>
+            </a>
+          </Link>
         ))}
-        
-        <TabsContent value="documents">
-          <DocumentsPage />
-        </TabsContent>
-        <TabsContent value="costs">
-          <CostsPage />
-        </TabsContent>
-        <TabsContent value="negotiation">
-          <NegotiationPage />
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 }
