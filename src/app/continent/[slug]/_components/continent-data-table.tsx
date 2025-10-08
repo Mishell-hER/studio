@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from 'react';
+import Image from 'next/image';
 import {
   Table,
   TableBody,
@@ -115,7 +116,18 @@ export function ContinentDataTable({ data }: { data: CountryData[] }) {
                                     <TableBody>
                                         {data.map((item) => (
                                         <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.country}</TableCell>
+                                            <TableCell className="font-medium">
+                                                <div className="flex items-center gap-3">
+                                                    <Image
+                                                        src={`https://flagcdn.com/w40/${item.flagCode}.png`}
+                                                        alt={`Bandera de ${item.country}`}
+                                                        width={24}
+                                                        height={16}
+                                                        className="rounded-sm"
+                                                    />
+                                                    {item.country}
+                                                </div>
+                                            </TableCell>
                                             <TableCell className="hidden sm:table-cell">{item.capital}</TableCell>
                                             <TableCell>{renderCellContent(item, config)}</TableCell>
                                         </TableRow>
