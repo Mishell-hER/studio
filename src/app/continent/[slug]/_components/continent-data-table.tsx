@@ -16,146 +16,118 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ExternalLink } from 'lucide-react';
+import { ExternalLink, Info } from 'lucide-react';
 import type { CountryData } from '@/lib/data';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
-type SortableKeys = keyof CountryData;
+type DataKey = keyof CountryData;
+
+interface TableConfig {
+  title: string;
+  header: string;
+  description: string;
+  dataKey: DataKey;
+  isLink: boolean;
+}
+
+const tableConfigs: TableConfig[] = [
+  { title: "Ficha País", header: "Información General", description: "Enlace a la ficha del país con datos sobre idioma, moneda, y cultura.", dataKey: "fichaPaisLink", isLink: true },
+  { title: "Acuerdo Comercial", header: "Acuerdo Vigente", description: "Acuerdo comercial de Perú con el país/bloque y su descripción.", dataKey: "tradeAgreement", isLink: false },
+  { title: "Aduanas", header: "Autoridad Aduanera", description: "Enlace a la autoridad aduanera local o descripción de controles.", dataKey: "customsInfo", isLink: true },
+  { title: "Link de Ruta", header: "Ruta Terrestre/Marítima", description: "Enlace a la ruta de transporte o detalles de la vía principal.", dataKey: "detailsLink", isLink: true },
+  { title: "Cómo Negociar", header: "Tips de Negociación", description: "Estilo de negociación, puntualidad y vestimenta recomendada.", dataKey: "logisticalInfo", isLink: false },
+  { title: "Indicadores de Desarrollo", header: "Datos Macroeconómicos", description: "Enlace a indicadores económicos clave (PBI, etc.).", dataKey: "indicadoresLink", isLink: true },
+];
+
+const renderCellContent = (item: CountryData, config: TableConfig) => {
+  const value = item[config.dataKey] as string;
+
+  if (!value || value === '#') {
+    return <span className="text-muted-foreground/70">No disponible</span>;
+  }
+  
+  if (config.isLink) {
+     const isUrl = value.startsWith('http') || value.startsWith('www');
+     if (isUrl) {
+         return (
+             <Button asChild variant="outline" size="sm">
+                <a href={value} target="_blank" rel="noopener noreferrer">
+                    Ver
+                    <ExternalLink className="ml-2 h-3 w-3" />
+                </a>
+            </Button>
+         )
+     }
+  }
+  
+  return value;
+}
 
 export function ContinentDataTable({ data }: { data: CountryData[] }) {
-  const [filter, setFilter] = React.useState('');
-  const [sortConfig, setSortConfig] = React.useState<{
-    key: SortableKeys;
-    direction: 'ascending' | 'descending';
-  } | null>({ key: 'country', direction: 'ascending' });
-
-  const sortedData = React.useMemo(() => {
-    let sortableItems = [...data];
-    if (sortConfig !== null) {
-      sortableItems.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableItems;
-  }, [data, sortConfig]);
-
-  const filteredData = sortedData.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val).toLowerCase().includes(filter.toLowerCase())
-    )
-  );
-
-  const requestSort = (key: SortableKeys) => {
-    let direction: 'ascending' | 'descending' = 'ascending';
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === 'ascending'
-    ) {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const getSortIndicator = (key: SortableKeys) => {
-    if (!sortConfig || sortConfig.key !== key) {
-      return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground/50" />;
-    }
-    if (sortConfig.direction === 'ascending') {
-      return <span className="ml-2">▲</span>;
-    }
-    return <span className="ml-2">▼</span>;
-  };
+  if (!data || data.length === 0) {
+    return (
+      <Card className="bg-card/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle>Sin datos</CardTitle>
+          <CardDescription>
+            No hay información disponible para este continente.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle>Country-Specific Data</CardTitle>
-        <CardDescription>
-          Filter and sort trade agreements, customs, and logistics information.
-        </CardDescription>
-        <div className="mt-4">
-          <Input
-            placeholder="Filter countries..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="max-w-sm bg-background/50"
-          />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <Button variant="ghost" onClick={() => requestSort('country')}>
-                    Country
-                    {getSortIndicator('country')}
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => requestSort('tradeAgreement')}
-                  >
-                    Trade Agreement
-                    {getSortIndicator('tradeAgreement')}
-                  </Button>
-                </TableHead>
-                <TableHead className="hidden md:table-cell">
-                  Customs Info
-                </TableHead>
-                <TableHead className="hidden lg:table-cell">
-                  Logistical Info
-                </TableHead>
-                <TableHead>Details</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.country}</TableCell>
-                    <TableCell>{item.tradeAgreement}</TableCell>
-                    <TableCell className="hidden text-muted-foreground md:table-cell">
-                      {item.customsInfo}
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground lg:table-cell">
-                      {item.logisticalInfo}
-                    </TableCell>
-                    <TableCell>
-                      <Button asChild variant="outline" size="sm">
-                        <a
-                          href={item.detailsLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View
-                          <ExternalLink className="ml-2 h-4 w-4" />
-                        </a>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    No results found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+     <Card className="bg-card/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle>Información Detallada por País</CardTitle>
+          <CardDescription>
+            Explora los datos específicos para cada país en las siguientes categorías.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Accordion type="single" collapsible className="w-full" defaultValue='item-0'>
+                {tableConfigs.map((config, index) => (
+                    <AccordionItem value={`item-${index}`} key={index}>
+                        <AccordionTrigger className="text-lg hover:no-underline">
+                            {config.title}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="p-2 rounded-md bg-background/30 mb-4 flex items-start gap-2 text-sm text-muted-foreground">
+                                <Info className="h-4 w-4 mt-1 flex-shrink-0" />
+                                <p>{config.description}</p>
+                            </div>
+                            <div className="rounded-md border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                        <TableHead className="w-[200px]">País</TableHead>
+                                        <TableHead className="hidden sm:table-cell w-[200px]">Ciudad</TableHead>
+                                        <TableHead>{config.header}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {data.map((item) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell className="font-medium">{item.country}</TableCell>
+                                            <TableCell className="hidden sm:table-cell">{item.capital}</TableCell>
+                                            <TableCell>{renderCellContent(item, config)}</TableCell>
+                                        </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
+        </CardContent>
+     </Card>
   );
 }

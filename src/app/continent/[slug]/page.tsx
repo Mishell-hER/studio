@@ -73,7 +73,6 @@ export default function ContinentPage({
         </div>
       </div>
 
-
       {continent.slug === 'south-america' && <PeruTransportInfo />}
       <ContinentDataTable data={data} />
     </div>
