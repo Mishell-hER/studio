@@ -3,7 +3,7 @@ import { logisticData } from '@/lib/data';
 import { continents } from '@/lib/continents';
 import { PeruTransportInfo } from '@/components/transport/peru-transport-info';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Calculator, Lightbulb } from 'lucide-react';
+import { ArrowLeft, FileText, Calculator, Lightbulb, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
@@ -11,6 +11,17 @@ export async function generateStaticParams() {
     slug: continent.slug,
   }));
 }
+
+const exportOrigins: Record<string, string> = {
+  'north-america': 'Ciudad de Panamá - Panamá',
+  'south-america': 'Lima - Perú',
+  'europe': 'Países Bajos',
+  'asia': 'Pekín - China',
+  'africa': 'Johannesburgo - Sudáfrica',
+  'oceania': 'Sídney - Australia',
+  'otros': 'Londres - Gran Bretaña',
+};
+
 
 export default function ContinentPage({
   params,
@@ -31,6 +42,7 @@ export default function ContinentPage({
   }
 
   const data = logisticData[params.slug] || [];
+  const exportOrigin = exportOrigins[params.slug];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -47,6 +59,12 @@ export default function ContinentPage({
             {continent.name}
           </h1>
         </div>
+        {exportOrigin && (
+          <div className="mt-4 flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-5 w-5 text-primary" />
+            <span className="font-medium">Exportando desde: {exportOrigin}</span>
+          </div>
+        )}
       </div>
       
       <div className="my-8 p-6 rounded-lg bg-card/50 backdrop-blur-sm border">
