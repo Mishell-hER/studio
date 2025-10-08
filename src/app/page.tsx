@@ -9,9 +9,6 @@ import { ArrowRight } from 'lucide-react';
 import { continents } from '@/lib/continents';
 
 export default function Home() {
-  // Exclude 'Otros' from the main grid
-  const mainContinents = continents.filter(c => c.slug !== 'otros');
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
       <div className="text-center max-w-2xl mx-auto mb-12">
@@ -26,7 +23,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
-        {mainContinents.map((continent) => (
+        {continents.map((continent) => (
           <Link href={`/continent/${continent.slug}`} key={continent.slug} legacyBehavior>
             <a className="block transform transition-transform duration-300 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-lg">
               <Card className="h-full bg-card/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary border-2 border-transparent transition-colors duration-300 group">
