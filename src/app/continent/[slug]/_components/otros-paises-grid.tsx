@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -13,7 +14,6 @@ import type { CountryData } from '@/lib/data';
 import { ArrowRight } from 'lucide-react';
 
 export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
-  const [selectedCountry, setSelectedCountry] = React.useState<CountryData | null>(null);
 
   if (!data || data.length === 0) {
     return (
@@ -27,16 +27,15 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
       </Card>
     );
   }
+  
+  // Create a unique list of "countries" from the data
+  const uniqueCountries = data.reduce((acc, current) => {
+    if (!acc.find((item) => item.country === current.country)) {
+      acc.push(current);
+    }
+    return acc;
+  }, [] as CountryData[]);
 
-  // TODO: Implement detail view when a country is selected.
-  if (selectedCountry) {
-     return (
-        <div>
-            <h2>{selectedCountry.country}</h2>
-            <button onClick={() => setSelectedCountry(null)}>Volver</button>
-        </div>
-     )
-  }
 
   return (
     <div>
@@ -44,16 +43,15 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
             <CardHeader>
                 <CardTitle>Explora por País</CardTitle>
                 <CardDescription>
-                Selecciona un país para ver la información detallada de logística y comercio.
+                Selecciona un país para ver la información detallada de logística y comercio para sus ciudades.
                 </CardDescription>
             </CardHeader>
         </Card>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.map((item) => (
+            {uniqueCountries.map((item) => (
+              <Link href={`/country/${item.country.toLowerCase().replace(/ /g, '-')}`} key={item.id}>
                 <Card 
-                    key={item.id}
-                    className="group transform cursor-pointer overflow-hidden bg-card/50 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-primary/10 hover:border-primary border-2 border-transparent"
-                    onClick={() => setSelectedCountry(item)}
+                    className="group transform cursor-pointer overflow-hidden bg-card/50 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-primary/10 hover:border-primary border-2 border-transparent h-full"
                 >
                     <CardHeader className="p-0">
                         <div className="flex items-center gap-4 p-6">
@@ -74,10 +72,11 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
                     </CardHeader>
                     <CardContent className="px-6 pb-4">
                         <div className="flex items-center text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            Ver detalles <ArrowRight className="w-4 h-4 ml-2" />
+                            Ver ciudades <ArrowRight className="w-4 h-4 ml-2" />
                         </div>
                     </CardContent>
                 </Card>
+              </Link>
             ))}
         </div>
     </div>

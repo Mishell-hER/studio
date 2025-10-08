@@ -111,7 +111,7 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
   return value;
 }
 
-export function ContinentDataTable({ data }: { data: CountryData[] }) {
+export function ContinentDataTable({ data, isCityLevel = false }: { data: CountryData[], isCityLevel?: boolean }) {
   if (!data || data.length === 0) {
     return (
       <Card className="bg-card/50 backdrop-blur-sm">
@@ -128,9 +128,9 @@ export function ContinentDataTable({ data }: { data: CountryData[] }) {
   return (
      <Card className="bg-card/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Información Detallada por País</CardTitle>
+          <CardTitle>Información Detallada por {isCityLevel ? 'Ciudad' : 'País'}</CardTitle>
           <CardDescription>
-            Explora los datos específicos para cada país en las siguientes categorías.
+            Explora los datos específicos para cada {isCityLevel ? 'ciudad' : 'país'} en las siguientes categorías.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -149,8 +149,8 @@ export function ContinentDataTable({ data }: { data: CountryData[] }) {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                          <TableHead className="w-[200px]">País</TableHead>
-                                          <TableHead className="hidden sm:table-cell w-[150px]">Ciudad</TableHead>
+                                          <TableHead className="w-[200px]">{isCityLevel ? 'Ciudad a donde quieres llegar' : 'País'}</TableHead>
+                                          <TableHead className="hidden sm:table-cell w-[150px]">{isCityLevel ? 'País' : 'Ciudad'}</TableHead>
                                           {config.headers.map(header => (
                                             <TableHead key={header.dataKey}>{header.label}</TableHead>
                                           ))}
@@ -168,10 +168,10 @@ export function ContinentDataTable({ data }: { data: CountryData[] }) {
                                                         height={16}
                                                         className="rounded-sm"
                                                     />
-                                                    {item.country}
+                                                    {isCityLevel ? item.capital : item.country}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="hidden sm:table-cell">{item.capital}</TableCell>
+                                            <TableCell className="hidden sm:table-cell">{isCityLevel ? item.country : item.capital}</TableCell>
                                             {config.headers.map(header => (
                                               <TableCell key={`${item.id}-${header.dataKey}`}>
                                                 {renderCellContent(item, header)}
