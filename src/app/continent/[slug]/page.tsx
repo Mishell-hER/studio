@@ -69,34 +69,31 @@ export default function ContinentPage({
       <div className="my-8 p-6 rounded-lg bg-card/50 backdrop-blur-sm border">
         <h3 className="text-xl font-semibold mb-4">Herramientas de Exportación</h3>
         <div className="flex flex-wrap gap-4">
-          {continent.slug === 'south-america' ? (
+          <Button asChild variant="outline">
+            <Link href="/documents">
+              <FileText className="mr-2" />
+              Documentos para Exportar
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/costs">
+              <Calculator className="mr-2" />
+              Calculadora de Costos
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/negotiation">
+              <Lightbulb className="mr-2" />
+              Tips para Negociar
+            </Link>
+          </Button>
+          {continent.slug === 'south-america' && (
              <Button asChild variant="outline">
               <Link href="/peru-routes">
                 <Truck className="mr-2" />
                 Nacional - Perú
               </Link>
             </Button>
-          ) : (
-            <>
-              <Button asChild variant="outline">
-                <Link href="/documents">
-                  <FileText className="mr-2" />
-                  Documentos para Exportar
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/costs">
-                  <Calculator className="mr-2" />
-                  Calculadora de Costos
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/negotiation">
-                  <Lightbulb className="mr-2" />
-                  Tips para Negociar
-                </Link>
-              </Button>
-            </>
           )}
         </div>
       </div>
