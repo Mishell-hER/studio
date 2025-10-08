@@ -29,11 +29,17 @@ import {
 
 type DataKey = keyof CountryData;
 
+interface HeaderConfig {
+  label: string;
+  dataKey: DataKey;
+  isLink?: boolean;
+  isTextarea?: boolean; 
+}
+
 interface TableConfig {
   title: string;
   description: string;
-  // Use a more flexible structure for headers
-  headers: { label: string; dataKey: DataKey; isLink?: boolean }[];
+  headers: HeaderConfig[];
 }
 
 const tableConfigs: TableConfig[] = [
@@ -44,7 +50,7 @@ const tableConfigs: TableConfig[] = [
       { label: "Ficha País", dataKey: "fichaPaisLink", isLink: true },
       { label: "Idioma Oficial", dataKey: "language" },
       { label: "Moneda Local", dataKey: "currency" },
-      { label: "Rasgos Culturales", dataKey: "culture" },
+      { label: "Rasgos Culturales", dataKey: "culture", isTextarea: true },
     ]
   },
   { 
@@ -54,8 +60,11 @@ const tableConfigs: TableConfig[] = [
   },
   { 
     title: "Aduanas", 
-    description: "Enlace a la autoridad aduanera local o descripción de controles.",
-    headers: [{ label: "Autoridad Aduanera", dataKey: "customsInfo", isLink: true }]
+    description: "Enlace a la autoridad aduanera local y descripción de controles.",
+    headers: [
+      { label: "Autoridad Aduanera", dataKey: "customsInfo", isLink: true },
+      { label: "Nivel de Rigurosidad", dataKey: "customsStrictness", isTextarea: true }
+    ]
   },
   { 
     title: "Ruta Terrestre", 
@@ -65,7 +74,7 @@ const tableConfigs: TableConfig[] = [
   { 
     title: "Cómo Negociar", 
     description: "Estilo de negociación, puntualidad y vestimenta recomendada.",
-    headers: [{ label: "Tips de Negociación", dataKey: "logisticalInfo" }]
+    headers: [{ label: "Tips de Negociación", dataKey: "logisticalInfo", isTextarea: true }]
   },
   { 
     title: "Indicadores de Desarrollo", 
@@ -74,14 +83,14 @@ const tableConfigs: TableConfig[] = [
   },
 ];
 
-const renderCellContent = (item: CountryData, dataKey: DataKey, isLink?: boolean) => {
-  const value = item[dataKey] as string;
+const renderCellContent = (item: CountryData, header: HeaderConfig) => {
+  const value = item[header.dataKey] as string;
 
   if (!value || value === '#') {
     return <span className="text-muted-foreground/70">No disponible</span>;
   }
   
-  if (isLink) {
+  if (header.isLink) {
      const isUrl = value.startsWith('http') || value.startsWith('www');
      if (isUrl) {
          return (
@@ -93,6 +102,10 @@ const renderCellContent = (item: CountryData, dataKey: DataKey, isLink?: boolean
             </Button>
          )
      }
+  }
+
+  if(header.isTextarea) {
+    return <p className="whitespace-pre-wrap max-w-sm">{value}</p>;
   }
   
   return value;
@@ -161,7 +174,7 @@ export function ContinentDataTable({ data }: { data: CountryData[] }) {
                                             <TableCell className="hidden sm:table-cell">{item.capital}</TableCell>
                                             {config.headers.map(header => (
                                               <TableCell key={`${item.id}-${header.dataKey}`}>
-                                                {renderCellContent(item, header.dataKey, header.isLink)}
+                                                {renderCellContent(item, header)}
                                               </TableCell>
                                             ))}
                                         </TableRow>
