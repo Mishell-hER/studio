@@ -27,9 +27,9 @@ export default function Home() {
           <Link
             href={`/continent/${continent.slug}`}
             key={continent.slug}
-            className="block transform transition-transform duration-300 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-lg"
+            className="block transform transition-transform duration-300 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-lg group"
           >
-            <Card className="h-full bg-card/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary border-2 border-transparent transition-colors duration-300 group">
+            <Card className="h-full bg-card/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary border-2 border-transparent transition-colors duration-300">
               <CardHeader className="flex flex-col items-center justify-center text-center p-8 h-full">
                 <continent.icon className="w-16 h-16 mb-4 text-primary transition-colors" />
                 <CardTitle className="text-xl font-semibold text-foreground">

@@ -14,11 +14,11 @@ export type ContinentInfo = {
 };
 
 export const continents: ContinentInfo[] = [
-  { name: 'North America', icon: NorthAmericaIcon, slug: 'north-america' },
-  { name: 'South America', icon: SouthAmericaIcon, slug: 'south-america' },
-  { name: 'Europe', icon: EuropeIcon, slug: 'europe' },
+  { name: 'América del Norte', icon: NorthAmericaIcon, slug: 'north-america' },
+  { name: 'América del Sur', icon: SouthAmericaIcon, slug: 'south-america' },
+  { name: 'Europa', icon: EuropeIcon, slug: 'europe' },
   { name: 'Asia', icon: AsiaIcon, slug: 'asia' },
-  { name: 'Africa', icon: AfricaIcon, slug: 'africa' },
-  { name: 'Oceania', icon: OceaniaIcon, slug: 'oceania' },
-  { name: 'Otros', icon: Globe, slug: 'otros' },
+  { name: 'África', icon: AfricaIcon, slug: 'africa' },
+  { name: 'Oceanía', icon: OceaniaIcon, slug: 'oceania' },
+  { name: 'Otros Países', icon: Globe, slug: 'otros' },
 ];

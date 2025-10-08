@@ -16,20 +16,20 @@ export function PeruTransportInfo() {
         </div>
         <div>
           <CardTitle className="text-primary">
-            Special Focus: Peru Internal Transport
+            Enfoque Especial: Transporte Interno en Perú
           </CardTitle>
           <CardDescription className="text-primary/80">
-            Key routes for South American distribution.
+            Rutas clave para la distribución en América del Sur.
           </CardDescription>
         </div>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground">
-          For exports within South America originating from or passing through
-          Peru, leveraging the internal road network is critical. Key corridors
-          include the Pan-American Highway for coastal distribution and the
-          Interoceanic Highway connecting Peru to Brazil. These routes are
-          essential for efficient overland transport to neighboring countries.
+          Para las exportaciones dentro de América del Sur que se originan o pasan
+          por Perú, es fundamental aprovechar la red de carreteras internas. Los corredores
+          clave incluyen la Carretera Panamericana para la distribución costera y la
+          Carretera Interoceánica que conecta Perú con Brasil. Estas rutas son
+          esenciales para un transporte terrestre eficiente a los países vecinos.
         </p>
       </CardContent>
     </Card>
