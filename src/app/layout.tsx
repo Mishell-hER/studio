@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { Header } from '@/components/layout/header';
 import { BackgroundAnimation } from '@/components/layout/background-animation';
 
 export const metadata: Metadata = {
@@ -27,7 +26,6 @@ export default function RootLayout({
       <body className={cn('font-body antialiased')}>
         <BackgroundAnimation />
         <div className="relative z-10 flex min-h-screen flex-col">
-          <Header />
           <main className="flex-1">{children}</main>
         </div>
       </body>
