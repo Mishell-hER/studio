@@ -14,7 +14,7 @@ export type ContinentInfo = {
 };
 
 export const continents: ContinentInfo[] = [
-  { name: 'América del Norte', icon: NorthAmericaIcon, slug: 'north-america' },
+  { name: 'América Centro-Norte', icon: NorthAmericaIcon, slug: 'north-america' },
   { name: 'América del Sur', icon: SouthAmericaIcon, slug: 'south-america' },
   { name: 'Europa', icon: EuropeIcon, slug: 'europe' },
   { name: 'Asia', icon: AsiaIcon, slug: 'asia' },
