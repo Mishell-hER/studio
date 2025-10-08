@@ -1,4 +1,5 @@
 import { ContinentDataTable } from '@/app/continent/[slug]/_components/continent-data-table';
+import { OtrosPaisesGrid } from '@/app/continent/[slug]/_components/otros-paises-grid';
 import { logisticData } from '@/lib/data';
 import { continents } from '@/lib/continents';
 import { Button } from '@/components/ui/button';
@@ -98,7 +99,7 @@ export default function ContinentPage({
         </div>
       </div>
 
-      <ContinentDataTable data={data} />
+      {params.slug === 'otros' ? <OtrosPaisesGrid data={data} /> : <ContinentDataTable data={data} />}
     </div>
   );
 }
