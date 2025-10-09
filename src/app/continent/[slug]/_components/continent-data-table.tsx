@@ -40,6 +40,8 @@ interface TableConfig {
   title: string;
   description: string;
   headers: HeaderConfig[];
+  cityLevelOnly?: boolean;
+  countryLevelOnly?: boolean;
 }
 
 const tableConfigs: TableConfig[] = [
@@ -56,7 +58,8 @@ const tableConfigs: TableConfig[] = [
   { 
     title: "Acuerdo Comercial", 
     description: "Acuerdo comercial de Perú con el país/bloque y su descripción.",
-    headers: [{ label: "Acuerdo Vigente", dataKey: "tradeAgreement" }]
+    headers: [{ label: "Acuerdo Vigente", dataKey: "tradeAgreement" }],
+    countryLevelOnly: true, // Only show for country level
   },
   { 
     title: "Aduanas", 
@@ -125,6 +128,14 @@ export function ContinentDataTable({ data, isCityLevel = false }: { data: Countr
     );
   }
 
+  const filteredTableConfigs = tableConfigs.filter(config => {
+    if (isCityLevel) {
+      return !config.countryLevelOnly;
+    }
+    return !config.cityLevelOnly;
+  });
+
+
   return (
      <Card className="bg-card/50 backdrop-blur-sm">
         <CardHeader>
@@ -135,7 +146,7 @@ export function ContinentDataTable({ data, isCityLevel = false }: { data: Countr
         </CardHeader>
         <CardContent>
             <Accordion type="single" collapsible className="w-full" defaultValue='item-0'>
-                {tableConfigs.map((config, index) => (
+                {filteredTableConfigs.map((config, index) => (
                     <AccordionItem value={`item-${index}`} key={index}>
                         <AccordionTrigger className="text-lg hover:no-underline">
                             {config.title}
