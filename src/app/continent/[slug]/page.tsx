@@ -19,7 +19,6 @@ const exportOrigins: Record<string, string> = {
   'asia': 'Pekín - China',
   'africa': 'Johannesburgo - Sudáfrica',
   'oceania': 'Sídney - Australia',
-  'otros': 'Londres - Gran Bretaña',
 };
 
 
@@ -43,6 +42,7 @@ export default function ContinentPage({
 
   const data = logisticData[params.slug] || [];
   const exportOrigin = exportOrigins[params.slug];
+  const isOtrosPaises = params.slug === 'otros';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -59,7 +59,7 @@ export default function ContinentPage({
             {continent.name}
           </h1>
         </div>
-        {exportOrigin && (
+        {exportOrigin && !isOtrosPaises && (
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
             <MapPin className="h-5 w-5 text-primary" />
             <span className="font-medium">Exportando desde: {exportOrigin}</span>
@@ -67,39 +67,41 @@ export default function ContinentPage({
         )}
       </div>
       
-      <div className="my-8 p-6 rounded-lg bg-card/50 backdrop-blur-sm border">
-        <h3 className="text-xl font-semibold mb-4">Herramientas de Exportación</h3>
-        <div className="flex flex-wrap gap-4">
-          <Button asChild variant="outline">
-            <Link href="/documents">
-              <FileText className="mr-2" />
-              Documentos para Exportar
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/costs">
-              <Calculator className="mr-2" />
-              Calculadora de Costos
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/negotiation">
-              <Lightbulb className="mr-2" />
-              Tips para Negociar
-            </Link>
-          </Button>
-          {continent.slug === 'south-america' && (
-             <Button asChild variant="outline">
-              <Link href="/peru-routes">
-                <Truck className="mr-2" />
-                Nacional - Perú
+      {!isOtrosPaises && (
+        <div className="my-8 p-6 rounded-lg bg-card/50 backdrop-blur-sm border">
+          <h3 className="text-xl font-semibold mb-4">Herramientas de Exportación</h3>
+          <div className="flex flex-wrap gap-4">
+            <Button asChild variant="outline">
+              <Link href="/documents">
+                <FileText className="mr-2" />
+                Documentos para Exportar
               </Link>
             </Button>
-          )}
+            <Button asChild variant="outline">
+              <Link href="/costs">
+                <Calculator className="mr-2" />
+                Calculadora de Costos
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/negotiation">
+                <Lightbulb className="mr-2" />
+                Tips para Negociar
+              </Link>
+            </Button>
+            {continent.slug === 'south-america' && (
+              <Button asChild variant="outline">
+                <Link href="/peru-routes">
+                  <Truck className="mr-2" />
+                  Nacional - Perú
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {params.slug === 'otros' ? <OtrosPaisesGrid data={data} /> : <ContinentDataTable data={data} />}
+      {isOtrosPaises ? <OtrosPaisesGrid data={data} /> : <ContinentDataTable data={data} />}
     </div>
   );
 }
