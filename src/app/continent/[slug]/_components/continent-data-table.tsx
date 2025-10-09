@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Info } from 'lucide-react';
+import { ExternalLink, Info, Search } from 'lucide-react';
 import type { CountryData } from '@/lib/data';
 import {
   Accordion,
@@ -26,6 +26,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Input } from '@/components/ui/input';
 
 type DataKey = keyof CountryData;
 
@@ -115,6 +116,8 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
 }
 
 export function ContinentDataTable({ data, isCityLevel = false }: { data: CountryData[], isCityLevel?: boolean }) {
+  const [searchTerm, setSearchTerm] = React.useState('');
+
   if (!data || data.length === 0) {
     return (
       <Card className="bg-card/50 backdrop-blur-sm">
@@ -127,14 +130,19 @@ export function ContinentDataTable({ data, isCityLevel = false }: { data: Countr
       </Card>
     );
   }
+  
+  const filteredData = data.filter(item => {
+    const target = isCityLevel ? item.capital : item.country;
+    return target.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const filteredTableConfigs = tableConfigs.filter(config => {
     if (isCityLevel) {
-      return !config.countryLevelOnly;
+      // For city level, hide "Acuerdo Comercial"
+      return !config.countryLevelOnly && config.title !== "Acuerdo Comercial";
     }
     return !config.cityLevelOnly;
   });
-
 
   return (
      <Card className="bg-card/50 backdrop-blur-sm">
@@ -145,6 +153,16 @@ export function ContinentDataTable({ data, isCityLevel = false }: { data: Countr
           </CardDescription>
         </CardHeader>
         <CardContent>
+            <div className="mb-6 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder={`Buscar ${isCityLevel ? 'ciudad' : 'país'}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full md:w-1/2 lg:w-1/3"
+              />
+            </div>
             <Accordion type="single" collapsible className="w-full" defaultValue='item-0'>
                 {filteredTableConfigs.map((config, index) => (
                     <AccordionItem value={`item-${index}`} key={index}>
@@ -168,28 +186,36 @@ export function ContinentDataTable({ data, isCityLevel = false }: { data: Countr
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {data.map((item) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">
-                                                <div className="flex items-center gap-3">
-                                                    <Image
-                                                        src={`https://flagcdn.com/w40/${item.flagCode}.png`}
-                                                        alt={`Bandera de ${item.country}`}
-                                                        width={24}
-                                                        height={16}
-                                                        className="rounded-sm"
-                                                    />
-                                                    {isCityLevel ? item.capital : item.country}
-                                                </div>
+                                        {filteredData.length > 0 ? (
+                                          filteredData.map((item) => (
+                                            <TableRow key={item.id}>
+                                                <TableCell className="font-medium">
+                                                    <div className="flex items-center gap-3">
+                                                        <Image
+                                                            src={`https://flagcdn.com/w40/${item.flagCode}.png`}
+                                                            alt={`Bandera de ${item.country}`}
+                                                            width={24}
+                                                            height={16}
+                                                            className="rounded-sm"
+                                                        />
+                                                        {isCityLevel ? item.capital : item.country}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="hidden sm:table-cell">{isCityLevel ? item.country : item.capital}</TableCell>
+                                                {config.headers.map(header => (
+                                                  <TableCell key={`${item.id}-${header.dataKey}`}>
+                                                    {renderCellContent(item, header)}
+                                                  </TableCell>
+                                                ))}
+                                            </TableRow>
+                                          ))
+                                        ) : (
+                                          <TableRow>
+                                            <TableCell colSpan={config.headers.length + 2} className="h-24 text-center text-muted-foreground">
+                                              No se encontraron resultados para &quot;{searchTerm}&quot;.
                                             </TableCell>
-                                            <TableCell className="hidden sm:table-cell">{isCityLevel ? item.country : item.capital}</TableCell>
-                                            {config.headers.map(header => (
-                                              <TableCell key={`${item.id}-${header.dataKey}`}>
-                                                {renderCellContent(item, header)}
-                                              </TableCell>
-                                            ))}
-                                        </TableRow>
-                                        ))}
+                                          </TableRow>
+                                        )}
                                     </TableBody>
                                 </Table>
                             </div>
