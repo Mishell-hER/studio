@@ -20,6 +20,8 @@ export async function generateStaticParams() {
 
 const exportOrigins: Record<string, string> = {
   'gran-bretaña': 'Londres - Gran Bretaña',
+  'indonesia': 'Yakarta - Indonesia',
+  'sudafrica': 'Johannesburgo - Sudáfrica',
   'malta': 'La Valeta - Malta',
   'irlanda': 'Dublín - Irlanda',
   'chipre': 'Nicosia - Chipre',
@@ -27,7 +29,6 @@ const exportOrigins: Record<string, string> = {
   'corea-del-sur': 'Seúl - Corea del Sur',
   'nueva-zelanda': 'Wellington - Nueva Zelanda',
   'bahrein': 'Manama - Bahréin',
-  'indonesia': 'Yakarta - Indonesia',
 };
 
 export default function CountryPage({
@@ -35,7 +36,7 @@ export default function CountryPage({
 }: {
   params: { slug: string };
 }) {
-  const countryName = Object.keys(exportOrigins).find(key => key === params.slug);
+  const countryName = Object.keys(exportOrigins).find(key => key === params.slug.replace('sudáfrica', 'sudafrica'));
   
   if (!countryName) {
     return (
@@ -54,7 +55,7 @@ export default function CountryPage({
     (c) => c.country.toLowerCase().replace(/ /g, '-') === params.slug
   );
   
-  const exportOrigin = exportOrigins[params.slug];
+  const exportOrigin = exportOrigins[countryName];
   const firstEntry = data[0];
 
   return (
