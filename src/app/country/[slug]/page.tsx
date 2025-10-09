@@ -1,7 +1,7 @@
 import { ContinentDataTable } from '@/app/continent/[slug]/_components/continent-data-table';
 import { logisticData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { ArrowLeft, MapPin, FileText, Calculator, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 
 // Find all unique countries in 'otros' to generate static params
@@ -13,32 +13,49 @@ const otherCountries = logisticData.otros.reduce((acc, current) => {
   }, [] as any[]);
 
 export async function generateStaticParams() {
-  return otherCountries.map((country) => ({
-    slug: country.country.toLowerCase().replace(/ /g, '-'),
+  const slugs = otherCountries.map((country) => country.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, ''));
+  // Special case for "Nueva Zelanda (Isla Norte)" and "Nueva Zelanda (Isla Sur)"
+  const nzNorteSlug = "nueva-zelanda-isla-norte";
+  const nzSurSlug = "nueva-zelanda-isla-sur";
+  if (!slugs.includes(nzNorteSlug)) slugs.push(nzNorteSlug);
+  if (!slugs.includes(nzSurSlug)) slugs.push(nzSurSlug);
+  
+  return slugs.map((slug) => ({
+    slug: slug,
   }));
 }
 
 const exportOrigins: Record<string, string> = {
-  'gran-bretaña': 'Londres - Gran Bretaña',
-  'indonesia': 'Yakarta - Indonesia',
-  'sudafrica': 'Johannesburgo - Sudáfrica',
+  'gran-bretana': 'Londres - Gran Bretaña',
+  'escocia': 'Edimburgo - Escocia',
   'malta': 'La Valeta - Malta',
   'irlanda': 'Dublín - Irlanda',
   'chipre': 'Nicosia - Chipre',
   'japon': 'Tokio - Japón',
   'corea-del-sur': 'Seúl - Corea del Sur',
-  'nueva-zelanda': 'Wellington - Nueva Zelanda',
+  'nueva-zelanda-isla-norte': 'Wellington - Nueva Zelanda (Isla Norte)',
+  'nueva-zelanda-isla-sur': 'Christchurch - Nueva Zelanda (Isla Sur)',
   'bahrein': 'Manama - Bahréin',
+  'indonesia': 'Yakarta - Indonesia',
+  'sudafrica': 'Johannesburgo - Sudáfrica',
 };
+
+const getCountryNameFromSlug = (slug: string): string | undefined => {
+    const matchingCountry = Object.keys(exportOrigins).find(key => 
+        key === slug
+    );
+    return matchingCountry;
+}
 
 export default function CountryPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const countryName = Object.keys(exportOrigins).find(key => key === params.slug.replace('sudáfrica', 'sudafrica'));
+
+  const countrySlug = getCountryNameFromSlug(params.slug);
   
-  if (!countryName) {
+  if (!countrySlug) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold">País no encontrado</h1>
@@ -49,14 +66,13 @@ export default function CountryPage({
     );
   }
 
-  const formattedCountryName = countryName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const countryName = otherCountries.find(c => c.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, '') === countrySlug)?.country;
 
   const data = logisticData.otros.filter(
-    (c) => c.country.toLowerCase().replace(/ /g, '-') === params.slug
+    (c) => c.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, '') === params.slug
   );
   
-  const exportOrigin = exportOrigins[countryName];
-  const firstEntry = data[0];
+  const exportOrigin = exportOrigins[countrySlug];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -69,7 +85,7 @@ export default function CountryPage({
         </Button>
         <div className="flex items-center gap-4">
           <h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-5xl">
-            {formattedCountryName}
+            {countryName}
           </h1>
         </div>
         {exportOrigin && (
@@ -79,6 +95,30 @@ export default function CountryPage({
           </div>
         )}
       </div>
+
+       <div className="my-8 p-6 rounded-lg bg-card/50 backdrop-blur-sm border">
+          <h3 className="text-xl font-semibold mb-4">Herramientas de Exportación</h3>
+          <div className="flex flex-wrap gap-4">
+            <Button asChild variant="outline">
+              <Link href="/documents">
+                <FileText className="mr-2" />
+                Documentos para Exportar
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/costs">
+                <Calculator className="mr-2" />
+                Calculadora de Costos
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/negotiation">
+                <Lightbulb className="mr-2" />
+                Tips para Negociar
+              </Link>
+            </Button>
+          </div>
+        </div>
       
       <ContinentDataTable data={data} isCityLevel={true} />
     </div>

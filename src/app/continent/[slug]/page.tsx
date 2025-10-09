@@ -3,7 +3,7 @@ import { OtrosPaisesGrid } from '@/app/continent/[slug]/_components/otros-paises
 import { logisticData } from '@/lib/data';
 import { continents } from '@/lib/continents';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Calculator, Lightbulb, MapPin, Truck } from 'lucide-react';
+import { ArrowLeft, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
@@ -67,40 +67,6 @@ export default function ContinentPage({
         )}
       </div>
       
-      {!isOtrosPaises && (
-        <div className="my-8 p-6 rounded-lg bg-card/50 backdrop-blur-sm border">
-          <h3 className="text-xl font-semibold mb-4">Herramientas de Exportación</h3>
-          <div className="flex flex-wrap gap-4">
-            <Button asChild variant="outline">
-              <Link href="/documents">
-                <FileText className="mr-2" />
-                Documentos para Exportar
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/costs">
-                <Calculator className="mr-2" />
-                Calculadora de Costos
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/negotiation">
-                <Lightbulb className="mr-2" />
-                Tips para Negociar
-              </Link>
-            </Button>
-            {continent.slug === 'south-america' && (
-              <Button asChild variant="outline">
-                <Link href="/peru-routes">
-                  <Truck className="mr-2" />
-                  Nacional - Perú
-                </Link>
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-
       {isOtrosPaises ? <OtrosPaisesGrid data={data} /> : <ContinentDataTable data={data} />}
     </div>
   );
