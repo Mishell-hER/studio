@@ -99,6 +99,17 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
     return <span className="text-muted-foreground/70">No disponible</span>;
   }
   
+  if (header.dataKey === 'tradeAgreement' && item.tradeAgreementLink) {
+    return (
+      <Button asChild variant="outline" size="sm">
+        <a href={item.tradeAgreementLink} target="_blank" rel="noopener noreferrer">
+          {String(value)}
+          <ExternalLink className="ml-2 h-3 w-3" />
+        </a>
+      </Button>
+    )
+  }
+
   if (header.isLink) {
      const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('www'));
      if (isUrl) {
