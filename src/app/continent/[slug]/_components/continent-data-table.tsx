@@ -75,8 +75,9 @@ const tableConfigs: TableConfig[] = [
     title: "Ruta Terrestre", 
     description: "Enlace a la ruta de transporte o detalles de la vía principal.",
     headers: [
+        { label: "Países que Atraviesa", dataKey: "countriesCrossed" },
+        { label: "Kilómetros", dataKey: "kilometers" },
         { label: "Ruta Terrestre", dataKey: "detailsLink", isLink: true },
-        { label: "Países que Atraviesa", dataKey: "countriesCrossed" }
     ]
   },
   { 
@@ -114,6 +115,10 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
 
   if(header.isTextarea) {
     return <p className="whitespace-pre-wrap max-w-sm">{value}</p>;
+  }
+
+  if(header.dataKey === 'kilometers' && typeof value === 'number') {
+    return value.toLocaleString('es-PE');
   }
   
   return String(value);
