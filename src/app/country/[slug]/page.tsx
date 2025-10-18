@@ -1,3 +1,4 @@
+
 import { ContinentDataTable } from '@/app/continent/[slug]/_components/continent-data-table';
 import { logisticData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -14,12 +15,7 @@ const otherCountries = logisticData.otros.reduce((acc, current) => {
 
 export async function generateStaticParams() {
   const slugs = otherCountries.map((country) => country.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, ''));
-  // Special case for "Nueva Zelanda (Isla Norte)" and "Nueva Zelanda (Isla Sur)"
-  const nzNorteSlug = "nueva-zelanda-isla-norte";
-  const nzSurSlug = "nueva-zelanda-isla-sur";
-  if (!slugs.includes(nzNorteSlug)) slugs.push(nzNorteSlug);
-  if (!slugs.includes(nzSurSlug)) slugs.push(nzSurSlug);
-  
+
   return slugs.map((slug) => ({
     slug: slug,
   }));
@@ -41,10 +37,9 @@ const exportOrigins: Record<string, string> = {
 };
 
 const getCountryNameFromSlug = (slug: string): string | undefined => {
-    const matchingCountry = Object.keys(exportOrigins).find(key => 
-        key === slug
-    );
-    return matchingCountry;
+  // Find a country in the 'otros' data that matches the slug
+  const country = otherCountries.find(c => c.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, '') === slug);
+  return country?.country;
 }
 
 export default function CountryPage({
@@ -53,9 +48,9 @@ export default function CountryPage({
   params: { slug: string };
 }) {
 
-  const countrySlug = getCountryNameFromSlug(params.slug);
+  const countryName = getCountryNameFromSlug(params.slug);
   
-  if (!countrySlug) {
+  if (!countryName) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold">País no encontrado</h1>
@@ -66,13 +61,11 @@ export default function CountryPage({
     );
   }
 
-  const countryName = otherCountries.find(c => c.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, '') === countrySlug)?.country;
-
   const data = logisticData.otros.filter(
     (c) => c.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, '') === params.slug
   );
   
-  const exportOrigin = exportOrigins[countrySlug];
+  const exportOrigin = exportOrigins[params.slug];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -124,3 +117,5 @@ export default function CountryPage({
     </div>
   );
 }
+
+    
