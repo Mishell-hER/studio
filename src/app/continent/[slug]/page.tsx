@@ -84,10 +84,10 @@ export default function ContinentPage({
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/negotiation">
+              <a href="https://www.stack-ai.com/chat/682b4dc30b7796295360567e-6QeSKcujmezlbXCeO4W9KF" target="_blank" rel="noopener noreferrer">
                 <Lightbulb className="mr-2" />
                 Tips para Negociar
-              </Link>
+              </a>
             </Button>
           </div>
         </div>
