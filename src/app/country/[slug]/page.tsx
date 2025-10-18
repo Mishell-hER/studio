@@ -1,4 +1,5 @@
 
+
 import { ContinentDataTable } from '@/app/continent/[slug]/_components/continent-data-table';
 import { logisticData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ const otherCountries = logisticData.otros.reduce((acc, current) => {
   }, [] as any[]);
 
 export async function generateStaticParams() {
-  const slugs = otherCountries.map((country) => country.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, ''));
+  const slugs = otherCountries.map((country) => country.country.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, ''));
 
   return slugs.map((slug) => ({
     slug: slug,
@@ -38,7 +39,7 @@ const exportOrigins: Record<string, string> = {
 
 const getCountryNameFromSlug = (slug: string): string | undefined => {
   // Find a country in the 'otros' data that matches the slug
-  const country = otherCountries.find(c => c.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, '') === slug);
+  const country = otherCountries.find(c => c.country.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, '') === slug);
   return country?.country;
 }
 
@@ -62,7 +63,7 @@ export default function CountryPage({
   }
 
   const data = logisticData.otros.filter(
-    (c) => c.country.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g, '') === params.slug
+    (c) => c.country.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, '') === params.slug
   );
   
   const exportOrigin = exportOrigins[params.slug];
