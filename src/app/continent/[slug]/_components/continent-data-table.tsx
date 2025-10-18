@@ -74,7 +74,10 @@ const tableConfigs: TableConfig[] = [
   { 
     title: "Ruta Terrestre", 
     description: "Enlace a la ruta de transporte o detalles de la vía principal.",
-    headers: [{ label: "Ruta Terrestre", dataKey: "detailsLink", isLink: true }]
+    headers: [
+        { label: "Ruta Terrestre", dataKey: "detailsLink", isLink: true },
+        { label: "Países que Atraviesa", dataKey: "countriesCrossed" }
+    ]
   },
   { 
     title: "Cómo Negociar", 
@@ -89,14 +92,14 @@ const tableConfigs: TableConfig[] = [
 ];
 
 const renderCellContent = (item: CountryData, header: HeaderConfig) => {
-  const value = item[header.dataKey] as string;
+  const value = item[header.dataKey] as string | number;
 
-  if (!value || value === '#') {
+  if (value === undefined || value === null || value === '#') {
     return <span className="text-muted-foreground/70">No disponible</span>;
   }
   
   if (header.isLink) {
-     const isUrl = value.startsWith('http') || value.startsWith('www');
+     const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('www'));
      if (isUrl) {
          return (
              <Button asChild variant="outline" size="sm">
@@ -113,7 +116,7 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
     return <p className="whitespace-pre-wrap max-w-sm">{value}</p>;
   }
   
-  return value;
+  return String(value);
 }
 
 export function ContinentDataTable({ data, isCityLevel = false }: { data: CountryData[], isCityLevel?: boolean }) {
