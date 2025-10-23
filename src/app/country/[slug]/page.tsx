@@ -1,5 +1,6 @@
 
 
+
 import { ContinentDataTable } from '@/app/continent/[slug]/_components/continent-data-table';
 import { logisticData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -118,5 +119,3 @@ export default function CountryPage({
     </div>
   );
 }
-
-    
