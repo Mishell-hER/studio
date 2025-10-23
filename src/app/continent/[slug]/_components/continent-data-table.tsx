@@ -194,11 +194,11 @@ export function ContinentDataTable({ data, isCityLevel = false }: { data: Countr
                                 <Info className="h-4 w-4 mt-1 flex-shrink-0" />
                                 <p>{config.description}</p>
                             </div>
-                            <div className="rounded-md border">
+                            <div className="rounded-md border overflow-x-auto">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                          <TableHead className="w-[200px]">{isCityLevel ? 'Ciudad a donde quieres llegar' : 'País'}</TableHead>
+                                          <TableHead className="w-[200px] min-w-[200px]">{isCityLevel ? 'Ciudad a donde quieres llegar' : 'País'}</TableHead>
                                           <TableHead className="hidden sm:table-cell w-[150px]">{isCityLevel ? 'País' : 'Ciudad'}</TableHead>
                                           {config.headers.map(header => (
                                             <TableHead key={header.dataKey}>{header.label}</TableHead>
