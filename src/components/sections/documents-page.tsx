@@ -46,30 +46,26 @@ const documentosData: Array<{
   {
     Documento: 'Factura Comercial',
     Formato: [
-      { text: 'Plantilla Factura Exportación', url: 'https://www.google.com/search?q=Plantilla+Factura+Exportaci%C3%B3n' },
-      { text: 'Portal SUNAT - Factura Electrónica', url: 'https://www.sunat.gob.pe/sol.html' },
+      { text: 'Plantilla Factura Exportación', url: 'https://drive.google.com/uc?export=download&id=1h39z9rMB_e0VQB6esInRPaDFvInmviJj' },
     ],
     Guías: [
-      { text: 'Requisitos Documentación', url: 'https://www.google.com/search?q=Requisitos+Documentaci%C3%B3n+Factura+Comercial+Exportaci%C3%B3n' },
-      { text: 'Orientación SUNAT', url: 'https://orientacion.sunat.gob.pe/index.php/empresas-menu/comprobantes-de-pago-empresas/comprobantes-de-pago-fisicos-empresas/factura' },
+      { text: 'Requisitos Documentación', url: 'https://www.youtube.com/watch?v=U6qxapAVtms' },
     ],
     Observaciones: 'Se requiere copia SUNAT o representación impresa de factura electrónica.',
   },
   {
     Documento: 'Lista de Empaque (Packing List)',
-    Formato: [{ text: 'Plantilla Packing List Excel', url: 'https://www.google.com/search?q=Plantilla+Packing+List+Excel' }],
-    Guías: [{ text: 'Instrucciones de llenado', url: 'https://www.google.com/search?q=Instrucciones+de+llenado+Packing+List' }],
+    Formato: [{ text: 'Plantilla Packing List', url: 'https://drive.google.com/uc?export=download&id=1h39z9rMB_e0VQB6esInRPaDFvInmviJj' }],
+    Guías: [{ text: 'Guía Lista Empaque', url: 'https://www.youtube.com/watch?v=tbfiZt2ORHE' }],
     Observaciones: 'Obligatoria. Detalla contenido, peso, medidas de cada bulto.',
   },
   {
     Documento: 'Declaración Jurada de Flete',
     Formato: [
-      { text: 'Formato Declaración Transporte', url: 'https://www.google.com/search?q=Formato+Declaraci%C3%B3n+Transporte' },
-      { text: 'Formulario SUNAT', url: 'https://www.google.com/search?q=Formulario+SUNAT+Declaraci%C3%B3n+Jurada+de+Flete' },
+      { text: 'Formato Declaración Transporte', url: 'https://drive.google.com/uc?export=download&id=1pvrUGoi2dYLQ1EGSOOPOFXCUYcLdxfpP' },
     ],
     Guías: [
-        { text: 'Orientación SUNAT', url: 'https://orientacion.sunat.gob.pe/' },
-        { text: 'Instructivos SUNAT', url: 'https://www.sunat.gob.pe/legislacion/procedim/despacho/exportacion/definitiva/proc-general/despa-pg.02.htm' },
+        { text: 'Orientación SUNAT', url: 'https://www.sunat.gob.pe/orientacionaduanera/exportacion/requisitosEx.html' },
     ],
     Observaciones: 'Cuando corresponda según tipo de operación.',
   },
@@ -77,32 +73,27 @@ const documentosData: Array<{
     Documento: 'Documentos de Control (Mercancías Restringidas)',
     Formato: [
         { text: 'Portal VUCE', url: 'https://www.vuce.gob.pe/' },
-        { text: 'Sistema VUCE', url: 'https://www.vuce.gob.pe/Paginas/Buscador.aspx' },
     ],
     Guías: [
-        { text: 'Manual VUCE', url: 'https://www.vuce.gob.pe/manuales/Manual_SENASA_M04_VUCE.pdf' },
-        { text: 'Guía VUCE', url: 'https://www.vuce.gob.pe/Paginas/Que-es-la-VUCE.aspx' },
+        { text: 'Orientación VUCE', url: 'https://www.vuce.gob.pe/manual_vuce/insertos/como_usar_vuce.pdf' },
     ],
     Observaciones: 'Los documentos se emiten digitalmente a través de VUCE.',
   },
   {
     Documento: 'Mandato Electrónico',
     Formato: [
-      { text: 'Portal SUNAT - Mandato Electrónico', url: 'https://www.sunat.gob.pe/operatividadaduanera/aduanas/mandatoelectronico/' },
-      { text: 'Sistema SUNAT en línea', url: 'https://www.sunat.gob.pe/sol.html' },
+      { text: 'Requisitos para Portal SUNAT - Mandato Electrónico', url: 'https://www.sunat.gob.pe/orientacionaduanera/exportacion/requisitos.html' },
     ],
     Guías: [
-      { text: 'Video Mandato Electrónico', url: 'https://www.youtube.com/watch?v=1bYR-mdeI9Y' },
-      { text: 'Orientación Mandato', url: 'https://www.sunat.gob.pe/operatividadaduanera/aduanas/mandatoelectronico/index.html#iv' },
+      { text: 'Video Mandato Electrónico', url: 'https://www.youtube.com/watch?v=WYdJh-IeWdQ' },
     ],
     Observaciones: 'Válido por periodo máximo de 1 año o por documento de transporte específico.',
   },
   {
     Documento: 'Declaración Simplificada de Exportación (DSE)',
-    Formato: [{ text: 'Formato DSE en Intendencias de Aduana', url: 'https://www.google.com/search?q=Formato+DSE+en+Intendencias+de+Aduana' }],
+    Formato: [{ text: 'Requisitos para DSE en Intendencias de Aduana', url: 'https://www.gob.pe/1134-despacho-simplificado-de-exportacion-despacho-simplificado-de-exportacion-tramitado-por-el-exportador' }],
     Guías: [
-        { text: 'Orientación DSE', url: 'https://www.gob.pe/137-solicitar-la-declaracion-simplificada-de-exportacion-dse' },
-        { text: 'Trámite DSE', url: 'https://www.gob.pe/137-solicitar-la-declaracion-simplificada-de-exportacion-dse' },
+        { text: 'Trámite DSE', url: 'https://www.sunat.gob.pe/orientacionaduanera/despsimpimportacion/tramiteAduanero.html' },
     ],
     Observaciones: 'Para exportaciones hasta $5,000 USD.',
   },
