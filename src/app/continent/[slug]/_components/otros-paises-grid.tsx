@@ -13,6 +13,11 @@ import {
 import type { CountryData } from '@/lib/data';
 import { ArrowRight } from 'lucide-react';
 
+// Helper to generate slugs consistently
+const generateSlug = (name: string) => {
+  return name.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, '');
+}
+
 export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
 
   if (!data || data.length === 0) {
@@ -28,9 +33,10 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
     );
   }
   
-  // Create a unique list of "countries" from the data
+  // Create a unique list of "countries" from the data that have at least one city (capital)
   const uniqueCountries = data.reduce((acc, current) => {
-    if (!acc.find((item) => item.country === current.country)) {
+    // Only add the country if it's not already in the accumulator and has a city
+    if (current.capital && !acc.find((item) => item.country === current.country)) {
       acc.push(current);
     }
     return acc;
@@ -49,7 +55,7 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
         </Card>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {uniqueCountries.map((item) => (
-              <Link href={`/country/${item.country.toLowerCase().replace(/ /g, '-')}`} key={item.id}>
+              <Link href={`/country/${generateSlug(item.country)}`} key={item.country}>
                 <Card 
                     className="group transform cursor-pointer overflow-hidden bg-card/50 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-primary/10 hover:border-primary border-2 border-transparent h-full"
                 >
@@ -66,7 +72,8 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
                                 <CardTitle className="text-xl font-semibold text-foreground">
                                     {item.country}
                                 </CardTitle>
-                                <CardDescription>{item.capital}</CardDescription>
+                                {/* Show a representative city or a general description if needed */}
+                                <CardDescription>Ver ciudades</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
