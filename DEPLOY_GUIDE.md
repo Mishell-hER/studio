@@ -1,6 +1,6 @@
 # Guía de Despliegue para LogisticX
 
-Este es un proyecto Next.js que utiliza el App Router. Debido a sus características modernas (Server Components, Server Actions, etc.), no es compatible con la exportación estática (`next export`) que requiere GitHub Pages para funcionar correctamente.
+Este es un proyecto Next.js que utiliza el App Router. Debido a sus características modernas (Server Components, Server Actions, etc.), **no es compatible con la exportación estática (`next export`) que requiere GitHub Pages** para funcionar correctamente.
 
 ## Opción Recomendada: Vercel
 
