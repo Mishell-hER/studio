@@ -53,7 +53,7 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
             <CardHeader>
                 <CardTitle>Explora por País</CardTitle>
                 <CardDescription>
-                Selecciona un país para ver la información detallada de logística y comercio para sus ciudades.
+                Selecciona un país para ver la información detallada de logística y comercio para sus ciudades. Esta es una lista de países que son islas o no tienen acceso terrestre, por eso sus rutas son internas entre sus ciudades partiendo desde la capital.
                 </CardDescription>
             </CardHeader>
         </Card>
