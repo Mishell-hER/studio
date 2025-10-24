@@ -6,14 +6,18 @@ import Link from 'next/link';
 
 // Find all unique countries in 'otros' to generate static params
 const otherCountries = logisticData.otros.reduce((acc, current) => {
-    if (!acc.find((item) => item.country === current.country)) {
+    if (current.capital && !acc.find((item) => item.country === current.country)) {
       acc.push(current);
     }
     return acc;
-  }, [] as any[]);
+}, [] as any[]);
+
+const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, '');
+}
 
 export async function generateStaticParams() {
-  const slugs = otherCountries.map((country) => country.country.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, ''));
+  const slugs = otherCountries.map((country) => generateSlug(country.country));
 
   return slugs.map((slug) => ({
     slug: slug,
@@ -37,7 +41,7 @@ const exportOrigins: Record<string, string> = {
 
 const getCountryNameFromSlug = (slug: string): string | undefined => {
   // Find a country in the 'otros' data that matches the slug
-  const country = otherCountries.find(c => c.country.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, '') === slug);
+  const country = otherCountries.find(c => generateSlug(c.country) === slug);
   return country?.country;
 }
 
@@ -61,7 +65,7 @@ export default function CountryPage({
   }
 
   const data = logisticData.otros.filter(
-    (c) => c.country.toLowerCase().replace(/ /g, '-').replace(/\(/g, '').replace(/\)/g, '') === params.slug
+    (c) => generateSlug(c.country) === params.slug
   );
   
   const exportOrigin = exportOrigins[params.slug];
@@ -98,10 +102,10 @@ export default function CountryPage({
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/costs">
+               <a href="https://docs.google.com/spreadsheets/d/1i3TokgiBS5yohfnpDl5w229np4c7QxKVyYxGr3l2z8k/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
                 <Calculator className="mr-2" />
                 Calculadora de Costos
-              </Link>
+              </a>
             </Button>
             <Button asChild variant="outline">
               <a href="https://www.stack-ai.com/chat/682b4dc30b7796295360567e-6QeSKcujmezlbXCeO4W9KF" target="_blank" rel="noopener noreferrer">

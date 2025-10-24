@@ -78,10 +78,10 @@ export default function ContinentPage({
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/costs">
+              <a href="https://docs.google.com/spreadsheets/d/1i3TokgiBS5yohfnpDl5w229np4c7QxKVyYxGr3l2z8k/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
                 <Calculator className="mr-2" />
                 Calculadora de Costos
-              </Link>
+              </a>
             </Button>
             <Button asChild variant="outline">
               <a href="https://www.stack-ai.com/chat/682b4dc30b7796295360567e-6QeSKcujmezlbXCeO4W9KF" target="_blank" rel="noopener noreferrer">
