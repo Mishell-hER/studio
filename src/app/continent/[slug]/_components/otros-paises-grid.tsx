@@ -42,6 +42,10 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
     return acc;
   }, [] as CountryData[]);
 
+  const countriesToHide = ["Gran Bretaña", "Bahréin", "Sudáfrica"];
+  const visibleCountries = uniqueCountries.filter(
+    (country) => !countriesToHide.includes(country.country)
+  );
 
   return (
     <div>
@@ -54,7 +58,7 @@ export function OtrosPaisesGrid({ data }: { data: CountryData[] }) {
             </CardHeader>
         </Card>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {uniqueCountries.map((item) => (
+            {visibleCountries.map((item) => (
               <Link href={`/country/${generateSlug(item.country)}`} key={item.country}>
                 <Card 
                     className="group transform cursor-pointer overflow-hidden bg-card/50 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-primary/10 hover:border-primary border-2 border-transparent h-full"
