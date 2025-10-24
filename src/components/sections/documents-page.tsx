@@ -24,12 +24,11 @@ const documentosData: Array<{
   {
     Documento: 'Declaración Única de Aduanas (DUA)',
     Formato: [
-      { text: 'Formato DUA Excel - SUNAT', url: 'https://www.google.com/search?q=Formato+DUA+Excel+SUNAT' },
-      { text: 'Estructuras DUA Exportación', url: 'https://www.google.com/search?q=Estructuras+DUA+Exportaci%C3%B3n' },
+      { text: 'Formato DUA Excel - SUNAT', url: 'https://www.sunat.gob.pe/operatividadaduanera/fast/estructuras/Formato-OMA-DAM-Ingreso-v2.xlsx' },
+      { text: 'Estructuras DUA Exportación', url: 'https://www.sunat.gob.pe/legislacion/nuevoSigad/2009/noviembre/pp251109/DuatransaccionCCL08B.xls' },
     ],
     Guías: [
-      { text: 'Instructivo Llenado DUA', url: 'https://www.google.com/search?q=Instructivo+Llenado+DUA' },
-      { text: 'Manual Declaración Aduanera', url: 'https://www.google.com/search?q=Manual+Declaraci%C3%B3n+Aduanera' },
+      { text: 'Instructivo Llenado DUA', url: 'https://www.youtube.com/watch?v=d_PayZ6lWCk' },
     ],
     Observaciones:
       'El DUA consta de 8 ejemplares totales, pero solo se usan 3 para exportación. Se requiere para exportaciones mayores a $5,000 USD.',
