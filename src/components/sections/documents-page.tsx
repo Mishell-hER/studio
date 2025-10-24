@@ -36,12 +36,10 @@ const documentosData: Array<{
   {
     Documento: 'Carta de Porte CMR (Terrestre)',
     Formato: [
-      { text: 'Formato CMR Internacional', url: 'https://www.google.com/search?q=Formato+CMR+Internacional' },
-      { text: 'Plantilla CMR Excel', url: 'https://www.google.com/search?q=Plantilla+CMR+Excel' },
+      { text: 'Formato CMR Internacional', url: 'https://drive.google.com/uc?export=download&id=16wH1jFpjN_Ns3vxk5faQth1aaK8YUJt5' },
     ],
     Guías: [
-      { text: 'Guía Carta de Porte CMR', url: 'https://www.google.com/search?q=Gu%C3%ADa+Carta+de+Porte+CMR' },
-      { text: 'Manual CMR', url: 'https://www.google.com/search?q=Manual+CMR' },
+      { text: 'Guía Carta de Porte CMR', url: 'https://www.diariodelexportador.com/2018/05/documento-de-transporte-terrestre-carta.html' },
     ],
     Observaciones: 'Obligatorias 4 copias firmadas según Convenio CMR (Transporte Terrestre).',
   },
