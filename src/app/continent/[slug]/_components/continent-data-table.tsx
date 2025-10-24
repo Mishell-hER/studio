@@ -27,6 +27,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type DataKey = keyof CountryData;
 
@@ -113,14 +114,31 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
   if (header.isLink) {
      const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('www'));
      if (isUrl) {
-         return (
-             <Button asChild variant="outline" size="sm">
-                <a href={value} target="_blank" rel="noopener noreferrer">
-                    Ver
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                </a>
-            </Button>
-         )
+         const linkButton = (
+            <Button asChild variant="outline" size="sm">
+              <a href={value} target="_blank" rel="noopener noreferrer">
+                  Ver
+                  <ExternalLink className="ml-2 h-3 w-3" />
+              </a>
+          </Button>
+         );
+         
+        if (header.dataKey === 'fichaPaisLink' && item.fichaPaisTooltip) {
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {linkButton}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">{item.fichaPaisTooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )
+        }
+
+         return linkButton;
      }
   }
 
