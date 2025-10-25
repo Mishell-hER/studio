@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { BackgroundAnimation } from '@/components/layout/background-animation';
+import { FloatingAssistant } from '@/components/layout/floating-assistant';
 
 export const metadata: Metadata = {
   title: 'LogisticX',
@@ -29,6 +30,7 @@ export default function RootLayout({
         <div className="relative z-10 flex min-h-screen flex-col">
           <main className="flex-1">{children}</main>
         </div>
+        <FloatingAssistant />
       </body>
     </html>
   );
