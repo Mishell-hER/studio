@@ -38,7 +38,13 @@ const creators = [
   },
 ];
 
-const CreatorCard = ({ creator }: { creator: (typeof creators)[0] }) => (
+const mentor = {
+    name: 'Manuel Rogelio Tejada Mandujano',
+    email: 'mtejada@continental.edu.pe',
+    imageUrl: 'https://picsum.photos/seed/mentor1/100/100',
+}
+
+const CreatorCard = ({ creator }: { creator: (typeof creators)[0] | typeof mentor }) => (
   <div className="flex flex-col items-center text-center">
     <Image
       src={creator.imageUrl}
@@ -60,10 +66,19 @@ export function CreatorsSection() {
         <h2 className="text-4xl font-extrabold text-center mb-12 text-primary tracking-wider">
           Nuestros Creadores
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 justify-center">
             {creators.map((creator) => (
               <CreatorCard key={creator.email} creator={creator} />
             ))}
+        </div>
+
+        <div className="mt-20">
+            <h2 className="text-4xl font-extrabold text-center mb-12 text-primary tracking-wider">
+              Mentor
+            </h2>
+            <div className="flex justify-center">
+                <CreatorCard creator={mentor} />
+            </div>
         </div>
       </div>
     </section>
