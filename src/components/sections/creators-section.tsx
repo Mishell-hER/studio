@@ -54,30 +54,16 @@ const CreatorCard = ({ creator }: { creator: (typeof creators)[0] }) => (
 );
 
 export function CreatorsSection() {
-  const leftCreators = creators.slice(0, 3);
-  const rightCreators = creators.slice(3, 6);
-  const bottomCreator = creators[6];
-
   return (
     <section className="bg-black text-white py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h2 className="text-4xl font-extrabold text-center mb-12 text-primary tracking-wider">
           Nuestros Creadores
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-          <div className="space-y-10">
-            {leftCreators.map((creator) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
+            {creators.map((creator) => (
               <CreatorCard key={creator.email} creator={creator} />
             ))}
-          </div>
-          <div className="space-y-10">
-            {rightCreators.map((creator) => (
-              <CreatorCard key={creator.email} creator={creator} />
-            ))}
-          </div>
-        </div>
-        <div className="flex justify-center">
-          <CreatorCard creator={bottomCreator} />
         </div>
       </div>
     </section>
