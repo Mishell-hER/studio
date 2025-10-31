@@ -112,6 +112,17 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
     )
   }
 
+  if (header.dataKey === 'exchangeRate' && value === 'Dólar (USD)') {
+    return (
+      <Button asChild variant="link" className="p-0 h-auto justify-start">
+        <a href="https://www.exchange-rates.org/es/tasas-actuales/usd" target="_blank" rel="noopener noreferrer">
+          {String(value)}
+          <ExternalLink className="ml-2 h-3 w-3" />
+        </a>
+      </Button>
+    );
+  }
+
   if (header.isLink) {
      const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('www'));
      if (isUrl) {
