@@ -54,6 +54,7 @@ const tableConfigs: TableConfig[] = [
       { label: "Ficha País", dataKey: "fichaPaisLink", isLink: true },
       { label: "Idioma Oficial", dataKey: "language" },
       { label: "Moneda Local", dataKey: "currency" },
+      { label: "Tipo de cambio mas usado (dolar o otro)", dataKey: "exchangeRate" },
       { label: "Principales 10 Productos que Importan", dataKey: "topImports", isTextarea: true },
       { label: "Rasgos Culturales", dataKey: "culture", isTextarea: true },
     ]
