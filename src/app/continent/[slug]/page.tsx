@@ -3,7 +3,7 @@ import { OtrosPaisesGrid } from '@/app/continent/[slug]/_components/otros-paises
 import { logisticData } from '@/lib/data';
 import { continents } from '@/lib/continents';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, FileText, Calculator, Lightbulb } from 'lucide-react';
+import { ArrowLeft, MapPin, FileText, Calculator, Lightbulb, ListChecks } from 'lucide-react';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
@@ -88,6 +88,12 @@ export default function ContinentPage({
                 <Lightbulb className="mr-2" />
                 Tips para Negociar
               </a>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/">
+                <ListChecks className="mr-2" />
+                Criterios de Proveedores
+              </Link>
             </Button>
           </div>
         </div>
