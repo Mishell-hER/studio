@@ -114,7 +114,7 @@ export default function CountryPage({
               </a>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/">
+              <Link href="/suppliers">
                 <ListChecks className="mr-2" />
                 Criterios de Proveedores
               </Link>
