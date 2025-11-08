@@ -113,9 +113,13 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
   }
 
   if (header.dataKey === 'exchangeRate' && value === 'Dólar (USD)') {
+    const isBelize = item.id === 'BLZ';
+    const linkUrl = isBelize
+      ? "https://www.exchange-rates.org/es/conversor/usd-bzd"
+      : "https://www.exchange-rates.org/es/tasas-actuales/usd";
     return (
       <Button asChild variant="link" className="p-0 h-auto justify-start">
-        <a href="https://www.exchange-rates.org/es/tasas-actuales/usd" target="_blank" rel="noopener noreferrer">
+        <a href={linkUrl} target="_blank" rel="noopener noreferrer">
           {String(value)}
           <ExternalLink className="ml-2 h-3 w-3" />
         </a>
