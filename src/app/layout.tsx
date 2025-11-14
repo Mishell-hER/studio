@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
+import { Sidebar } from '@/components/ui/sidebar';
 
 export const metadata: Metadata = {
   title: 'LogisticX',
@@ -29,8 +30,10 @@ export default function RootLayout({
       <body className={cn('min-h-screen bg-background font-sans antialiased', 'font-body')}>
         <FirebaseClientProvider>
           <div className="flex min-h-screen">
-            <AppSidebar />
-            <main className="flex-1 flex-col p-4 md:p-8 overflow-y-auto">
+            <Sidebar>
+              <AppSidebar />
+            </Sidebar>
+            <main className="flex-1 flex-col p-4 md:p-8 overflow-y-auto ml-16">
               {children}
             </main>
           </div>
