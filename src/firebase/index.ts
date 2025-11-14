@@ -1,4 +1,4 @@
-import { initializeApp, getApps, FirebaseOptions, getApp } from 'firebase/app';
+import { initializeApp, getApps, FirebaseOptions } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 export * from './provider';
@@ -7,15 +7,6 @@ export * from './auth/use-user';
 export * from './firestore/use-collection';
 export * from './firestore/use-doc';
 
-const firebaseConfig: FirebaseOptions = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
 export function initializeFirebase(config: FirebaseOptions) {
   const apps = getApps();
   const app = apps.length ? apps[0] : initializeApp(config);
@@ -23,12 +14,12 @@ export function initializeFirebase(config: FirebaseOptions) {
   const firestore = getFirestore(app);
 
   if (process.env.NODE_ENV === 'development') {
-    // These checks are to prevent re-connecting the emulators on every hot-reload
+    // Estos condicionales evitan que se reconecte en cada recarga en caliente
     if (!(auth as any).emulatorConfig) {
-        connectAuthEmulator(auth, 'http://localhost:9099');
+      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
     }
-    if (!(firestore as any).emulatorConfig) {
-        connectFirestoreEmulator(firestore, 'localhost', 8080);
+    if (!(firestore as any)._settings.host) {
+      connectFirestoreEmulator(firestore, 'localhost', 8080);
     }
   }
 
