@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile in the system.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "name": { "type": "string", "description": "The user's display name." },
+        "email": { "type": "string", "format": "email", "description": "The user's email address." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." },
+        "role": { "type": "string", "enum": ["normal", "expert"], "description": "The role of the user." },
+        "continent": { "type": "string", "description": "The continent of the user." },
+        "verified": { "type": "boolean", "description": "Whether the user is verified." }
+      },
+      "required": ["uid", "name", "email", "role", "verified"]
+    },
+    "Post": {
+      "title": "Forum Post",
+      "description": "Represents a single post or question in the forum.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the post." },
+        "content": { "type": "string", "description": "The main content of the post." },
+        "authorId": { "type": "string", "description": "The ID of the user who created the post." },
+        "continent": { "type": "string", "description": "The continent the post is related to." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the post was created." }
+      },
+      "required": ["title", "content", "authorId", "continent", "timestamp"]
+    },
+    "Reply": {
+      "title": "Post Reply",
+      "description": "Represents a reply to a forum post.",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string", "description": "The ID of the post this reply belongs to." },
+        "content": { "type": "string", "description": "The content of the reply." },
+        "authorId": { "type": "string", "description": "The ID of the user who wrote the reply." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the reply was created." }
+      },
+      "required": ["postId", "content", "authorId", "timestamp"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores public profiles for all users."
+    },
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Stores all the forum posts."
+    },
+    "/replies/{replyId}": {
+      "schema": { "$ref": "#/entities/Reply" },
+      "description": "Stores all replies to posts."
+    }
+  }
+}

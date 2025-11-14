@@ -47,12 +47,6 @@ export default function ContinentPage({
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href="/">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a la selección
-          </Link>
-        </Button>
         <div className="flex items-center gap-4">
            <continent.icon className="h-10 w-10 text-primary" />
           <h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-5xl">

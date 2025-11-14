@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { BackgroundAnimation } from '@/components/layout/background-animation';
-import { FloatingAssistant } from '@/components/layout/floating-assistant';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: 'LogisticX',
@@ -26,11 +28,17 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('font-body antialiased')}>
-        <BackgroundAnimation />
-        <div className="relative z-10 flex min-h-screen flex-col">
-          <main className="flex-1">{children}</main>
-        </div>
-        <FloatingAssistant />
+        <FirebaseClientProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <div className="p-4 md:p-8">
+                 {children}
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+        </FirebaseClientProvider>
+        <Toaster />
       </body>
     </html>
   );
