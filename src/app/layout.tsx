@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { Header } from '@/components/layout/header';
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
   title: 'LogisticX',
@@ -25,10 +27,15 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('min-h-screen bg-background font-sans antialiased', 'font-body')}>
-        <div className="relative flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </div>
+        <FirebaseClientProvider>
+          <div className="flex min-h-screen">
+            <AppSidebar />
+            <main className="flex-1 flex-col p-4 md:p-8 overflow-y-auto">
+              {children}
+            </main>
+          </div>
+          <Toaster />
+        </FirebaseClientProvider>
       </body>
     </html>
   );

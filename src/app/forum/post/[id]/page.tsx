@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from 'firebase/firestore';
 import { useFirestore, useUser, useDoc, useCollection } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,10 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Post, Reply, UserProfile } from '@/lib/types';
+import { useMemo } from 'react';
 
 function UserAvatar({ userId }: { userId: string }) {
     const firestore = useFirestore();
-    const userRef = firestore ? doc(firestore, 'users', userId) : null;
+    const userRef = useMemo(() => firestore ? doc(firestore, 'users', userId) : null, [firestore, userId]);
     const { data: userProfile, loading } = useDoc<UserProfile>(userRef);
 
     if (loading || !userProfile) {
@@ -28,7 +29,7 @@ function UserAvatar({ userId }: { userId: string }) {
 
 function ReplyCard({ reply }: { reply: Reply }) {
     const firestore = useFirestore();
-    const userRef = firestore ? doc(firestore, 'users', reply.authorId) : null;
+    const userRef = useMemo(() => firestore ? doc(firestore, 'users', reply.authorId) : null, [firestore, reply.authorId]);
     const { data: author, loading } = useDoc<UserProfile>(userRef);
 
     return (
@@ -56,48 +57,17 @@ function ReplyCard({ reply }: { reply: Reply }) {
 export default function PostPage({ params }: { params: { id: string } }) {
   const { user } = useUser();
   const firestore = useFirestore();
-  const [post, setPost] = useState<Post | null>(null);
-  const [author, setAuthor] = useState<UserProfile | null>(null);
-  const [replies, setReplies] = useState<Reply[]>([]);
+  
+  const postRef = useMemo(() => firestore ? doc(firestore, 'posts', params.id) : null, [firestore, params.id]);
+  const { data: post, loading: postLoading } = useDoc<Post>(postRef);
+
+  const authorRef = useMemo(() => (firestore && post) ? doc(firestore, 'users', post.authorId) : null, [firestore, post]);
+  const { data: author } = useDoc<UserProfile>(authorRef);
+
+  const repliesQuery = useMemo(() => firestore ? query(collection(firestore, 'replies'), where('postId', '==', params.id), orderBy('timestamp', 'asc')) : null, [firestore, params.id]);
+  const { data: replies, loading: repliesLoading } = useCollection<Reply>(repliesQuery);
+  
   const [newReply, setNewReply] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  // Fetch Post and Author
-  useEffect(() => {
-    if (!firestore || !params.id) return;
-    const fetchPost = async () => {
-      setLoading(true);
-      const postRef = doc(firestore, 'posts', params.id);
-      const postSnap = await getDoc(postRef);
-
-      if (postSnap.exists()) {
-        const postData = { id: postSnap.id, ...postSnap.data() } as Post;
-        setPost(postData);
-
-        const authorRef = doc(firestore, 'users', postData.authorId);
-        const authorSnap = await getDoc(authorRef);
-        if (authorSnap.exists()) {
-          setAuthor(authorSnap.data() as UserProfile);
-        }
-      }
-      setLoading(false);
-    };
-    fetchPost();
-  }, [firestore, params.id]);
-
-  // Subscribe to Replies
-  useEffect(() => {
-    if (!firestore || !params.id) return;
-    const repliesQuery = query(collection(firestore, 'replies'), where('postId', '==', params.id), orderBy('timestamp', 'asc'));
-    
-    const unsubscribe = onSnapshot(repliesQuery, (querySnapshot) => {
-        const repliesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reply));
-        setReplies(repliesData);
-    });
-
-    return () => unsubscribe();
-}, [firestore, params.id]);
-
 
   const handleReplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +82,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
     setNewReply('');
   };
 
-  if (loading) return <p>Cargando publicación...</p>;
+  if (postLoading) return <p>Cargando publicación...</p>;
   if (!post) return <p>Publicación no encontrada.</p>;
 
   return (
@@ -121,7 +91,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         <CardHeader>
           <CardTitle className="text-3xl">{post.title}</CardTitle>
           <CardDescription>
-            En <span className="font-semibold">{post.continent}</span> por {author?.name || 'Anónimo'} el {new Date(post.timestamp?.seconds * 1000).toLocaleDateString()}
+            En <span className="font-semibold">{post.continent}</span> por {author?.name || 'Anónimo'} el {post.timestamp ? new Date(post.timestamp?.seconds * 1000).toLocaleDateString() : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -130,8 +100,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Respuestas ({replies.length})</h2>
-        {replies.map(reply => (
+        <h2 className="text-2xl font-bold">Respuestas ({replies?.length || 0})</h2>
+        {repliesLoading ? <p>Cargando respuestas...</p> : replies?.map(reply => (
           <ReplyCard key={reply.id} reply={reply} />
         ))}
       </div>
@@ -158,28 +128,4 @@ export default function PostPage({ params }: { params: { id: string } }) {
       )}
     </div>
   );
-}
-
-// Helper hook to fetch replies - not used in this version but useful for reference
-function useReplies(postId: string) {
-    const firestore = useFirestore();
-    const [replies, setReplies] = useState<Reply[]>([]);
-
-    useEffect(() => {
-        if (!firestore) return;
-        const q = query(
-            collection(firestore, 'replies'),
-            where('postId', '==', postId),
-            orderBy('timestamp', 'asc')
-        );
-
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const repliesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reply));
-            setReplies(repliesData);
-        });
-
-        return () => unsubscribe();
-    }, [firestore, postId]);
-
-    return replies;
 }
