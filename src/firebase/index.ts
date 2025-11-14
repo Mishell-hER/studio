@@ -1,6 +1,11 @@
-import { initializeApp, getApps, getApp, FirebaseOptions } from 'firebase/app';
+import { initializeApp, getApps, FirebaseOptions, getApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+export * from './provider';
+export * from './client-provider';
+export * from './auth/use-user';
+export * from './firestore/use-collection';
+export * from './firestore/use-doc';
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,7 +16,7 @@ const firebaseConfig: FirebaseOptions = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-function initializeFirebase(config: FirebaseOptions) {
+export function initializeFirebase(config: FirebaseOptions) {
   const apps = getApps();
   const app = apps.length ? apps[0] : initializeApp(config);
   const auth = getAuth(app);
@@ -29,28 +34,3 @@ function initializeFirebase(config: FirebaseOptions) {
 
   return { app, auth, firestore };
 }
-
-// Hook to get Firebase services
-function useFirebase() {
-  const { app, auth, firestore } = initializeFirebase(firebaseConfig);
-  return { app, auth, firestore };
-}
-
-function useFirebaseApp() {
-    return initializeFirebase(firebaseConfig).app;
-}
-
-function useAuth() {
-    return initializeFirebase(firebaseConfig).auth;
-}
-
-function useFirestore() {
-    return initializeFirebase(firebaseConfig).firestore;
-}
-
-
-export { useFirebase, useFirebaseApp, useAuth, useFirestore, initializeFirebase };
-export * from './client-provider';
-export * from './auth/use-user';
-export * from './firestore/use-collection';
-export * from './firestore/use-doc';

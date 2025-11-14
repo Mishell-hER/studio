@@ -18,9 +18,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Button } from "../ui/button"
-import { useUser } from "@/firebase"
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth"
-import { useFirestore } from "@/firebase"
+import { useUser, useAuth, useFirestore } from "@/firebase"
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth"
 import { doc, setDoc } from "firebase/firestore"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import {
@@ -48,11 +47,12 @@ const menuItems = [
 
 function UserProfile() {
     const { user, loading } = useUser();
-    const auth = getAuth();
+    const auth = useAuth();
     const firestore = useFirestore();
     const { state: sidebarState } = useSidebar()
 
     const handleSignIn = async () => {
+        if (!auth) return;
         const provider = new GoogleAuthProvider();
         try {
             const result = await signInWithPopup(auth, provider);
@@ -75,6 +75,7 @@ function UserProfile() {
     };
 
     const handleSignOut = async () => {
+        if (!auth) return;
         try {
             await signOut(auth);
         } catch (error) {
@@ -141,7 +142,7 @@ export function AppSidebar() {
   const isMobile = useIsMobile()
 
   return (
-    <Sidebar>
+    <>
       <SidebarHeader>
         <div className="flex items-center gap-2">
             <h1 className={cn("duration-200 text-lg font-semibold", state === 'collapsed' && 'opacity-0 hidden')}>LogisticX</h1>
@@ -190,6 +191,6 @@ export function AppSidebar() {
           </Button>
         </SidebarTrigger>
       )}
-    </Sidebar>
+    </>
   )
 }
