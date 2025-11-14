@@ -72,6 +72,12 @@ export default function CountryPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
+       <Button asChild variant="ghost" className="mb-4">
+          <Link href="/continent/otros">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver a Otros Países
+          </Link>
+        </Button>
       <div className="mb-8">
         <div className="flex items-center gap-4">
           <h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-5xl">

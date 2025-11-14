@@ -1,14 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/layout/app-sidebar';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { Toaster } from "@/components/ui/toaster"
+import { Header } from '@/components/layout/header';
 
 export const metadata: Metadata = {
   title: 'LogisticX',
-  description: 'Centro de información sobre logística y comercio global.',
+  description: 'Tu centro de información para la logística de exportación.',
 };
 
 export default function RootLayout({
@@ -27,18 +24,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={cn('font-body antialiased')}>
-        <FirebaseClientProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              <div className="p-4 md:p-8">
-                 {children}
-              </div>
-            </SidebarInset>
-          </SidebarProvider>
-        </FirebaseClientProvider>
-        <Toaster />
+      <body className={cn('min-h-screen bg-background font-sans antialiased', 'font-body')}>
+        <div className="relative flex min-h-screen flex-col">
+          <Header />
+          <main className="flex-1">{children}</main>
+        </div>
       </body>
     </html>
   );
