@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { AppSidebar } from '@/components/layout/app-sidebar';
@@ -7,6 +8,11 @@ import { Toaster } from '@/components/ui/toaster';
 import { Sidebar } from '@/components/ui/sidebar';
 import { LoginModal } from '@/components/auth/login-modal';
 import { ModalProvider } from '@/providers/modal-provider';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: 'LogisticX',
@@ -22,14 +28,8 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
-      <body className={cn('min-h-screen bg-background font-sans antialiased', 'font-body')}>
+      <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
         <FirebaseClientProvider>
           <ModalProvider />
           <div className="flex min-h-screen">
