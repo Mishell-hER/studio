@@ -51,45 +51,71 @@ const questions = [
 
 const TIME_PER_QUESTION = 20;
 
+// Colores del diseño
+const COLORS = {
+  TITLE_SABES: '#32CD32',
+  TITLE_O: '#FFA500',
+  TITLE_PERDIDO: '#FF4500',
+  BUTTON_JUGAR: '#58CC02',
+  BUTTON_OPCIONES: '#1cb0f6',
+  BUTTON_SALIR: '#FF4B4B',
+};
+
 function GameMenu({ onPlay }: { onPlay: () => void }) {
     const router = useRouter();
+
+    const buttonBaseStyle: React.CSSProperties = {
+        padding: '15px 25px',
+        border: 'none',
+        borderRadius: '12px',
+        fontSize: '1.1em',
+        fontWeight: 'bold',
+        color: 'white',
+        cursor: 'pointer',
+        boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)',
+        transition: 'all 0.1s ease',
+        flex: 1,
+        margin: '0 5px'
+    };
+
     return (
         <div 
-            className="w-full max-w-md h-[650px] bg-cover bg-center bg-no-repeat rounded-2xl shadow-lg flex flex-col items-center justify-between p-5"
-            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj')" }}
+            className="w-full max-w-md h-[650px] rounded-2xl shadow-lg flex flex-col items-center justify-between p-5"
+            style={{
+                backgroundImage: "url('https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+            }}
         >
-             <h1 className="text-4xl font-black text-center leading-tight mt-10" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                <span className="block" style={{ color: '#32CD32', textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>¿Sabes</span>
-                <span className="text-5xl" style={{ color: '#FFA500', textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>o</span>
-                <span className="block" style={{ color: '#FF4500', textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>Estás Perdido?</span>
+            <h1 className="text-4xl font-black text-center leading-tight mt-10" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                <span style={{ color: COLORS.TITLE_SABES, display: 'block' }}>¿Sabes</span>
+                <span style={{ color: COLORS.TITLE_O, fontSize: '1.2em', display: 'block' }}>o</span>
+                <span style={{ color: COLORS.TITLE_PERDIDO, display: 'block' }}>Estás Perdido?</span>
             </h1>
             
             <div className="w-full flex justify-around mb-5">
-                <Button 
+                <button 
                     onClick={onPlay}
-                    className="text-lg font-bold text-white rounded-xl shadow-lg transition-transform transform hover:scale-105"
-                    style={{ backgroundColor: '#58CC02', boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)' }}
+                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_JUGAR }}
                 >
                     JUGAR
-                </Button>
-                <Button 
-                    className="text-lg font-bold text-white rounded-xl shadow-lg transition-transform transform hover:scale-105"
-                    style={{ backgroundColor: '#1cb0f6', boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)' }}
+                </button>
+                <button 
+                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_OPCIONES }}
                 >
                     OPCIONES
-                </Button>
-                <Button 
+                </button>
+                 <button 
                     onClick={() => router.push('/')}
-                    className="text-lg font-bold text-white rounded-xl shadow-lg transition-transform transform hover:scale-105"
-                    style={{ backgroundColor: '#FF4B4B', boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)' }}
+                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_SALIR }}
                 >
                     SALIR
-                </Button>
+                </button>
             </div>
         </div>
     );
 }
-
 
 function GameComponent() {
     const [gameState, setGameState] = React.useState('playing');
@@ -112,7 +138,7 @@ function GameComponent() {
     const handleTimeOut = () => {
         setGameState('feedback');
         setIsCorrect(false);
-        setSelectedOption(null); // Marcar que no hubo selección
+        setSelectedOption(null);
     };
     
     const handleOptionSelect = (index: number) => {
@@ -140,9 +166,7 @@ function GameComponent() {
             setTimeLeft(TIME_PER_QUESTION);
             setGameState('playing');
         } else {
-            // Aquí puedes redirigir a una pantalla de fin de nivel o algo similar
             alert("¡Nivel completado!");
-            // Reiniciar para demostración
             setCurrentQuestionIndex(0);
             setTimeLeft(TIME_PER_QUESTION);
             setGameState('playing');
@@ -161,29 +185,14 @@ function GameComponent() {
                     <div className="relative h-12 w-12">
                         <svg className="h-full w-full" viewBox="0 0 36 36">
                             <path
-                                d="M18 2.0845
-                                a 15.9155 15.9155 0 0 1 0 31.83
-                                a 15.9155 15.9155 0 0 1 0 -31.83"
-                                className="text-gray-600/50"
-                                fill="none"
-                                strokeWidth="4"
-                            />
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.83 a 15.9155 15.9155 0 0 1 0 -31.83"
+                                className="text-gray-600/50" fill="none" strokeWidth="4" />
                             <path
-                                d="M18 2.0845
-                                a 15.9155 15.9155 0 0 1 0 31.83
-                                a 15.9155 15.9155 0 0 1 0 -31.83"
-                                className={cn(
-                                    "transition-all duration-500",
-                                    timeProgress > 50 ? "text-green-500" : timeProgress > 25 ? "text-yellow-500" : "text-red-500"
-                                )}
-                                fill="none"
-                                strokeWidth="4"
-                                strokeDasharray={`${timeProgress}, 100`}
-                            />
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.83 a 15.9155 15.9155 0 0 1 0 -31.83"
+                                className={cn("transition-all duration-500", timeProgress > 50 ? "text-green-500" : timeProgress > 25 ? "text-yellow-500" : "text-red-500")}
+                                fill="none" strokeWidth="4" strokeDasharray={`${timeProgress}, 100`} />
                         </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-lg font-bold">
-                            {timeLeft}
-                        </span>
+                        <span className="absolute inset-0 flex items-center justify-center text-lg font-bold">{timeLeft}</span>
                     </div>
                 </div>
                 <Progress value={progressPercentage} className="w-full" />
@@ -207,14 +216,8 @@ function GameComponent() {
 
                         return (
                             <button
-                                key={index}
-                                onClick={() => handleOptionSelect(index)}
-                                disabled={gameState === 'feedback'}
-                                className={cn(
-                                    "w-full text-left p-4 rounded-lg border-2 transition-all flex items-center justify-between",
-                                    optionClass
-                                )}
-                            >
+                                key={index} onClick={() => handleOptionSelect(index)} disabled={gameState === 'feedback'}
+                                className={cn("w-full text-left p-4 rounded-lg border-2 transition-all flex items-center justify-between", optionClass)}>
                                 <span className="font-medium">{opcion.texto}</span>
                                 {gameState === 'feedback' && opcion.esCorrecta && <Check className="h-5 w-5 text-green-500" />}
                                 {gameState === 'feedback' && isSelected && !opcion.esCorrecta && <X className="h-5 w-5 text-red-500" />}
@@ -236,13 +239,9 @@ function GameComponent() {
 
                 <div className="mt-6">
                     {gameState === 'feedback' ? (
-                        <Button className="w-full" onClick={handleNextQuestion}>
-                            Continuar
-                        </Button>
+                        <Button className="w-full" onClick={handleNextQuestion}>Continuar</Button>
                     ) : (
-                         <Button className="w-full" onClick={handleCheckAnswer} disabled={selectedOption === null}>
-                            Verificar
-                        </Button>
+                         <Button className="w-full" onClick={handleCheckAnswer} disabled={selectedOption === null}>Verificar</Button>
                     )}
                 </div>
 
@@ -250,7 +249,6 @@ function GameComponent() {
         </Card>
     );
 }
-
 
 export default function SuppliersPage() {
     const [screen, setScreen] = React.useState<'menu' | 'game'>('menu');
