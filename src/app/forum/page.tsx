@@ -3,14 +3,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Post } from '@/lib/types';
-import Link from 'next/link';
 import { continents } from '@/lib/continents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PostCard } from './_components/post-card';
+import { NewPostInline } from './_components/new-post-inline';
 
 export default function ForumPage() {
   const router = useRouter();
@@ -46,24 +45,12 @@ export default function ForumPage() {
 
   const renderPosts = () => {
     if (loading) return <p>Cargando publicaciones...</p>;
-    if (posts.length === 0) return <p className="text-muted-foreground">No hay publicaciones aún. ¡Sé el primero en preguntar!</p>;
+    if (posts.length === 0) return <p className="text-muted-foreground py-8 text-center">No hay publicaciones aún. ¡Sé el primero en preguntar!</p>;
     
     return (
       <div className="space-y-4">
         {posts.map(post => (
-          <Link href={`/forum/post/${post.id}`} key={post.id} className="block">
-            <Card className="hover:bg-accent transition-colors">
-              <CardHeader>
-                <CardTitle>{post.title}</CardTitle>
-                <CardDescription>
-                  <span className="font-semibold">{post.continent}</span> - Publicado el {new Date(post.timestamp?.seconds * 1000).toLocaleDateString()}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="line-clamp-2 text-muted-foreground">{post.content}</p>
-              </CardContent>
-            </Card>
-          </Link>
+          <PostCard post={post} key={post.id} />
         ))}
       </div>
     );
@@ -87,18 +74,7 @@ export default function ForumPage() {
           {user && (
              <Card className="mt-6">
                 <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                        <Avatar>
-                            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'Usuario'} />
-                            <AvatarFallback>{user.displayName?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <button 
-                          className="flex-grow text-left bg-muted hover:bg-muted/90 text-muted-foreground px-4 py-2 rounded-full transition-colors text-sm"
-                          onClick={() => router.push('/forum/new-post')}
-                        >
-                            Pregunta algo...
-                        </button>
-                    </div>
+                    <NewPostInline user={user} />
                 </CardContent>
              </Card>
           )}
