@@ -79,7 +79,7 @@ const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }
             
             <div className="flex-grow flex items-center justify-center">
                  <Image
-                    src="https://picsum.photos/seed/pelican/400/300"
+                    src="https://picsum.photos/seed/pelican-container/400/300"
                     alt="Pelícano sobre un contenedor"
                     width={400}
                     height={300}
