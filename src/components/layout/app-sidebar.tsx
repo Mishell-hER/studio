@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Globe, LogIn, LogOut, MessageSquare, UserPlus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useLoginModal } from "@/hooks/use-login-modal"
 
 const menuItems = [
     {
@@ -49,6 +50,7 @@ function UserProfile() {
     const auth = useAuth();
     const { state: sidebarState } = useSidebar()
     const router = useRouter()
+    const { onOpen } = useLoginModal();
 
     const handleSignOut = async () => {
         if (!auth) return;
@@ -101,15 +103,14 @@ function UserProfile() {
 
     ) : (
         <div className={cn("flex flex-col gap-2", sidebarState === "expanded" ? "px-2" : "px-3")}>
-             <Link href="/login" className="w-full">
-                <SidebarMenuButton
-                    icon={<LogIn />}
-                    className="w-full"
-                    tooltip={{ children: "Iniciar Sesión" }}
-                >
-                    <span>Iniciar Sesión</span>
-                </SidebarMenuButton>
-            </Link>
+             <SidebarMenuButton
+                icon={<LogIn />}
+                className="w-full"
+                tooltip={{ children: "Iniciar Sesión" }}
+                onClick={onOpen}
+            >
+                <span>Iniciar Sesión</span>
+            </SidebarMenuButton>
              <Link href="/register" className="w-full">
                 <SidebarMenuButton
                     icon={<UserPlus />}
@@ -124,8 +125,6 @@ function UserProfile() {
     )
 }
 
-// Need to import useRouter at the top of the file
-import { useRouter } from "next/navigation"
 
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar()

@@ -5,6 +5,8 @@ import { AppSidebar } from '@/components/layout/app-sidebar';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { Sidebar } from '@/components/ui/sidebar';
+import { LoginModal } from '@/components/auth/login-modal';
+import { ModalProvider } from '@/providers/modal-provider';
 
 export const metadata: Metadata = {
   title: 'LogisticX',
@@ -29,6 +31,7 @@ export default function RootLayout({
       </head>
       <body className={cn('min-h-screen bg-background font-sans antialiased', 'font-body')}>
         <FirebaseClientProvider>
+          <ModalProvider />
           <div className="flex min-h-screen">
             <Sidebar>
               <AppSidebar />

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,12 +7,21 @@ import { useAuth } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useLoginModal } from '@/hooks/use-login-modal';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export function LoginModal() {
   const router = useRouter();
   const auth = useAuth();
+  const { isOpen, onClose, onOpen } = useLoginModal();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,6 +35,7 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      onClose();
       router.push('/forum'); // Redirigir al foro después del login
     } catch (err: any) {
       setError('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
@@ -33,14 +43,21 @@ export default function LoginPage() {
     }
   };
 
+  const handleClose = () => {
+    setError('');
+    onClose();
+  }
+
   return (
-    <div className="container mx-auto flex h-full items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Iniciar Sesión</CardTitle>
-          <CardDescription>Ingresa tus credenciales para acceder a tu cuenta.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Iniciar Sesión</DialogTitle>
+          <DialogDescription>
+            Ingresa tus credenciales para acceder a tu cuenta.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
           <form onSubmit={handleSignIn} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Correo Electrónico</Label>
@@ -70,12 +87,16 @@ export default function LoginPage() {
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             ¿No tienes una cuenta?{' '}
-            <Link href="/register" className="font-medium text-primary hover:underline">
+            <Link 
+              href="/register" 
+              className="font-medium text-primary hover:underline"
+              onClick={onClose}
+            >
               Regístrate
             </Link>
           </p>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
