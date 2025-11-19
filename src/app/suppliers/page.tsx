@@ -36,6 +36,7 @@ const buttonBaseStyle: React.CSSProperties = {
   margin: '0 5px'
 };
 
+
 function GameMenu({ onPlay, onGoToMenu }: { onPlay: () => void, onGoToMenu: () => void }) {
     const router = useRouter();
 
@@ -46,10 +47,6 @@ function GameMenu({ onPlay, onGoToMenu }: { onPlay: () => void, onGoToMenu: () =
                 height: '650px', 
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                backgroundImage: 'url("/game_menu_background.jpg")',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
                 backgroundColor: COLORS.BACKGROUND_CONTAINER,
                 display: 'flex',
                 flexDirection: 'column',
@@ -216,9 +213,7 @@ function GameComponent({ onGoToMenu }: { onGoToMenu: () => void }) {
             setGameState('playing');
         } else {
             alert("¡Nivel completado!");
-            setCurrentQuestionIndex(0);
-            setTimeLeft(TIME_PER_QUESTION);
-            setGameState('playing');
+            onGoToMenu();
         }
     };
     
@@ -318,13 +313,7 @@ export default function SuppliersPage() {
                 <GameMenu onPlay={handlePlay} onGoToMenu={handleGoToMenu}/>
             ) : (
                 <div className="w-full">
-                     <Button asChild variant="ghost" className="mb-4">
-                        <button onClick={handleGoToMenu}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Volver al menú
-                        </button>
-                    </Button>
-                    <GameComponent onGoToMenu={handleGoToMenu} />
+                     <GameComponent onGoToMenu={handleGoToMenu} />
                 </div>
             )}
         </div>
