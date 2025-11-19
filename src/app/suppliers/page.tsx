@@ -71,15 +71,24 @@ type GameState = 'menu' | 'playing' | 'level-complete';
 const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }) => {
     return (
         <div className="flex flex-col items-center justify-center w-full h-full max-w-md mx-auto p-4">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-center mb-8 leading-tight">
                 <span className="block text-green-500">¿Sabes</span> 
                 <span className="text-orange-500 text-5xl md:text-6xl mx-2">o</span> 
                 <span className="block text-red-500">Estás Perdido?</span>
             </h1>
             
-            <div className="flex-grow"></div>
+            <div className="flex-grow flex items-center justify-center">
+                 <Image
+                    src="https://picsum.photos/seed/pelican/400/300"
+                    alt="Pelícano sobre un contenedor"
+                    width={400}
+                    height={300}
+                    className="rounded-lg object-cover"
+                    data-ai-hint="pelican container"
+                 />
+            </div>
 
-            <div className="flex justify-around w-full">
+            <div className="flex justify-around w-full mt-8">
                  <Button 
                     onClick={onPlay} 
                     className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
