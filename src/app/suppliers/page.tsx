@@ -71,36 +71,46 @@ type GameState = 'menu' | 'playing' | 'level-complete';
 
 const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }) => {
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-[#e8f9fd]">
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#e8f9fd] p-4">
             <div 
-              className="relative w-full max-w-md h-[650px] bg-cover bg-center bg-no-repeat rounded-2xl shadow-lg flex flex-col items-center p-5 box-border"
-              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj')" }}
+              className="relative w-full max-w-md h-[650px] rounded-2xl shadow-lg flex flex-col items-center p-5 box-border overflow-hidden"
             >
-                <div className="flex-grow flex items-center justify-center">
-                    {/* El título y la imagen del pelícano están ahora en el fondo. */}
-                </div>
+                <Image
+                    src="https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj"
+                    alt="Menu de juego con un pelícano sobre un contenedor"
+                    layout="fill"
+                    objectFit="cover"
+                    className="z-0"
+                />
 
-                <div className="flex justify-around w-full mt-auto z-10">
-                    <Button 
-                        onClick={onPlay} 
-                        className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
-                        style={{ backgroundColor: '#58CC02' }}
-                    >
-                        JUGAR
-                    </Button>
-                    <Button 
-                        className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
-                        style={{ backgroundColor: '#1cb0f6' }}
-                    >
-                        OPCIONES
-                    </Button>
-                    <Button 
-                        onClick={onExit} 
-                        className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
-                        style={{ backgroundColor: '#FF4B4B' }}
-                    >
-                        SALIR
-                    </Button>
+                <div className="relative z-10 flex flex-col items-center justify-between h-full w-full">
+                    <h1 className="text-4xl font-extrabold text-center leading-tight mt-10" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                        <span className="block text-green-500">¿Sabes</span>
+                        <span className="text-orange-500 text-5xl">o</span>
+                        <span className="block text-red-500">Estás Perdido?</span>
+                    </h1>
+                    
+                    <div className="flex-grow"></div>
+
+                    <div className="flex justify-around w-full mb-5">
+                         <Button 
+                            onClick={onPlay} 
+                            className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] bg-[#58CC02] hover:bg-[#4aa402]"
+                        >
+                            JUGAR
+                        </Button>
+                        <Button 
+                            className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] bg-[#1cb0f6] hover:bg-[#1899d6]"
+                        >
+                            OPCIONES
+                        </Button>
+                        <Button 
+                            onClick={onExit} 
+                            className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] bg-[#FF4B4B] hover:bg-[#dd3a3a]"
+                        >
+                            SALIR
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
