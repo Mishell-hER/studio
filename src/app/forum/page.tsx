@@ -74,7 +74,7 @@ export default function ForumPage() {
         <TabsContent value="preguntas">
              <Card className="mt-6">
                 <CardContent className="p-4">
-                    <NewPostInline user={user} />
+                    <NewPostInline user={user} type="question" />
                 </CardContent>
              </Card>
 
@@ -97,7 +97,7 @@ export default function ForumPage() {
         <TabsContent value="opiniones">
             <Card className="mt-6">
                 <CardContent className="p-4">
-                    <NewPostInline user={user} />
+                    <NewPostInline user={user} type="opinion" />
                 </CardContent>
              </Card>
            <div className="mt-6 text-center text-muted-foreground py-12">

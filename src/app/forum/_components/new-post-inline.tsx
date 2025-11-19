@@ -14,7 +14,12 @@ import { continents } from '@/lib/continents';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLoginModal } from '@/hooks/use-login-modal';
 
-export function NewPostInline({ user }: { user: User | null }) {
+interface NewPostInlineProps {
+    user: User | null;
+    type: 'question' | 'opinion';
+}
+
+export function NewPostInline({ user, type }: NewPostInlineProps) {
   const router = useRouter();
   const firestore = useFirestore();
   const { onOpen } = useLoginModal();
@@ -70,6 +75,13 @@ export function NewPostInline({ user }: { user: User | null }) {
     }
   };
 
+  const placeholderText = () => {
+    if (!user) {
+        return type === 'question' ? 'Inicia sesión para preguntar algo...' : 'Inicia sesión para opinar o abrir debate...';
+    }
+    return type === 'question' ? 'Haz una pregunta o comparte tu opinión...' : 'Opina algo o abre un debate...';
+  }
+
   return (
     <div className="flex items-start gap-4">
       <Avatar>
@@ -82,7 +94,7 @@ export function NewPostInline({ user }: { user: User | null }) {
             className="w-full text-left bg-muted hover:bg-muted/90 text-muted-foreground px-4 py-2 rounded-md transition-colors text-sm"
             onClick={handleOpenForm}
           >
-            {user ? 'Haz una pregunta o comparte tu opinión...' : 'Inicia sesión para preguntar algo...'}
+            {placeholderText()}
           </button>
         ) : (
           <AnimatePresence>
@@ -96,13 +108,13 @@ export function NewPostInline({ user }: { user: User | null }) {
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Título de la pregunta"
+                placeholder="Título de la publicación"
                 required
               />
               <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Describe tu pregunta o tu opinión..."
+                placeholder="Describe tu publicación..."
                 rows={4}
                 required
               />
