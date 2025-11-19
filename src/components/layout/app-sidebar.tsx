@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Globe, LogIn, LogOut, MessageSquare, UserPlus } from "lucide-react"
+import { Globe, LogIn, LogOut, MessageSquare, UserPlus, Truck } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -42,6 +42,11 @@ const menuItems = [
         href: "/forum",
         label: "Foro Comunitario",
         icon: MessageSquare,
+    },
+    {
+        href: "/suppliers",
+        label: "Proveedores",
+        icon: Truck,
     }
 ]
 
