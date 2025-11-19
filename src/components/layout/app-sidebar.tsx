@@ -45,7 +45,7 @@ const menuItems = [
     },
     {
         href: "/suppliers",
-        label: "Proveedores",
+        label: "¿Sabes o Estás Perdido?",
         icon: Truck,
     }
 ]
