@@ -11,18 +11,36 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { continents } from '@/lib/continents';
-import { Card, CardContent } from '@/components/ui/card';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLoginModal } from '@/hooks/use-login-modal';
 
-export function NewPostInline({ user }: { user: User }) {
+export function NewPostInline({ user }: { user: User | null }) {
   const router = useRouter();
   const firestore = useFirestore();
+  const { onOpen } = useLoginModal();
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [continent, setContinent] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleOpenForm = () => {
+    if (!user) {
+      onOpen();
+    } else {
+      setIsExpanded(true);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsExpanded(false);
+    setTitle('');
+    setContent('');
+    setContinent('');
+    setError('');
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,19 +54,14 @@ export function NewPostInline({ user }: { user: User }) {
     setError('');
 
     try {
-      const docRef = await addDoc(collection(firestore, 'posts'), {
+      await addDoc(collection(firestore, 'posts'), {
         title,
         content,
         continent,
         authorId: user.uid,
         timestamp: serverTimestamp(),
       });
-      setIsExpanded(false);
-      setTitle('');
-      setContent('');
-      setContinent('');
-      // Optionally, navigate to the new post
-      // router.push(`/forum/post/${docRef.id}`);
+      handleCancel();
     } catch (err) {
       console.error(err);
       setError('No se pudo crear la publicación. Inténtalo de nuevo.');
@@ -60,16 +73,16 @@ export function NewPostInline({ user }: { user: User }) {
   return (
     <div className="flex items-start gap-4">
       <Avatar>
-        <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'Usuario'} />
-        <AvatarFallback>{user.displayName?.[0]}</AvatarFallback>
+        <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || 'Usuario'} />
+        <AvatarFallback>{user?.displayName?.[0] || '?'}</AvatarFallback>
       </Avatar>
       <div className="w-full">
         {!isExpanded ? (
           <button
             className="w-full text-left bg-muted hover:bg-muted/90 text-muted-foreground px-4 py-2 rounded-md transition-colors text-sm"
-            onClick={() => setIsExpanded(true)}
+            onClick={handleOpenForm}
           >
-            Haz una pregunta o comparte tu opinión...
+            {user ? 'Haz una pregunta o comparte tu opinión...' : 'Inicia sesión para preguntar algo...'}
           </button>
         ) : (
           <AnimatePresence>
@@ -107,7 +120,7 @@ export function NewPostInline({ user }: { user: User }) {
               </Select>
               {error && <p className="text-destructive text-sm">{error}</p>}
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="ghost" onClick={() => setIsExpanded(false)} disabled={isSubmitting}>
+                <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSubmitting}>
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={isSubmitting || !title || !content || !continent}>

@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -71,13 +72,11 @@ export default function ForumPage() {
           <TabsTrigger value="opiniones">Opiniones</TabsTrigger>
         </TabsList>
         <TabsContent value="preguntas">
-          {user && (
              <Card className="mt-6">
                 <CardContent className="p-4">
                     <NewPostInline user={user} />
                 </CardContent>
              </Card>
-          )}
 
           <div className="mt-6 flex items-center gap-4">
             <span className="text-sm font-medium">Filtrar por continente:</span>
@@ -96,6 +95,11 @@ export default function ForumPage() {
           </div>
         </TabsContent>
         <TabsContent value="opiniones">
+            <Card className="mt-6">
+                <CardContent className="p-4">
+                    <NewPostInline user={user} />
+                </CardContent>
+             </Card>
            <div className="mt-6 text-center text-muted-foreground py-12">
             <p>Aquí se listarán discusiones de opiniones generales, sin un formato Q&A estricto.</p>
             <p>(Funcionalidad en desarrollo)</p>
