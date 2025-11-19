@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Post, Reply, UserProfile } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Star, MessageSquare } from 'lucide-react';
+import { useLoginModal } from '@/hooks/use-login-modal';
 
 
 function UserAvatar({ userId }: { userId: string }) {
@@ -96,9 +97,72 @@ function ReplyCard({ reply }: { reply: Reply }) {
     );
 }
 
+function ReplyForm({ postId }: { postId: string }) {
+    const { user } = useUser();
+    const firestore = useFirestore();
+    const { onOpen } = useLoginModal();
+    const [newReply, setNewReply] = useState('');
+
+    const handleReplySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newReply.trim() || !user || !firestore) return;
+
+        await addDoc(collection(firestore, 'replies'), {
+            postId: postId,
+            authorId: user.uid,
+            content: newReply,
+            timestamp: serverTimestamp(),
+        });
+        setNewReply('');
+    };
+
+    if (!user) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Escribe una respuesta</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div onClick={onOpen} className="cursor-pointer">
+                        <Textarea
+                            placeholder="Inicia sesión para compartir tu conocimiento..."
+                            rows={5}
+                            disabled
+                            className="bg-muted"
+                        />
+                    </div>
+                    <Button onClick={onOpen} className="mt-4">
+                        Inicia sesión para responder
+                    </Button>
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Escribe una respuesta</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleReplySubmit} className="space-y-4">
+                    <Textarea
+                        value={newReply}
+                        onChange={(e) => setNewReply(e.target.value)}
+                        placeholder="Comparte tu conocimiento..."
+                        rows={5}
+                    />
+                    <Button type="submit" disabled={!newReply.trim()}>
+                        Publicar Respuesta
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
+    );
+}
+
 
 export default function PostPage({ params }: { params: { id: string } }) {
-  const { user } = useUser();
   const firestore = useFirestore();
   
   const postRef = useMemo(() => firestore ? doc(firestore, 'posts', params.id) : null, [firestore, params.id]);
@@ -110,20 +174,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const repliesQuery = useMemo(() => firestore ? query(collection(firestore, 'replies'), where('postId', '==', params.id), orderBy('timestamp', 'asc')) : null, [firestore, params.id]);
   const { data: replies, loading: repliesLoading } = useCollection<Reply>(repliesQuery);
   
-  const [newReply, setNewReply] = useState('');
-
-  const handleReplySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newReply.trim() || !user || !firestore) return;
-
-    await addDoc(collection(firestore, 'replies'), {
-      postId: params.id,
-      authorId: user.uid,
-      content: newReply,
-      timestamp: serverTimestamp(),
-    });
-    setNewReply('');
-  };
 
   if (postLoading) return <p>Cargando publicación...</p>;
   if (!post) return <p>Publicación no encontrada.</p>;
@@ -148,27 +198,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
           <ReplyCard key={reply.id} reply={reply} />
         ))}
       </div>
+      
+      <ReplyForm postId={params.id} />
 
-      {user && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Escribe una respuesta</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleReplySubmit} className="space-y-4">
-              <Textarea
-                value={newReply}
-                onChange={(e) => setNewReply(e.target.value)}
-                placeholder="Comparte tu conocimiento..."
-                rows={5}
-              />
-              <Button type="submit" disabled={!newReply.trim()}>
-                Publicar Respuesta
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
