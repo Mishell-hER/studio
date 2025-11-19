@@ -77,15 +77,7 @@ const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }
                 <span className="block text-red-500">Estás Perdido?</span>
             </h1>
             
-            <div className="relative w-full h-64 mb-12">
-                <Image
-                    src="https://picsum.photos/seed/pelican-container/600/400"
-                    alt="Pelícano sobre un contenedor en el agua"
-                    fill
-                    className="object-contain"
-                    data-ai-hint="pelican container"
-                />
-            </div>
+            <div className="flex-grow"></div>
 
             <div className="flex justify-around w-full">
                  <Button 
