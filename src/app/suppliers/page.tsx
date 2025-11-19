@@ -9,6 +9,122 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 
+// --- CONSTANTES DE COLOR ---
+const COLORS = {
+  TITLE_SABES: '#32CD32',      // Verde (Título)
+  TITLE_O: '#FFA500',          // Naranja (Título)
+  TITLE_PERDIDO: '#FF4500',    // Rojo-Naranja (Título)
+  BUTTON_JUGAR: '#58CC02',     // Verde (JUGAR)
+  BUTTON_OPCIONES: '#1cb0f6',  // Azul (OPCIONES)
+  BUTTON_SALIR: '#FF4B4B',     // Rojo (SALIR)
+  BACKGROUND_CONTAINER: '#EAEAEA', // Color de fondo si la imagen no carga
+  TEXT_SHADOW_LIGHT: 'rgba(255, 255, 255, 0.8)',
+  TEXT_SHADOW_DARK: 'rgba(0, 0, 0, 0.2)',
+};
+
+// --- ESTILO BASE DEL BOTÓN ---
+const buttonBaseStyle: React.CSSProperties = {
+  padding: '15px 25px',
+  border: 'none',
+  borderRadius: '12px',
+  fontSize: '1.1em',
+  fontWeight: 'bold',
+  color: 'white',
+  cursor: 'pointer',
+  boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)', 
+  transition: 'all 0.1s ease',
+  flex: 1,
+  margin: '0 5px'
+};
+
+function GameMenu({ onPlay }: { onPlay: () => void }) {
+    const router = useRouter();
+
+    return (
+        <div 
+            style={{
+                width: '450px', 
+                height: '650px', 
+                borderRadius: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                backgroundImage: 'url("/game_menu_background.jpg")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundColor: COLORS.BACKGROUND_CONTAINER,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px',
+                boxSizing: 'border-box',
+                position: 'relative',
+            }}
+        >
+            <h1 style={{
+                fontSize: '2.5em',
+                fontWeight: '900',
+                lineHeight: '1.1',
+                marginTop: '40px', 
+                marginBottom: '20px',
+                fontFamily: "'Comic Sans MS', cursive, sans-serif",
+                textAlign: 'center',
+            }}>
+                <span style={{ 
+                    color: COLORS.TITLE_SABES,
+                    textShadow: `2px 2px 0px ${COLORS.TEXT_SHADOW_DARK}, -2px -2px 0px ${COLORS.TEXT_SHADOW_LIGHT}`,
+                    display: 'block' 
+                }}>
+                    ¿Sabes
+                </span>
+                <span style={{ 
+                    color: COLORS.TITLE_O,
+                    fontSize: '1.2em',
+                    display: 'block'
+                }}>
+                    o
+                </span>
+                <span style={{ 
+                    color: COLORS.TITLE_PERDIDO,
+                    textShadow: `2px 2px 0px ${COLORS.TEXT_SHADOW_DARK}, -2px -2px 0px ${COLORS.TEXT_SHADOW_LIGHT}`,
+                    display: 'block' 
+                }}>
+                    Estás Perdido?
+                </span>
+            </h1>
+
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-around',
+                width: '95%',
+                maxWidth: '400px',
+                marginBottom: '20px',
+            }}>
+                <button 
+                    onClick={onPlay}
+                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_JUGAR }}
+                >
+                    JUGAR
+                </button>
+                
+                <button 
+                    onClick={() => console.log('Abrir opciones...')}
+                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_OPCIONES }}
+                >
+                    OPCIONES
+                </button>
+                
+                <button 
+                    onClick={() => router.push('/')}
+                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_SALIR }}
+                >
+                    SALIR
+                </button>
+            </div>
+        </div>
+    );
+}
+
 const levels = [
     "Iniciado Global", "Comerciante Novato", "Exportador Emergente", "Navegante Internacional", "Mercader en Ascenso",
     "Puente Comercial", "Despachador Internacional", "Explorador de Mercados", "Conquistador de Fronteras", "Logístico Global",
@@ -50,71 +166,6 @@ const questions = [
 ];
 
 const TIME_PER_QUESTION = 20;
-
-const COLORS = {
-  TITLE_SABES: '#32CD32',
-  TITLE_O: '#FFA500',
-  TITLE_PERDIDO: '#FF4500',
-  BUTTON_JUGAR: '#58CC02',
-  BUTTON_OPCIONES: '#1cb0f6',
-  BUTTON_SALIR: '#FF4B4B',
-};
-
-function GameMenu({ onPlay }: { onPlay: () => void }) {
-    const router = useRouter();
-
-    const buttonBaseStyle: React.CSSProperties = {
-        padding: '15px 25px',
-        border: 'none',
-        borderRadius: '12px',
-        fontSize: '1.1em',
-        fontWeight: 'bold',
-        color: 'white',
-        cursor: 'pointer',
-        boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)',
-        transition: 'all 0.1s ease',
-        flex: 1,
-        margin: '0 5px'
-    };
-
-    return (
-        <div 
-            className="w-full max-w-md h-[650px] rounded-2xl shadow-lg flex flex-col items-center justify-between p-5"
-            style={{
-                backgroundImage: "url('/game_menu_background.png')",
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-            }}
-        >
-            <h1 className="text-4xl font-black text-center leading-tight mt-10" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                <span style={{ color: COLORS.TITLE_SABES, display: 'block' }}>¿Sabes</span>
-                <span style={{ color: COLORS.TITLE_O, fontSize: '1.2em', display: 'block' }}>o</span>
-                <span style={{ color: COLORS.TITLE_PERDIDO, display: 'block' }}>Estás Perdido?</span>
-            </h1>
-            
-            <div className="w-full flex justify-around mb-5">
-                <button 
-                    onClick={onPlay}
-                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_JUGAR }}
-                >
-                    JUGAR
-                </button>
-                <button 
-                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_OPCIONES }}
-                >
-                    OPCIONES
-                </button>
-                 <button 
-                    onClick={() => router.push('/')}
-                    style={{ ...buttonBaseStyle, backgroundColor: COLORS.BUTTON_SALIR }}
-                >
-                    SALIR
-                </button>
-            </div>
-        </div>
-    );
-}
 
 function GameComponent() {
     const [gameState, setGameState] = React.useState('playing');
@@ -180,7 +231,7 @@ function GameComponent() {
         <Card className="w-full mx-auto max-w-2xl bg-card/80 backdrop-blur-sm">
             <CardHeader>
                 <div className="flex justify-between items-center mb-4">
-                     <CardTitle className="text-xl">Nivel {currentQuestionIndex}: {levels[currentQuestionIndex + 1]}</CardTitle>
+                     <CardTitle className="text-xl">Nivel {currentQuestionIndex + 1}: {levels[currentQuestionIndex + 1]}</CardTitle>
                     <div className="relative h-12 w-12">
                         <svg className="h-full w-full" viewBox="0 0 36 36">
                             <path
@@ -256,22 +307,24 @@ export default function SuppliersPage() {
         setScreen('game');
     };
 
+    const handleGoToMenu = () => {
+        setScreen('menu');
+    }
+
     return (
-        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-full">
+        <div className="w-full h-full flex items-center justify-center">
             {screen === 'menu' ? (
                 <GameMenu onPlay={handlePlay} />
             ) : (
-                <>
-                    <div className="absolute top-4 left-4 z-10">
-                        <Button asChild variant="ghost">
-                            <Link href="/">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Volver al inicio
-                            </Link>
-                        </Button>
-                    </div>
+                <div className="w-full">
+                    <Button asChild variant="ghost" className="mb-4">
+                        <button onClick={handleGoToMenu}>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Volver al menú
+                        </button>
+                    </Button>
                     <GameComponent />
-                </>
+                </div>
             )}
         </div>
     );
