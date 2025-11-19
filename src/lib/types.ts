@@ -4,8 +4,14 @@ export interface UserProfile {
     id: string;
     uid: string;
     name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     photoURL?: string;
+    birthYear: number;
+    hasCompany: boolean;
+    ruc?: string;
+    sector?: string;
     role: 'normal' | 'expert';
     verified: boolean;
     continent: string;

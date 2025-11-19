@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Globe, LogIn, LogOut, MessageSquare, User as UserIcon } from "lucide-react"
+import { Globe, LogIn, LogOut, MessageSquare, UserPlus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -18,9 +18,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Button } from "../ui/button"
-import { useUser, useAuth, useFirestore } from "@/firebase"
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth"
-import { doc, setDoc } from "firebase/firestore"
+import { useUser, useAuth } from "@/firebase"
+import { signOut } from "firebase/auth"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import {
   DropdownMenu,
@@ -48,36 +47,14 @@ const menuItems = [
 function UserProfile() {
     const { user, loading } = useUser();
     const auth = useAuth();
-    const firestore = useFirestore();
     const { state: sidebarState } = useSidebar()
-
-    const handleSignIn = async () => {
-        if (!auth) return;
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            if (user && firestore) {
-                const userRef = doc(firestore, 'users', user.uid);
-                await setDoc(userRef, {
-                uid: user.uid,
-                name: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                role: 'normal',
-                verified: false,
-                continent: 'Unknown'
-                }, { merge: true });
-            }
-        } catch (error) {
-            console.error("Error during sign-in:", error);
-        }
-    };
+    const router = useRouter()
 
     const handleSignOut = async () => {
         if (!auth) return;
         try {
             await signOut(auth);
+            router.push('/');
         } catch (error) {
             console.error("Error during sign-out:", error);
         }
@@ -123,18 +100,32 @@ function UserProfile() {
         </DropdownMenu>
 
     ) : (
-         <SidebarMenuButton
-            onClick={handleSignIn}
-            icon={<LogIn />}
-            className="w-full"
-            tooltip={{
-              children: "Iniciar Sesión",
-            }}
-          >
-            <span>Iniciar Sesión</span>
-        </SidebarMenuButton>
+        <div className={cn("flex flex-col gap-2", sidebarState === "expanded" ? "px-2" : "px-3")}>
+             <Link href="/login" className="w-full">
+                <SidebarMenuButton
+                    icon={<LogIn />}
+                    className="w-full"
+                    tooltip={{ children: "Iniciar Sesión" }}
+                >
+                    <span>Iniciar Sesión</span>
+                </SidebarMenuButton>
+            </Link>
+             <Link href="/register" className="w-full">
+                <SidebarMenuButton
+                    icon={<UserPlus />}
+                    variant="outline"
+                    className="w-full"
+                     tooltip={{ children: "Registrarse" }}
+                >
+                    <span>Registrarse</span>
+                </SidebarMenuButton>
+            </Link>
+        </div>
     )
 }
+
+// Need to import useRouter at the top of the file
+import { useRouter } from "next/navigation"
 
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar()

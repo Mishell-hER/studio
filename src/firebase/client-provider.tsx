@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { FirebaseProvider } from './provider';
 import { initializeFirebase } from './index';
 
-// Configuración para producción y desarrollo
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,6 +11,7 @@ const firebaseConfig = {
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
+
 
 export function FirebaseClientProvider({ children }: { children: React.ReactNode }) {
   const { app, auth, firestore } = useMemo(() => initializeFirebase(firebaseConfig), []);
