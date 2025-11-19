@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 
@@ -49,15 +49,54 @@ const questions = [
     }
 ];
 
-const TIME_PER_QUESTION = 20; // 20 segundos por pregunta
+const TIME_PER_QUESTION = 20;
+
+function GameMenu({ onPlay }: { onPlay: () => void }) {
+    const router = useRouter();
+    return (
+        <div 
+            className="w-full max-w-md h-[650px] bg-cover bg-center bg-no-repeat rounded-2xl shadow-lg flex flex-col items-center justify-between p-5"
+            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj')" }}
+        >
+             <h1 className="text-4xl font-black text-center leading-tight mt-10" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                <span className="block" style={{ color: '#32CD32', textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>¿Sabes</span>
+                <span className="text-5xl" style={{ color: '#FFA500', textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>o</span>
+                <span className="block" style={{ color: '#FF4500', textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>Estás Perdido?</span>
+            </h1>
+            
+            <div className="w-full flex justify-around mb-5">
+                <Button 
+                    onClick={onPlay}
+                    className="text-lg font-bold text-white rounded-xl shadow-lg transition-transform transform hover:scale-105"
+                    style={{ backgroundColor: '#58CC02', boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)' }}
+                >
+                    JUGAR
+                </Button>
+                <Button 
+                    className="text-lg font-bold text-white rounded-xl shadow-lg transition-transform transform hover:scale-105"
+                    style={{ backgroundColor: '#1cb0f6', boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)' }}
+                >
+                    OPCIONES
+                </Button>
+                <Button 
+                    onClick={() => router.push('/')}
+                    className="text-lg font-bold text-white rounded-xl shadow-lg transition-transform transform hover:scale-105"
+                    style={{ backgroundColor: '#FF4B4B', boxShadow: '0 5px 0 0 rgba(0, 0, 0, 0.3)' }}
+                >
+                    SALIR
+                </Button>
+            </div>
+        </div>
+    );
+}
+
 
 function GameComponent() {
-    const [gameState, setGameState] = React.useState('playing'); // 'playing', 'feedback'
+    const [gameState, setGameState] = React.useState('playing');
     const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
     const [selectedOption, setSelectedOption] = React.useState<number | null>(null);
     const [isCorrect, setIsCorrect] = React.useState<boolean | null>(null);
     const [timeLeft, setTimeLeft] = React.useState(TIME_PER_QUESTION);
-    const router = useRouter();
 
     React.useEffect(() => {
         if (gameState === 'playing') {
@@ -78,7 +117,7 @@ function GameComponent() {
     const handleTimeOut = () => {
         setGameState('feedback');
         setIsCorrect(false);
-        setSelectedOption(null); // Para que no haya seleccionada
+        setSelectedOption(null);
     };
     
     const handleOptionSelect = (index: number) => {
@@ -106,9 +145,8 @@ function GameComponent() {
             setTimeLeft(TIME_PER_QUESTION);
             setGameState('playing');
         } else {
-            // Fin del juego o nivel
             alert("¡Nivel completado!");
-            setCurrentQuestionIndex(0); // Reiniciar por ahora
+            setCurrentQuestionIndex(0);
             setTimeLeft(TIME_PER_QUESTION);
             setGameState('playing');
         }
@@ -200,13 +238,13 @@ function GameComponent() {
                  </div>
 
                 <div className="mt-6">
-                    {gameState === 'playing' ? (
-                        <Button className="w-full" onClick={handleCheckAnswer} disabled={selectedOption === null}>
-                            Verificar
-                        </Button>
-                    ) : (
+                    {gameState === 'feedback' ? (
                         <Button className="w-full" onClick={handleNextQuestion}>
                             Continuar
+                        </Button>
+                    ) : (
+                         <Button className="w-full" onClick={handleCheckAnswer} disabled={selectedOption === null}>
+                            Verificar
                         </Button>
                     )}
                 </div>
@@ -216,21 +254,26 @@ function GameComponent() {
     );
 }
 
-
 export default function SuppliersPage() {
-    const router = useRouter();
+    const [screen, setScreen] = React.useState<'menu' | 'game'>('menu');
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <Button asChild variant="ghost" className="mb-4">
-                <Link href="/">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Volver al inicio
-                </Link>
-            </Button>
-             <h1 className="text-3xl font-bold tracking-tighter mb-2">¿Sabes o Estás Perdido?</h1>
-            <p className="text-muted-foreground mb-8">Pon a prueba tus conocimientos sobre exportación y logística.</p>
-            <GameComponent />
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-full">
+            {screen === 'menu' ? (
+                <GameMenu onPlay={() => setScreen('game')} />
+            ) : (
+                <>
+                    <div className="absolute top-4 left-4">
+                        <Button asChild variant="ghost">
+                            <Link href="/">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Volver al inicio
+                            </Link>
+                        </Button>
+                    </div>
+                    <GameComponent />
+                </>
+            )}
         </div>
     );
 }
