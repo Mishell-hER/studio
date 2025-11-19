@@ -71,18 +71,16 @@ type GameState = 'menu' | 'playing' | 'level-complete';
 
 const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }) => {
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-[#e8f9fd] p-4">
+        <div className="w-full min-h-screen flex items-center justify-center p-4 bg-[#e8f9fd]">
             <div 
               className="relative w-full max-w-md h-[650px] rounded-2xl shadow-lg flex flex-col items-center p-5 box-border overflow-hidden"
+              style={{
+                backgroundImage: "url('https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
             >
-                <Image
-                    src="https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj"
-                    alt="Menu de juego con un pelícano sobre un contenedor"
-                    layout="fill"
-                    objectFit="cover"
-                    className="z-0"
-                />
-
                 <div className="relative z-10 flex flex-col items-center justify-between h-full w-full">
                     <h1 className="text-4xl font-extrabold text-center leading-tight mt-10" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                         <span className="block text-green-500">¿Sabes</span>
