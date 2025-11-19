@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, X } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -37,7 +36,7 @@ const buttonBaseStyle: React.CSSProperties = {
   margin: '0 5px'
 };
 
-function GameMenu({ onPlay }: { onPlay: () => void }) {
+function GameMenu({ onPlay, onGoToMenu }: { onPlay: () => void, onGoToMenu: () => void }) {
     const router = useRouter();
 
     return (
@@ -167,7 +166,7 @@ const questions = [
 
 const TIME_PER_QUESTION = 20;
 
-function GameComponent() {
+function GameComponent({ onGoToMenu }: { onGoToMenu: () => void }) {
     const [gameState, setGameState] = React.useState('playing');
     const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
     const [selectedOption, setSelectedOption] = React.useState<number | null>(null);
@@ -294,7 +293,9 @@ function GameComponent() {
                          <Button className="w-full" onClick={handleCheckAnswer} disabled={selectedOption === null}>Verificar</Button>
                     )}
                 </div>
-
+                <div className="mt-4">
+                  <Button variant="link" onClick={onGoToMenu}>Volver al menú</Button>
+                </div>
             </CardContent>
         </Card>
     );
@@ -314,16 +315,16 @@ export default function SuppliersPage() {
     return (
         <div className="w-full h-full flex items-center justify-center">
             {screen === 'menu' ? (
-                <GameMenu onPlay={handlePlay} />
+                <GameMenu onPlay={handlePlay} onGoToMenu={handleGoToMenu}/>
             ) : (
                 <div className="w-full">
-                    <Button asChild variant="ghost" className="mb-4">
+                     <Button asChild variant="ghost" className="mb-4">
                         <button onClick={handleGoToMenu}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver al menú
                         </button>
                     </Button>
-                    <GameComponent />
+                    <GameComponent onGoToMenu={handleGoToMenu} />
                 </div>
             )}
         </div>
