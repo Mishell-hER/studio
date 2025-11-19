@@ -33,6 +33,10 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --role-expert-bg: 350 85% 60%; 
+    --role-expert-fg: 350 85% 98%;
+    --role-beginner-bg: 142 76% 36%;
+    --role-beginner-fg: 142 76% 96%;
   }
   .dark {
     --background: 0 0% 4%;

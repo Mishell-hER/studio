@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Post } from '@/lib/types';
 import Link from 'next/link';
 import { continents } from '@/lib/continents';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function ForumPage() {
   const router = useRouter();
@@ -42,6 +43,31 @@ export default function ForumPage() {
     return () => unsubscribe();
   }, [firestore, continentFilter]);
 
+  const renderPosts = () => {
+    if (loading) return <p>Cargando publicaciones...</p>;
+    if (posts.length === 0) return <p className="text-muted-foreground">No hay publicaciones aún. ¡Sé el primero en preguntar!</p>;
+    
+    return (
+      <div className="space-y-4">
+        {posts.map(post => (
+          <Link href={`/forum/post/${post.id}`} key={post.id} className="block">
+            <Card className="hover:bg-accent transition-colors">
+              <CardHeader>
+                <CardTitle>{post.title}</CardTitle>
+                <CardDescription>
+                  <span className="font-semibold">{post.continent}</span> - Publicado el {new Date(post.timestamp?.seconds * 1000).toLocaleDateString()}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="line-clamp-2 text-muted-foreground">{post.content}</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -56,44 +82,35 @@ export default function ForumPage() {
         )}
       </div>
 
-      <div className="mb-6 flex items-center gap-4">
-        <span className="text-sm font-medium">Filtrar por continente:</span>
-        <Select value={continentFilter} onValueChange={setContinentFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Seleccionar continente" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {continents.map(c => <SelectItem key={c.slug} value={c.name}>{c.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {loading ? (
-        <p>Cargando publicaciones...</p>
-      ) : (
-        <div className="space-y-4">
-          {posts.length === 0 ? (
-            <p className="text-muted-foreground">No hay publicaciones aún. ¡Sé el primero en preguntar!</p>
-          ) : (
-            posts.map(post => (
-              <Link href={`/forum/post/${post.id}`} key={post.id} className="block">
-                <Card className="hover:bg-accent transition-colors">
-                  <CardHeader>
-                    <CardTitle>{post.title}</CardTitle>
-                    <CardDescription>
-                      <span className="font-semibold">{post.continent}</span> - Publicado el {new Date(post.timestamp?.seconds * 1000).toLocaleDateString()}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="line-clamp-2 text-muted-foreground">{post.content}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))
-          )}
-        </div>
-      )}
+       <Tabs defaultValue="preguntas" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="preguntas">Preguntas y Respuestas</TabsTrigger>
+          <TabsTrigger value="opiniones">Opiniones</TabsTrigger>
+        </TabsList>
+        <TabsContent value="preguntas">
+          <div className="mt-6 flex items-center gap-4">
+            <span className="text-sm font-medium">Filtrar por continente:</span>
+            <Select value={continentFilter} onValueChange={setContinentFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Seleccionar continente" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {continents.map(c => <SelectItem key={c.slug} value={c.name}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="mt-6">
+            {renderPosts()}
+          </div>
+        </TabsContent>
+        <TabsContent value="opiniones">
+           <div className="mt-6 text-center text-muted-foreground py-12">
+            <p>Aquí se listarán discusiones de opiniones generales, sin un formato Q&A estricto.</p>
+            <p>(Funcionalidad en desarrollo)</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

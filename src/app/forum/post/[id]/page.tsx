@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from 'firebase/firestore';
+import { useState, useEffect, useMemo } from 'react';
+import { doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from 'firebase/firestore';
 import { useFirestore, useUser, useDoc, useCollection } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Post, Reply, UserProfile } from '@/lib/types';
-import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import { Star, MessageSquare } from 'lucide-react';
+
 
 function UserAvatar({ userId }: { userId: string }) {
     const firestore = useFirestore();
@@ -27,19 +29,50 @@ function UserAvatar({ userId }: { userId: string }) {
     );
 }
 
+const StarRating = ({ rating, onRate, commentId }: { rating: number, onRate: (rating: number) => void, commentId: string }) => {
+    return (
+        <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                    key={star}
+                    className={cn(
+                        "h-5 w-5 cursor-pointer transition-colors",
+                        star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-400"
+                    )}
+                    onClick={() => onRate(star)}
+                />
+            ))}
+        </div>
+    );
+};
+
+
 function ReplyCard({ reply }: { reply: Reply }) {
     const firestore = useFirestore();
     const userRef = useMemo(() => firestore ? doc(firestore, 'users', reply.authorId) : null, [firestore, reply.authorId]);
     const { data: author, loading } = useDoc<UserProfile>(userRef);
+    const [currentRating, setCurrentRating] = useState(0); // Simulación
+
+    const handleRate = (rating: number) => {
+        setCurrentRating(rating);
+        // Aquí iría la lógica para enviar la calificación a Firebase
+        alert(`¡Voto de ${rating} estrellas registrado para el comentario #${reply.id}! (Simulación)`);
+    };
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+        <Card className="bg-card/70">
+            <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-4">
                  {author && <UserAvatar userId={reply.authorId} />}
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                         <span className="font-semibold">{loading ? 'Cargando...' : author?.name}</span>
-                        {author?.role && <Badge variant={author.role === 'expert' ? 'default' : 'secondary'}>{author.role === 'expert' ? 'Experto' : 'Usuario'}</Badge>}
+                        {author?.role && (
+                             <Badge 
+                                className={cn(author.role === 'expert' ? 'bg-destructive text-destructive-foreground' : 'bg-green-600 text-white', 'border-transparent')}
+                             >
+                                 {author.role === 'expert' ? 'Experto' : 'Usuario'}
+                             </Badge>
+                        )}
                     </div>
                     <p className="text-xs text-muted-foreground">
                         {reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleString() : 'Justo ahora'}
@@ -47,7 +80,17 @@ function ReplyCard({ reply }: { reply: Reply }) {
                 </div>
             </CardHeader>
             <CardContent>
-                <p className="whitespace-pre-wrap">{reply.content}</p>
+                <p className="whitespace-pre-wrap text-foreground/90">{reply.content}</p>
+                 <div className="mt-4 flex items-center justify-between text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                       <StarRating rating={currentRating} onRate={handleRate} commentId={reply.id} />
+                       <span className="text-xs ml-2">({currentRating > 0 ? `${currentRating}.0/5` : 'Sin calificar'})</span>
+                    </div>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        Responder
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     );
