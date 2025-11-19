@@ -51,7 +51,6 @@ const questions = [
 
 const TIME_PER_QUESTION = 20;
 
-// Colores del diseño
 const COLORS = {
   TITLE_SABES: '#32CD32',
   TITLE_O: '#FFA500',
@@ -82,7 +81,7 @@ function GameMenu({ onPlay }: { onPlay: () => void }) {
         <div 
             className="w-full max-w-md h-[650px] rounded-2xl shadow-lg flex flex-col items-center justify-between p-5"
             style={{
-                backgroundImage: "url('https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj')",
+                backgroundImage: "url('/game_menu_background.png')",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
