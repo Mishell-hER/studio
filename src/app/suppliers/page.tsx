@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -70,45 +71,37 @@ type GameState = 'menu' | 'playing' | 'level-complete';
 
 const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }) => {
     return (
-        <div className="flex flex-col items-center justify-center w-full h-full max-w-md mx-auto p-4">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-center mb-8 leading-tight">
-                <span className="block text-green-500">¿Sabes</span> 
-                <span className="text-orange-500 text-5xl md:text-6xl mx-2">o</span> 
-                <span className="block text-red-500">Estás Perdido?</span>
-            </h1>
-            
-            <div className="flex-grow flex items-center justify-center">
-                 <Image
-                    src="https://picsum.photos/seed/pelican-container/400/300"
-                    alt="Pelícano sobre un contenedor"
-                    width={400}
-                    height={300}
-                    className="rounded-lg object-cover"
-                    data-ai-hint="pelican container"
-                 />
-            </div>
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#e8f9fd]">
+            <div 
+              className="relative w-full max-w-md h-[650px] bg-cover bg-center bg-no-repeat rounded-2xl shadow-lg flex flex-col items-center p-5 box-border"
+              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/gg-dl/ABS2GSkfnpd-HqZaeMMjQ4zEsAyfTveW8UOFO8j3fwUKLPKI1kq4WCWorwrrNyQ6xdVjvrH5kU3rBBKmDmCJlxtEPdMMkydWT30dkdsTd2GYkL_WngIX6Y4Kd8W7cbmOiQEtEpc605Tnj7ne9imdN6XL7eI72fIEKmJFHyJ9uC3Vzi-tiEyBJw=s1024-rj')" }}
+            >
+                <div className="flex-grow flex items-center justify-center">
+                    {/* El título y la imagen del pelícano están ahora en el fondo. */}
+                </div>
 
-            <div className="flex justify-around w-full mt-8">
-                 <Button 
-                    onClick={onPlay} 
-                    className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
-                    style={{ backgroundColor: '#4CAF50' }}
-                 >
-                    JUGAR
-                </Button>
-                <Button 
-                    className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
-                    style={{ backgroundColor: '#2196F3' }}
-                >
-                    OPCIONES
-                </Button>
-                <Button 
-                    onClick={onExit} 
-                    className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
-                    style={{ backgroundColor: '#F44336' }}
-                >
-                    SALIR
-                </Button>
+                <div className="flex justify-around w-full mt-auto z-10">
+                    <Button 
+                        onClick={onPlay} 
+                        className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
+                        style={{ backgroundColor: '#58CC02' }}
+                    >
+                        JUGAR
+                    </Button>
+                    <Button 
+                        className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
+                        style={{ backgroundColor: '#1cb0f6' }}
+                    >
+                        OPCIONES
+                    </Button>
+                    <Button 
+                        onClick={onExit} 
+                        className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
+                        style={{ backgroundColor: '#FF4B4B' }}
+                    >
+                        SALIR
+                    </Button>
+                </div>
             </div>
         </div>
     );
@@ -240,9 +233,7 @@ export default function SuppliersPage() {
 
     if (gameState === 'menu') {
         return (
-          <div className="min-h-screen w-full flex items-center justify-center bg-[#e8f9fd]">
             <GameMenu onPlay={startGame} onExit={exitGame} />
-          </div>
         );
     }
 
