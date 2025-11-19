@@ -8,7 +8,6 @@ import {
 import { ArrowRight } from 'lucide-react';
 import { continents } from '@/lib/continents';
 import { CreatorsSection } from '@/components/sections/creators-section';
-import { FloatingAssistant } from '@/components/layout/floating-assistant';
 
 
 export default function Home() {
@@ -49,7 +48,6 @@ export default function Home() {
         </div>
       </div>
       <CreatorsSection />
-      <FloatingAssistant />
     </>
   );
 }
