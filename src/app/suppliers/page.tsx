@@ -70,33 +70,14 @@ type GameState = 'menu' | 'playing' | 'level-complete';
 
 const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }) => {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] bg-amber-50 rounded-lg p-8 text-center">
-            <div className="relative mb-8">
-                 <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter">
-                    <span className="text-blue-500">¿</span>
-                    <span className="text-blue-400">S</span>
-                    <span className="text-green-400">a</span>
-                    <span className="text-green-500">b</span>
-                    <span className="text-yellow-400">e</span>
-                    <span className="text-yellow-500">s</span>
-                    <span className="text-blue-500"> o </span>
-                    <span className="text-orange-500">E</span>
-                    <span className="text-orange-400">s</span>
-                    <span className="text-red-400">t</span>
-                    <span className="text-red-500">á</span>
-                    <span className="text-purple-500">s</span>
-                    <span className="text-orange-500"> P</span>
-                    <span className="text-orange-400">e</span>
-                    <span className="text-red-400">r</span>
-                    <span className="text-red-500">d</span>
-                    <span className="text-purple-500">i</span>
-                    <span className="text-purple-400">d</span>
-                    <span className="text-blue-400">o</span>
-                    <span className="text-blue-500">?</span>
-                </h1>
-            </div>
+        <div className="flex flex-col items-center justify-center w-full h-full max-w-md mx-auto p-4">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-center mb-8">
+                <span className="block text-green-500">¿Sabes</span> 
+                <span className="text-orange-500 text-5xl md:text-6xl mx-2">o</span> 
+                <span className="block text-red-500">Estás Perdido?</span>
+            </h1>
             
-            <div className="relative w-full max-w-md h-64 mb-12">
+            <div className="relative w-full h-64 mb-12">
                 <Image
                     src="https://picsum.photos/seed/pelican-container/600/400"
                     alt="Pelícano sobre un contenedor en el agua"
@@ -106,15 +87,26 @@ const GameMenu = ({ onPlay, onExit }: { onPlay: () => void, onExit: () => void }
                 />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-                <Button onClick={onPlay} className="w-full h-14 text-xl font-bold bg-green-500 hover:bg-green-600 text-white">
-                    <Play className="mr-2" /> JUGAR
+            <div className="flex justify-around w-full">
+                 <Button 
+                    onClick={onPlay} 
+                    className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
+                    style={{ backgroundColor: '#4CAF50' }}
+                 >
+                    JUGAR
                 </Button>
-                <Button variant="outline" className="w-full h-14 text-xl font-bold border-blue-500 text-blue-500 bg-blue-100 hover:bg-blue-200">
-                    <Settings className="mr-2" /> OPCIONES
+                <Button 
+                    className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
+                    style={{ backgroundColor: '#2196F3' }}
+                >
+                    OPCIONES
                 </Button>
-                <Button onClick={onExit} className="w-full h-14 text-xl font-bold bg-red-500 hover:bg-red-600 text-white">
-                    <LogOut className="mr-2" /> SALIR
+                <Button 
+                    onClick={onExit} 
+                    className="h-14 text-lg font-bold text-white shadow-[0_5px_0_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.3)]"
+                    style={{ backgroundColor: '#F44336' }}
+                >
+                    SALIR
                 </Button>
             </div>
         </div>
@@ -246,16 +238,20 @@ export default function SuppliersPage() {
 
 
     if (gameState === 'menu') {
-        return <GameMenu onPlay={startGame} onExit={exitGame} />;
+        return (
+          <div className="min-h-screen w-full flex items-center justify-center bg-[#e8f9fd]">
+            <GameMenu onPlay={startGame} onExit={exitGame} />
+          </div>
+        );
     }
 
     return (
         <div className="container mx-auto px-4 py-8">
             <Button asChild variant="ghost" className="mb-4">
-                <Link href="/">
+                <button onClick={() => setGameState('menu')}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Volver al inicio
-                </Link>
+                    Volver al menú
+                </button>
             </Button>
 
             <Card className="w-full max-w-2xl mx-auto bg-card/50 backdrop-blur-sm mt-4">
