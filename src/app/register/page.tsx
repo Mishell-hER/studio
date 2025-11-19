@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -12,9 +13,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
+
+const profileImages = Array.from({ length: 10 }, (_, i) => `https://picsum.photos/seed/${i + 1}/100/100`);
+
 
 const formSchema = z
   .object({
@@ -23,6 +28,7 @@ const formSchema = z
     email: z.string().email('Correo electrónico no válido.'),
     password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.'),
     birthYear: z.coerce.number().min(1900, 'Año no válido.').max(new Date().getFullYear() - 10, 'Debes tener al menos 10 años.'),
+    photoURL: z.string().url('Por favor, selecciona una foto de perfil.').min(1, 'Por favor, selecciona una foto de perfil.'),
     hasCompany: z.boolean().default(false),
     ruc: z.string().optional(),
     sector: z.string().optional(),
@@ -54,6 +60,7 @@ export default function RegisterPage() {
       email: '',
       password: '',
       birthYear: undefined,
+      photoURL: '',
       hasCompany: false,
       ruc: '',
       sector: '',
@@ -73,7 +80,11 @@ export default function RegisterPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       const displayName = `${values.firstName} ${values.lastName}`;
-      await updateProfile(user, { displayName });
+
+      await updateProfile(user, { 
+          displayName,
+          photoURL: values.photoURL 
+        });
 
       const userRef = doc(firestore, 'users', user.uid);
       await setDoc(userRef, {
@@ -83,10 +94,10 @@ export default function RegisterPage() {
         firstName: values.firstName,
         lastName: values.lastName,
         birthYear: values.birthYear,
+        photoURL: values.photoURL,
         hasCompany: values.hasCompany,
         ruc: values.hasCompany ? values.ruc : null,
         sector: values.hasCompany ? values.sector : null,
-        photoURL: user.photoURL,
         role: 'normal',
         verified: false,
         continent: 'Unknown', // O detectar de alguna manera
@@ -105,7 +116,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="container mx-auto flex h-full items-center justify-center">
+    <div className="container mx-auto flex h-full items-center justify-center py-12">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>Crear una Cuenta</CardTitle>
@@ -152,6 +163,41 @@ export default function RegisterPage() {
                   </FormItem>
                 )} />
 
+              <FormField
+                control={form.control}
+                name="photoURL"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Elige tu Foto de Perfil</FormLabel>
+                     <FormControl>
+                        <div className="grid grid-cols-5 gap-2">
+                          {profileImages.map((img) => (
+                            <button
+                              key={img}
+                              type="button"
+                              onClick={() => field.onChange(img)}
+                              className={cn(
+                                'rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                                field.value === img && 'ring-2 ring-primary ring-offset-2'
+                              )}
+                            >
+                              <Image
+                                src={img}
+                                alt="Avatar"
+                                width={100}
+                                height={100}
+                                className="rounded-full"
+                                data-ai-hint="avatar image"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField control={form.control} name="hasCompany" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
                      <FormControl>
@@ -192,7 +238,7 @@ export default function RegisterPage() {
           </Form>
            <p className="mt-4 text-center text-sm text-muted-foreground">
             ¿Ya tienes una cuenta?{' '}
-            <Link href="/login" className="font-medium text-primary hover:underline">
+            <Link href="#" onClick={(e) => { e.preventDefault(); router.push('/login'); }} className="font-medium text-primary hover:underline">
               Inicia sesión
             </Link>
           </p>
