@@ -10,6 +10,7 @@ import { Post } from '@/lib/types';
 import Link from 'next/link';
 import { continents } from '@/lib/continents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ForumPage() {
   const router = useRouter();
@@ -75,11 +76,6 @@ export default function ForumPage() {
           <h1 className="text-3xl font-bold">Foro Comunitario</h1>
           <p className="text-muted-foreground">Pregunta y comparte tus conocimientos con la comunidad.</p>
         </div>
-        {user && (
-          <Button onClick={() => router.push('/forum/new-post')}>
-            Nueva Pregunta
-          </Button>
-        )}
       </div>
 
        <Tabs defaultValue="preguntas" className="w-full">
@@ -88,6 +84,25 @@ export default function ForumPage() {
           <TabsTrigger value="opiniones">Opiniones</TabsTrigger>
         </TabsList>
         <TabsContent value="preguntas">
+          {user && (
+             <Card className="mt-6">
+                <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                        <Avatar>
+                            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'Usuario'} />
+                            <AvatarFallback>{user.displayName?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <button 
+                          className="flex-grow text-left bg-muted hover:bg-muted/90 text-muted-foreground px-4 py-2 rounded-full transition-colors text-sm"
+                          onClick={() => router.push('/forum/new-post')}
+                        >
+                            Pregunta algo...
+                        </button>
+                    </div>
+                </CardContent>
+             </Card>
+          )}
+
           <div className="mt-6 flex items-center gap-4">
             <span className="text-sm font-medium">Filtrar por continente:</span>
             <Select value={continentFilter} onValueChange={setContinentFilter}>
