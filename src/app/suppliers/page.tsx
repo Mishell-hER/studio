@@ -99,25 +99,20 @@ function GameComponent() {
     const [timeLeft, setTimeLeft] = React.useState(TIME_PER_QUESTION);
 
     React.useEffect(() => {
-        if (gameState === 'playing') {
+        if (gameState === 'playing' && timeLeft > 0) {
             const timer = setInterval(() => {
-                setTimeLeft(prev => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        handleTimeOut();
-                        return 0;
-                    }
-                    return prev - 1;
-                });
+                setTimeLeft(prev => prev - 1);
             }, 1000);
             return () => clearInterval(timer);
+        } else if (timeLeft === 0 && gameState === 'playing') {
+            handleTimeOut();
         }
-    }, [currentQuestionIndex, gameState]);
+    }, [timeLeft, gameState]);
     
     const handleTimeOut = () => {
         setGameState('feedback');
         setIsCorrect(false);
-        setSelectedOption(null);
+        setSelectedOption(null); // Marcar que no hubo selección
     };
     
     const handleOptionSelect = (index: number) => {
@@ -145,7 +140,9 @@ function GameComponent() {
             setTimeLeft(TIME_PER_QUESTION);
             setGameState('playing');
         } else {
+            // Aquí puedes redirigir a una pantalla de fin de nivel o algo similar
             alert("¡Nivel completado!");
+            // Reiniciar para demostración
             setCurrentQuestionIndex(0);
             setTimeLeft(TIME_PER_QUESTION);
             setGameState('playing');
@@ -160,7 +157,7 @@ function GameComponent() {
         <Card className="w-full mx-auto max-w-2xl bg-card/80 backdrop-blur-sm">
             <CardHeader>
                 <div className="flex justify-between items-center mb-4">
-                     <CardTitle className="text-xl">Nivel 1: {levels[1]}</CardTitle>
+                     <CardTitle className="text-xl">Nivel {currentQuestionIndex}: {levels[currentQuestionIndex + 1]}</CardTitle>
                     <div className="relative h-12 w-12">
                         <svg className="h-full w-full" viewBox="0 0 36 36">
                             <path
@@ -228,11 +225,11 @@ function GameComponent() {
                 
                 <div className={cn("mt-6 transition-all duration-300", gameState === 'feedback' ? 'opacity-100 h-auto' : 'opacity-0 h-0 invisible' )}>
                      {isCorrect !== null && (
-                         <div className={cn("p-4 rounded-lg", isCorrect ? "bg-green-900/50" : "bg-red-900/50")}>
-                             <h3 className={cn("font-bold text-lg", isCorrect ? "text-green-300" : "text-red-300")}>
+                         <div className={cn("p-4 rounded-lg", timeLeft === 0 ? "bg-yellow-900/50" : (isCorrect ? "bg-green-900/50" : "bg-red-900/50"))}>
+                             <h3 className={cn("font-bold text-lg", timeLeft === 0 ? "text-yellow-300" : (isCorrect ? "text-green-300" : "text-red-300"))}>
                                  {timeLeft === 0 ? "¡Se acabó el tiempo!" : isCorrect ? "¡Respuesta Correcta!" : "Respuesta Incorrecta"}
                              </h3>
-                             {!isCorrect && <p className="text-muted-foreground mt-2">{currentQuestion.explicacion}</p>}
+                             {(isCorrect === false || timeLeft === 0) && <p className="text-muted-foreground mt-2">{currentQuestion.explicacion}</p>}
                          </div>
                      )}
                  </div>
@@ -254,16 +251,21 @@ function GameComponent() {
     );
 }
 
+
 export default function SuppliersPage() {
     const [screen, setScreen] = React.useState<'menu' | 'game'>('menu');
+
+    const handlePlay = () => {
+        setScreen('game');
+    };
 
     return (
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-full">
             {screen === 'menu' ? (
-                <GameMenu onPlay={() => setScreen('game')} />
+                <GameMenu onPlay={handlePlay} />
             ) : (
                 <>
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-4 left-4 z-10">
                         <Button asChild variant="ghost">
                             <Link href="/">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
