@@ -2,22 +2,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { continents } from '@/lib/continents';
-import { useLoginModal } from '@/hooks/use-login-modal';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
 
 export default function NewPostPage() {
   const router = useRouter();
   const firestore = useFirestore();
-  const { user, loading: userLoading } = useUser();
-  const loginModal = useLoginModal();
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -30,14 +25,18 @@ export default function NewPostPage() {
       setError('Todos los campos son obligatorios.');
       return;
     }
-    if (!firestore || !user) return;
+    if (!firestore) return;
 
     try {
+      // For anonymous users, we can use a generic authorId or generate one
+      const authorId = `anonymous_${Date.now()}`;
+      
       await addDoc(collection(firestore, 'posts'), {
         title,
         content,
         continent,
-        authorId: user.uid,
+        authorId: authorId,
+        authorName: "Usuario Anónimo", // Generic author name
         timestamp: serverTimestamp(),
       });
       router.push('/forum');
@@ -46,25 +45,6 @@ export default function NewPostPage() {
       setError('No se pudo crear la publicación. Inténtalo de nuevo.');
     }
   };
-
-  if (userLoading) {
-    return <p>Cargando...</p>;
-  }
-
-  if (!user) {
-    return (
-      <Alert>
-        <Terminal className="h-4 w-4" />
-        <AlertTitle>¡Debes iniciar sesión!</AlertTitle>
-        <AlertDescription>
-          Para crear una nueva pregunta, necesitas tener una cuenta. 
-          <Button variant="link" onClick={loginModal.onOpen}>
-            Inicia sesión aquí.
-          </Button>
-        </AlertDescription>
-      </Alert>
-    )
-  }
 
   return (
     <div className="container mx-auto max-w-2xl">

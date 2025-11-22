@@ -7,12 +7,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Star, Award, Loader2, Lock, CheckCircle, Trophy, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
-import { useFirestore, useDoc, useCollection } from '@/firebase';
-import { doc, setDoc, serverTimestamp, collection, query, orderBy } from 'firebase/firestore';
-import type { GameProgress, UserProfile } from '@/lib/types';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Play, Loader2, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 
 // --- TIPOS DE DATOS ---
 interface Level {
@@ -136,16 +131,14 @@ const GameComponent: React.FC<{
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const [score, setScore] = useState(0);
-    const [levelStartTime, setLevelStartTime] = useState(0);
     
     const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
     const [timerKey, setTimerKey] = useState(0);
 
     useEffect(() => {
         onPlayAudio('background');
-        setLevelStartTime(Date.now());
         return () => { onPlayAudio('none'); }; // Stop audio on component unmount
-    }, []);
+    }, [onPlayAudio]);
 
     const levelData = useMemo(() => levels.find(l => l.level === currentLevel)!, [currentLevel]);
     const questionData = useMemo(() => questions[currentLevel]?.[currentQuestionIndex], [currentLevel, currentQuestionIndex]);
@@ -199,7 +192,6 @@ const GameComponent: React.FC<{
         const isLastQuestion = currentQuestionIndex === levelData.questions - 1;
 
         if (isLastQuestion) {
-            // Logic to save progress is removed
             alert(`Nivel ${currentLevel} completado! Puntuación: ${score + (isCorrect ? 1 : 0)}`);
 
             if(currentLevel < levels.length) {
@@ -210,7 +202,6 @@ const GameComponent: React.FC<{
             }
             setCurrentQuestionIndex(0);
             setScore(0);
-            setLevelStartTime(Date.now());
         } else {
             setCurrentQuestionIndex(prev => prev + 1);
         }
@@ -308,7 +299,7 @@ const MenuCard: React.FC<{ title: string; description: string; icon: React.Eleme
     </Card>
 );
 
-const GameMenu: React.FC<{ onNavigate: (view: 'playing' | 'levels' | 'ranking') => void }> = ({ onNavigate }) => {
+const GameMenu: React.FC<{ onNavigate: (view: 'playing') => void }> = ({ onNavigate }) => {
     
     return (
         <div className="w-full max-w-4xl mx-auto space-y-8">
@@ -322,80 +313,8 @@ const GameMenu: React.FC<{ onNavigate: (view: 'playing' | 'levels' | 'ranking') 
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <MenuCard title="Jugar" description="Inicia una nueva partida y sube de nivel." icon={Play} onClick={() => onNavigate('playing')} bgColor="bg-green-500/10" textColor="text-green-500" />
-                <MenuCard title="Niveles" description="Revisa tu progreso y el tiempo por nivel." icon={Star} onClick={() => onNavigate('levels')} bgColor="bg-blue-500/10" textColor="text-blue-500" />
-                <MenuCard title="Ranking" description="Mira tu posición en la tabla de líderes." icon={Award} onClick={() => onNavigate('ranking')} bgColor="bg-yellow-500/10" textColor="text-yellow-500" />
             </div>
         </div>
-    )
-}
-
-const LevelsScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) => {
-    // This is a placeholder as progress is not saved
-    const highestLevelCompleted = 0;
-
-    return (
-        <Card className="w-full max-w-4xl mx-auto">
-            <CardHeader>
-                <div className='flex justify-between items-start'>
-                    <div>
-                        <CardTitle className="text-2xl flex items-center gap-3">
-                            <Avatar>
-                                <AvatarFallback>?</AvatarFallback>
-                            </Avatar>
-                            Tu Progreso
-                        </CardTitle>
-                        <CardDescription>Inicia sesión para guardar y ver tu progreso.</CardDescription>
-                    </div>
-                     <Button onClick={onBackToMenu} variant="ghost"><ArrowLeft className="mr-2 h-4 w-4" /> Volver</Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                    {levels.map(level => {
-                        const isCompleted = level.level <= highestLevelCompleted;
-                        const isCurrent = level.level === highestLevelCompleted + 1;
-                        const isLocked = level.level > highestLevelCompleted + 1;
-                        
-                        const levelCircle = (
-                            <div key={level.level} className={cn(
-                                "relative flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 transition-all duration-300",
-                                isCompleted && "bg-green-100 border-green-500 text-green-800",
-                                isCurrent && "bg-yellow-100 border-yellow-500 text-yellow-800 animate-pulse",
-                                isLocked && "bg-muted/50 border-border text-muted-foreground"
-                            )}>
-                                {isLocked && <Lock className="w-6 h-6 absolute" />}
-                                <span className={cn("text-3xl font-bold", isLocked && "opacity-20")}>{level.level}</span>
-                                {isCompleted && <CheckCircle className="w-5 h-5 absolute top-1 right-1 text-green-600" />}
-                            </div>
-                        );
-
-                        return levelCircle;
-                    })}
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
-
-const RankingScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) => {
-
-    return (
-         <Card className="w-full max-w-4xl mx-auto">
-             <CardHeader>
-                <div className='flex justify-between items-start'>
-                    <div>
-                        <CardTitle className="text-2xl flex items-center gap-3"><Trophy /> Ranking Global</CardTitle>
-                        <CardDescription>Los mejores jugadores de la comunidad.</CardDescription>
-                    </div>
-                    <Button onClick={onBackToMenu} variant="ghost"><ArrowLeft className="mr-2 h-4 w-4" /> Volver</Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="text-center py-10 text-muted-foreground">
-                    <p>La tabla de clasificación estará disponible cuando se active el inicio de sesión.</p>
-                </div>
-            </CardContent>
-        </Card>
     )
 }
 
@@ -422,7 +341,7 @@ const LevelIntro: React.FC<{ level: number, onStart: () => void }> = ({ level, o
 
 // --- PÁGINA PRINCIPAL ---
 export default function SuppliersPage() {
-    const [gameState, setGameState] = useState<'menu' | 'intro' | 'playing' | 'levels' | 'ranking'>('menu');
+    const [gameState, setGameState] = useState<'menu' | 'intro' | 'playing'>('menu');
     const [audioState, setAudioState] = useState<'background' | 'lose' | 'none'>('none');
     const [isMuted, setIsMuted] = useState(false);
     
@@ -430,7 +349,7 @@ export default function SuppliersPage() {
     const currentLevel = 1;
 
 
-    const handleNavigate = (view: 'playing' | 'levels' | 'ranking') => {
+    const handleNavigate = (view: 'playing') => {
         if (view === 'playing') {
             setGameState('intro');
         } else {
@@ -448,10 +367,6 @@ export default function SuppliersPage() {
                 return <LevelIntro level={currentLevel} onStart={() => setGameState('playing')} />;
             case 'playing':
                 return <GameComponent onBackToMenu={handleBackToMenu} onPlayAudio={setAudioState} />;
-            case 'levels':
-                return <LevelsScreen onBackToMenu={handleBackToMenu} />;
-            case 'ranking':
-                return <RankingScreen onBackToMenu={handleBackToMenu} />;
             case 'menu':
             default:
                 return <GameMenu onNavigate={handleNavigate} />;

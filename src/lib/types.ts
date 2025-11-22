@@ -12,6 +12,7 @@ export interface Post {
     title: string;
     content: string;
     authorId: string;
+    authorName?: string;
     continent: string;
     timestamp: Timestamp;
 }
@@ -21,6 +22,7 @@ export interface Reply {
     postId: string;
     content: string;
     authorId: string;
+    authorName?: string;
     timestamp: Timestamp;
 }
 
