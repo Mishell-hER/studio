@@ -1,7 +1,6 @@
 import type { Timestamp } from "firebase/firestore";
 
 export interface UserProfile {
-    id: string;
     uid: string;
     name: string;
     firstName: string;
@@ -14,7 +13,7 @@ export interface UserProfile {
     sector?: string;
     role: 'normal' | 'expert';
     verified: boolean;
-    continent: string;
+    createdAt: Timestamp;
 }
 
 export interface Post {
