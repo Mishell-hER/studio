@@ -16,6 +16,11 @@ export function FirebaseClientProvider({ children }: { children: React.ReactNode
 
   const { app, auth, firestore } = useMemo(() => initializeFirebase(firebaseConfig), [firebaseConfig]);
 
+  // Si estamos en el servidor, app será null, así que no envolvemos con el provider.
+  if (!app) {
+    return <>{children}</>;
+  }
+
   return (
     <FirebaseProvider app={app} auth={auth} firestore={firestore}>
       {children}
