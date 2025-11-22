@@ -45,6 +45,30 @@
         "timestamp": { "type": "string", "format": "date-time", "description": "When the reply was created." }
       },
       "required": ["postId", "content", "authorId", "timestamp"]
+    },
+    "GameProgress": {
+      "title": "Game Progress",
+      "description": "Stores a user's progress in the logistics game.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The user's unique ID." },
+        "highestLevelCompleted": { "type": "number", "description": "The highest level the user has successfully completed." },
+        "levels": {
+          "type": "object",
+          "description": "An object containing details for each completed level.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "score": { "type": "number", "description": "The score obtained for the level." },
+              "timeTakenSeconds": { "type": "number", "description": "The time in seconds it took to complete the level." },
+              "completedAt": { "type": "string", "format": "date-time", "description": "Timestamp of when the level was completed." }
+            },
+            "required": ["score", "timeTakenSeconds", "completedAt"]
+          }
+        },
+        "lastPlayed": { "type": "string", "format": "date-time", "description": "Timestamp of the last time the user played." }
+      },
+      "required": ["userId", "highestLevelCompleted", "lastPlayed"]
     }
   },
   "auth": {
@@ -62,6 +86,10 @@
     "/replies/{replyId}": {
       "schema": { "$ref": "#/entities/Reply" },
       "description": "Stores all replies to posts."
+    },
+    "/gameProgress/{userId}": {
+      "schema": { "$ref": "#/entities/GameProgress" },
+      "description": "Stores the game progress for each user."
     }
   }
 }

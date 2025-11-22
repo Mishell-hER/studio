@@ -33,3 +33,17 @@ export interface Reply {
     authorId: string;
     timestamp: Timestamp;
 }
+
+export interface GameProgress {
+    id: string;
+    userId: string;
+    highestLevelCompleted: number;
+    levels: {
+        [level: number]: {
+            score: number;
+            timeTakenSeconds: number;
+            completedAt: Timestamp;
+        }
+    };
+    lastPlayed: Timestamp;
+}

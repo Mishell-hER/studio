@@ -7,7 +7,11 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Settings, Star, Award } from 'lucide-react';
+import { Play, Settings, Star, Award, Loader2 } from 'lucide-react';
+import { useUser, useFirestore, useDoc } from '@/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import type { GameProgress } from '@/lib/types';
+import { useLoginModal } from '@/hooks/use-login-modal';
 
 
 // --- TIPOS DE DATOS ---
@@ -83,23 +87,50 @@ const questions: { [key: number]: Question[] } = {
             explanation: "Los modos de transporte principales son marítimo, aéreo, terrestre y ferroviario. El transporte subterráneo no es una categoría estándar en logística comercial."
         }
     ],
-    // Aquí se agregarían las preguntas para los demás niveles...
+    // Dummy questions for other levels to make the logic work
+    ...Array.from({ length: 19 }, (_, i) => i + 2).reduce((acc, level) => {
+        acc[level] = Array.from({ length: levels[level-1].questions }, (_, qIndex) => ({
+            question: `Pregunta ${qIndex + 1} del Nivel ${level}`,
+            options: ["Opción A", "Opción B", "Opción C", "Opción D"],
+            correctAnswer: "Opción A",
+            explanation: `Explicación para la pregunta ${qIndex + 1} del Nivel ${level}.`
+        }));
+        return acc;
+    }, {} as { [key: number]: Question[] })
 };
 
 
 const TIME_PER_QUESTION = 15; // 15 segundos por pregunta
 
 // --- COMPONENTE DEL JUEGO ---
-const GameComponent: React.FC = () => {
+const GameComponent: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) => {
+    const { user } = useUser();
+    const firestore = useFirestore();
+
+    const gameProgressRef = useMemo(() => {
+      if (!firestore || !user) return null;
+      return doc(firestore, 'gameProgress', user.uid);
+    }, [firestore, user]);
+
+    const { data: gameProgress, loading: loadingProgress } = useDoc<GameProgress>(gameProgressRef);
+    
     const [currentLevel, setCurrentLevel] = useState(1);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const [score, setScore] = useState(0);
+    const [levelStartTime, setLevelStartTime] = useState(0);
     
     const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
     const [timerKey, setTimerKey] = useState(0);
+
+    useEffect(() => {
+        if (!loadingProgress && gameProgress) {
+            setCurrentLevel((gameProgress.highestLevelCompleted || 0) + 1);
+        }
+        setLevelStartTime(Date.now());
+    }, [loadingProgress, gameProgress]);
 
     const levelData = useMemo(() => levels.find(l => l.level === currentLevel)!, [currentLevel]);
     const questionData = useMemo(() => questions[currentLevel]?.[currentQuestionIndex], [currentLevel, currentQuestionIndex]);
@@ -152,25 +183,53 @@ const GameComponent: React.FC = () => {
         }
     };
     
-    const handleNextQuestion = () => {
-        setIsAnswered(false);
-        setSelectedAnswer(null);
-        resetTimer();
+    const handleNextQuestion = async () => {
+        const isLastQuestion = currentQuestionIndex === levelData.questions - 1;
 
-        if (currentQuestionIndex < levelData.questions - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-        } else {
-            // Fin del nivel
-            alert(`Nivel ${currentLevel} completado! Puntuación: ${score}/${levelData.questions}`);
+        if (isLastQuestion) {
+            // End of level
+            if (firestore && user) {
+                const timeTakenSeconds = Math.round((Date.now() - levelStartTime) / 1000);
+                const newProgress = {
+                    userId: user.uid,
+                    highestLevelCompleted: Math.max(gameProgress?.highestLevelCompleted || 0, currentLevel),
+                    levels: {
+                        ...gameProgress?.levels,
+                        [currentLevel]: {
+                            score: score + (isCorrect ? 1 : 0),
+                            timeTakenSeconds,
+                            completedAt: serverTimestamp(),
+                        }
+                    },
+                    lastPlayed: serverTimestamp()
+                };
+                
+                try {
+                    await setDoc(gameProgressRef, newProgress, { merge: true });
+                    alert(`Nivel ${currentLevel} completado! Puntuación: ${score + (isCorrect ? 1 : 0)}/${levelData.questions}. Tu progreso ha sido guardado.`);
+                } catch(e) {
+                    console.error("Error saving progress: ", e);
+                    alert("Hubo un error al guardar tu progreso.");
+                }
+
+            }
+
             if(currentLevel < levels.length) {
                 setCurrentLevel(prev => prev + 1);
             } else {
                 alert("¡Felicidades, has completado todos los niveles!");
-                setCurrentLevel(1); // Reiniciar
+                onBackToMenu();
             }
             setCurrentQuestionIndex(0);
             setScore(0);
+            setLevelStartTime(Date.now());
+        } else {
+            setCurrentQuestionIndex(prev => prev + 1);
         }
+
+        setIsAnswered(false);
+        setSelectedAnswer(null);
+        resetTimer();
     };
     
     const getButtonClass = (option: string) => {
@@ -186,11 +245,23 @@ const GameComponent: React.FC = () => {
         return 'border-border opacity-60';
     };
 
+    if (loadingProgress) {
+        return (
+            <Card className="w-full max-w-2xl mx-auto bg-card/70 backdrop-blur-sm">
+                <CardContent className="p-6 text-center flex items-center justify-center h-48">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="ml-4">Cargando tu progreso...</p>
+                </CardContent>
+            </Card>
+        );
+    }
+    
     if (!questionData) {
         return (
-            <Card>
+            <Card className="w-full max-w-2xl mx-auto bg-card/70 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
                     <p>¡Felicidades! Has completado todos los niveles disponibles.</p>
+                     <Button onClick={onBackToMenu} className="mt-4">Volver al Menú</Button>
                 </CardContent>
             </Card>
         );
@@ -274,10 +345,11 @@ const GameComponent: React.FC = () => {
                     )}
                 </AnimatePresence>
                 
-                <div className="flex justify-end">
+                <div className="flex justify-between items-center">
+                    <Button onClick={onBackToMenu} variant="ghost">Volver al Menú</Button>
                     {isAnswered ? (
                         <Button onClick={handleNextQuestion} className="w-full sm:w-auto">
-                            Continuar
+                            {currentQuestionIndex === levelData.questions - 1 ? "Finalizar Nivel" : "Siguiente Pregunta"}
                         </Button>
                     ) : (
                         <Button onClick={handleVerify} disabled={!selectedAnswer} className="w-full sm:w-auto">
@@ -321,6 +393,17 @@ const MenuCard: React.FC<{
 );
 
 const GameMenu: React.FC<{ onStartGame: () => void }> = ({ onStartGame }) => {
+    const { user, loading } = useUser();
+    const { onOpen: openLoginModal } = useLoginModal();
+
+    const handlePlayClick = () => {
+        if (user) {
+            onStartGame();
+        } else {
+            openLoginModal();
+        }
+    };
+    
     return (
         <div className="w-full max-w-4xl mx-auto space-y-8">
             <div className="text-center">
@@ -337,13 +420,14 @@ const GameMenu: React.FC<{ onStartGame: () => void }> = ({ onStartGame }) => {
                     title="Jugar"
                     description="Inicia una nueva partida y sube de nivel."
                     icon={Play}
-                    onClick={onStartGame}
+                    onClick={handlePlayClick}
                     bgColor="bg-green-500/10"
                     textColor="text-green-500"
+                    disabled={loading}
                 />
                  <MenuCard 
                     title="Niveles"
-                    description="Selecciona un nivel específico para practicar."
+                    description="Revisa tu progreso y el tiempo por nivel."
                     icon={Star}
                     onClick={() => alert("¡Próximamente!")}
                     bgColor="bg-blue-500/10"
@@ -381,6 +465,10 @@ export default function SuppliersPage() {
         setGameState('playing');
     };
 
+    const handleBackToMenu = () => {
+        setGameState('menu');
+    }
+
     return (
         <div className="w-full h-full flex flex-col items-center justify-center p-4">
             <AnimatePresence mode="wait">
@@ -404,7 +492,7 @@ export default function SuppliersPage() {
                         transition={{ duration: 0.3 }}
                         className="w-full"
                     >
-                        <GameComponent />
+                        <GameComponent onBackToMenu={handleBackToMenu} />
                     </motion.div>
                 )}
             </AnimatePresence>
