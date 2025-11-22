@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Globe, LogIn, LogOut, MessageSquare, UserPlus, Truck } from "lucide-react"
+import { Globe, MessageSquare, Truck } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -19,20 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Button } from "../ui/button"
-import { useUser, useAuth } from "@/firebase"
-import { signOut } from "firebase/auth"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useLoginModal } from "@/hooks/use-login-modal"
-import { useRegisterModal } from "@/hooks/use-register-modal"
 
 const menuItems = [
     {
@@ -51,87 +38,6 @@ const menuItems = [
         icon: Truck,
     }
 ]
-
-function UserProfile() {
-    const { user, loading } = useUser();
-    const auth = useAuth();
-    const { state: sidebarState } = useSidebar()
-    const router = useRouter()
-    const loginModal = useLoginModal();
-    const registerModal = useRegisterModal();
-
-    const handleSignOut = async () => {
-        if (!auth) return;
-        try {
-            await signOut(auth);
-            router.push('/');
-        } catch (error) {
-            console.error("Error during sign-out:", error);
-        }
-    };
-
-    if (loading) {
-        return <div className="w-full h-10 bg-muted rounded-md animate-pulse" />
-    }
-
-    return user ? (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full h-auto justify-start px-3">
-                    <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'Usuario'} />
-                            <AvatarFallback>{user.displayName?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className={cn("flex flex-col items-start duration-200", sidebarState === 'collapsed' && 'opacity-0 hidden')}>
-                           <span className="text-sm font-medium leading-none truncate">{user.displayName}</span>
-                           <span className="text-xs leading-none text-muted-foreground truncate">
-                            {user.email}
-                           </span>
-                        </div>
-                    </div>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
-                 <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user.displayName}</p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar sesión</span>
-                  </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-
-    ) : (
-        <div className={cn("flex flex-col gap-2", sidebarState === "expanded" ? "px-2" : "px-3")}>
-             <SidebarMenuButton
-                icon={<LogIn />}
-                className="w-full"
-                tooltip={{ children: "Iniciar Sesión" }}
-                onClick={loginModal.onOpen}
-            >
-                <span>Iniciar Sesión</span>
-            </SidebarMenuButton>
-            <SidebarMenuButton
-                icon={<UserPlus />}
-                variant="outline"
-                className="w-full"
-                 tooltip={{ children: "Registrarse" }}
-                 onClick={registerModal.onOpen}
-            >
-                <span>Registrarse</span>
-            </SidebarMenuButton>
-        </div>
-    )
-}
-
 
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar()
@@ -173,9 +79,6 @@ export function AppSidebar() {
             ))}
             </SidebarMenu>
         </SidebarBody>
-        <div className="py-2">
-            <UserProfile />
-        </div>
       </SidebarContent>
        {!isMobile && (
         <SidebarTrigger asChild>
@@ -191,5 +94,3 @@ export function AppSidebar() {
     </>
   )
 }
-
-    

@@ -8,10 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Play, Star, Award, Loader2, Lock, CheckCircle, Trophy, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
-import { useUser, useFirestore, useDoc, useCollection } from '@/firebase';
+import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, setDoc, serverTimestamp, collection, query, orderBy } from 'firebase/firestore';
 import type { GameProgress, UserProfile } from '@/lib/types';
-import { useLoginModal } from '@/hooks/use-login-modal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -131,16 +130,6 @@ const GameComponent: React.FC<{
     onBackToMenu: () => void,
     onPlayAudio: (sound: 'background' | 'lose' | 'none') => void 
 }> = ({ onBackToMenu, onPlayAudio }) => {
-    const { user } = useUser();
-    const firestore = useFirestore();
-
-    const gameProgressRef = useMemo(() => {
-      if (!firestore || !user) return null;
-      return doc(firestore, 'gameProgress', user.uid);
-    }, [firestore, user]);
-
-    const { data: gameProgress, loading: loadingProgress } = useDoc<GameProgress>(gameProgressRef);
-    
     const [currentLevel, setCurrentLevel] = useState(1);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -154,20 +143,9 @@ const GameComponent: React.FC<{
 
     useEffect(() => {
         onPlayAudio('background');
+        setLevelStartTime(Date.now());
         return () => { onPlayAudio('none'); }; // Stop audio on component unmount
     }, []);
-
-    useEffect(() => {
-        if (!loadingProgress) {
-            const initialLevel = (gameProgress?.highestLevelCompleted || 0) + 1;
-            if(initialLevel > levels.length) {
-                setCurrentLevel(levels.length);
-            } else {
-                setCurrentLevel(initialLevel);
-            }
-            setLevelStartTime(Date.now());
-        }
-    }, [loadingProgress, gameProgress]);
 
     const levelData = useMemo(() => levels.find(l => l.level === currentLevel)!, [currentLevel]);
     const questionData = useMemo(() => questions[currentLevel]?.[currentQuestionIndex], [currentLevel, currentQuestionIndex]);
@@ -221,27 +199,8 @@ const GameComponent: React.FC<{
         const isLastQuestion = currentQuestionIndex === levelData.questions - 1;
 
         if (isLastQuestion) {
-            if (firestore && user) {
-                const timeTakenSeconds = Math.round((Date.now() - levelStartTime) / 1000);
-                const finalScore = score + (isCorrect ? 1 : 0);
-                const newProgress = {
-                    userId: user.uid,
-                    highestLevelCompleted: Math.max(gameProgress?.highestLevelCompleted || 0, finalScore > (levelData.questions / 2) ? currentLevel : gameProgress?.highestLevelCompleted || 0),
-                    levels: {
-                        ...(gameProgress?.levels || {}),
-                        [currentLevel]: {
-                            score: finalScore,
-                            timeTakenSeconds,
-                            completedAt: new Date(),
-                        }
-                    },
-                    lastPlayed: new Date()
-                };
-                
-                try {
-                    await setDoc(gameProgressRef, newProgress, { merge: true });
-                } catch(e) { console.error("Error saving progress: ", e); alert("Hubo un error al guardar tu progreso."); }
-            }
+            // Logic to save progress is removed
+            alert(`Nivel ${currentLevel} completado! Puntuación: ${score + (isCorrect ? 1 : 0)}`);
 
             if(currentLevel < levels.length) {
                 setCurrentLevel(prev => prev + 1);
@@ -267,17 +226,6 @@ const GameComponent: React.FC<{
         if (option === selectedAnswer && !isCorrect) return 'bg-red-500/20 border-red-500 text-red-800 dark:text-red-300';
         return 'border-border opacity-60';
     };
-
-    if (loadingProgress) {
-        return (
-            <Card className="w-full max-w-2xl mx-auto bg-card/70 backdrop-blur-sm">
-                <CardContent className="p-6 text-center flex items-center justify-center h-48">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="ml-4">Cargando tu progreso...</p>
-                </CardContent>
-            </Card>
-        );
-    }
     
     if (!questionData) {
         return (
@@ -361,12 +309,6 @@ const MenuCard: React.FC<{ title: string; description: string; icon: React.Eleme
 );
 
 const GameMenu: React.FC<{ onNavigate: (view: 'playing' | 'levels' | 'ranking') => void }> = ({ onNavigate }) => {
-    const { user, loading } = useUser();
-    const { onOpen: openLoginModal } = useLoginModal();
-
-    const handlePlayClick = () => user ? onNavigate('playing') : openLoginModal();
-    const handleLevelsClick = () => user ? onNavigate('levels') : openLoginModal();
-    const handleRankingClick = () => onNavigate('ranking');
     
     return (
         <div className="w-full max-w-4xl mx-auto space-y-8">
@@ -379,29 +321,17 @@ const GameMenu: React.FC<{ onNavigate: (view: 'playing' | 'levels' | 'ranking') 
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <MenuCard title="Jugar" description="Inicia una nueva partida y sube de nivel." icon={Play} onClick={handlePlayClick} bgColor="bg-green-500/10" textColor="text-green-500" disabled={loading} />
-                <MenuCard title="Niveles" description="Revisa tu progreso y el tiempo por nivel." icon={Star} onClick={handleLevelsClick} bgColor="bg-blue-500/10" textColor="text-blue-500" disabled={loading} />
-                <MenuCard title="Ranking" description="Mira tu posición en la tabla de líderes." icon={Award} onClick={handleRankingClick} bgColor="bg-yellow-500/10" textColor="text-yellow-500" />
+                <MenuCard title="Jugar" description="Inicia una nueva partida y sube de nivel." icon={Play} onClick={() => onNavigate('playing')} bgColor="bg-green-500/10" textColor="text-green-500" />
+                <MenuCard title="Niveles" description="Revisa tu progreso y el tiempo por nivel." icon={Star} onClick={() => onNavigate('levels')} bgColor="bg-blue-500/10" textColor="text-blue-500" />
+                <MenuCard title="Ranking" description="Mira tu posición en la tabla de líderes." icon={Award} onClick={() => onNavigate('ranking')} bgColor="bg-yellow-500/10" textColor="text-yellow-500" />
             </div>
         </div>
     )
 }
 
 const LevelsScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) => {
-    const { user } = useUser();
-    const firestore = useFirestore();
-
-    const gameProgressRef = useMemo(() => {
-        if (!firestore || !user) return null;
-        return doc(firestore, 'gameProgress', user.uid);
-    }, [firestore, user]);
-
-    const { data: gameProgress, loading } = useDoc<GameProgress>(gameProgressRef);
-    const highestLevelCompleted = gameProgress?.highestLevelCompleted || 0;
-    
-    if (loading) {
-        return <div className="text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>
-    }
+    // This is a placeholder as progress is not saved
+    const highestLevelCompleted = 0;
 
     return (
         <Card className="w-full max-w-4xl mx-auto">
@@ -410,12 +340,11 @@ const LevelsScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) 
                     <div>
                         <CardTitle className="text-2xl flex items-center gap-3">
                             <Avatar>
-                                <AvatarImage src={user?.photoURL || undefined} />
-                                <AvatarFallback>{user?.displayName?.[0]}</AvatarFallback>
+                                <AvatarFallback>?</AvatarFallback>
                             </Avatar>
                             Tu Progreso
                         </CardTitle>
-                        <CardDescription>Has completado {highestLevelCompleted} de {levels.length} niveles.</CardDescription>
+                        <CardDescription>Inicia sesión para guardar y ver tu progreso.</CardDescription>
                     </div>
                      <Button onClick={onBackToMenu} variant="ghost"><ArrowLeft className="mr-2 h-4 w-4" /> Volver</Button>
                 </div>
@@ -426,11 +355,7 @@ const LevelsScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) 
                         const isCompleted = level.level <= highestLevelCompleted;
                         const isCurrent = level.level === highestLevelCompleted + 1;
                         const isLocked = level.level > highestLevelCompleted + 1;
-                        const levelData = gameProgress?.levels?.[level.level];
-
-                        const minutes = levelData ? Math.floor(levelData.timeTakenSeconds / 60) : 0;
-                        const seconds = levelData ? levelData.timeTakenSeconds % 60 : 0;
-
+                        
                         const levelCircle = (
                             <div key={level.level} className={cn(
                                 "relative flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 transition-all duration-300",
@@ -444,21 +369,6 @@ const LevelsScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) 
                             </div>
                         );
 
-                        if (isCompleted && levelData) {
-                            return (
-                                <TooltipProvider key={level.level}>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>{levelCircle}</TooltipTrigger>
-                                        <TooltipContent>
-                                            <p className="font-semibold">Nivel {level.level} - Completado</p>
-                                            <p>Puntuación: {levelData.score}/{level.questions}</p>
-                                            <p>Tiempo: {minutes}m {seconds}s</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            );
-                        }
-
                         return levelCircle;
                     })}
                 </div>
@@ -468,37 +378,6 @@ const LevelsScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) 
 };
 
 const RankingScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) => {
-    const firestore = useFirestore();
-    const progressQuery = useMemo(() => firestore ? query(collection(firestore, 'gameProgress'), orderBy('highestLevelCompleted', 'desc')) : null, [firestore]);
-    const { data: allProgress, loading } = useCollection<GameProgress>(progressQuery);
-
-    const usersQuery = useMemo(() => firestore ? query(collection(firestore, 'users')) : null, [firestore]);
-    const { data: allUsers } = useCollection<UserProfile>(usersQuery);
-
-    const rankedUsers = useMemo(() => {
-        if (!allProgress || !allUsers) return [];
-
-        const usersMap = new Map(allUsers.map(u => [u.uid, u]));
-        
-        return allProgress
-            .map(progress => {
-                const user = usersMap.get(progress.userId);
-                const totalTime = Object.values(progress.levels || {}).reduce((sum, level) => sum + level.timeTakenSeconds, 0);
-                return {
-                    user,
-                    progress,
-                    totalTime
-                };
-            })
-            .filter(item => item.user)
-            .sort((a, b) => {
-                if (b.progress.highestLevelCompleted !== a.progress.highestLevelCompleted) {
-                    return b.progress.highestLevelCompleted - a.progress.highestLevelCompleted;
-                }
-                return a.totalTime - b.totalTime;
-            });
-
-    }, [allProgress, allUsers]);
 
     return (
          <Card className="w-full max-w-4xl mx-auto">
@@ -512,28 +391,9 @@ const RankingScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu })
                 </div>
             </CardHeader>
             <CardContent>
-                {loading ? (
-                    <div className="text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>
-                ) : (
-                    <div className="space-y-4">
-                        {rankedUsers.map((item, index) => (
-                            <div key={item.user!.id} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                                <div className="flex items-center gap-4">
-                                    <span className="text-lg font-bold w-8 text-center">{index + 1}</span>
-                                    <Avatar>
-                                        <AvatarImage src={item.user!.photoURL || undefined} />
-                                        <AvatarFallback>{item.user!.name[0]}</AvatarFallback>
-                                    </Avatar>
-                                    <span className="font-semibold">{item.user!.name}</span>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-primary">Nivel {item.progress.highestLevelCompleted}</p>
-                                    <p className="text-xs text-muted-foreground">Tiempo total: {Math.floor(item.totalTime / 60)}m {item.totalTime % 60}s</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <div className="text-center py-10 text-muted-foreground">
+                    <p>La tabla de clasificación estará disponible cuando se active el inicio de sesión.</p>
+                </div>
             </CardContent>
         </Card>
     )
@@ -566,13 +426,8 @@ export default function SuppliersPage() {
     const [audioState, setAudioState] = useState<'background' | 'lose' | 'none'>('none');
     const [isMuted, setIsMuted] = useState(false);
     
-    const { user, loading } = useUser();
-    const { data: gameProgress } = useDoc<GameProgress>(useMemo(() => {
-        const firestore = useFirestore();
-        if (!firestore || !user) return null;
-        return doc(firestore, 'gameProgress', user.uid);
-    }, [user]));
-    const currentLevel = (gameProgress?.highestLevelCompleted || 0) + 1;
+    // Hardcoded level for now
+    const currentLevel = 1;
 
 
     const handleNavigate = (view: 'playing' | 'levels' | 'ranking') => {
@@ -629,5 +484,3 @@ export default function SuppliersPage() {
         </div>
     );
 }
-
-    

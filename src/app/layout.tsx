@@ -6,8 +6,6 @@ import { AppSidebar } from '@/components/layout/app-sidebar';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { Sidebar } from '@/components/ui/sidebar';
-import { LoginModal } from '@/components/auth/login-modal';
-import { ModalProvider } from '@/providers/modal-provider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,7 +29,6 @@ export default function RootLayout({
       </head>
       <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
         <FirebaseClientProvider>
-          <ModalProvider />
           <div className="flex min-h-screen">
             <Sidebar>
               <AppSidebar />

@@ -1,26 +1,6 @@
 
 {
   "entities": {
-    "UserProfile": {
-      "title": "User Profile",
-      "description": "Represents a user's profile in the system.",
-      "type": "object",
-      "properties": {
-        "uid": { "type": "string", "description": "The user's unique ID." },
-        "name": { "type": "string", "description": "The user's full display name." },
-        "firstName": { "type": "string", "description": "The user's first name." },
-        "lastName": { "type": "string", "description": "The user's last name." },
-        "email": { "type": "string", "format": "email", "description": "The user's email address." },
-        "photoURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." },
-        "birthYear": { "type": "number", "description": "The user's year of birth." },
-        "hasCompany": { "type": "boolean", "description": "Whether the user has a company." },
-        "ruc": { "type": "string", "description": "The company's RUC (if applicable)." },
-        "sector": { "type": "string", "description": "The company's sector (if applicable)." },
-        "role": { "type": "string", "enum": ["normal", "expert"], "description": "The role of the user." },
-        "verified": { "type": "boolean", "description": "Whether the user is verified." }
-      },
-      "required": ["uid", "name", "email", "firstName", "lastName", "birthYear", "hasCompany", "role", "verified"]
-    },
     "Post": {
       "title": "Forum Post",
       "description": "Represents a single post or question in the forum.",
@@ -45,40 +25,12 @@
         "timestamp": { "type": "string", "format": "date-time", "description": "When the reply was created." }
       },
       "required": ["postId", "content", "authorId", "timestamp"]
-    },
-    "GameProgress": {
-      "title": "Game Progress",
-      "description": "Stores a user's progress in the logistics game.",
-      "type": "object",
-      "properties": {
-        "userId": { "type": "string", "description": "The user's unique ID." },
-        "highestLevelCompleted": { "type": "number", "description": "The highest level the user has successfully completed." },
-        "levels": {
-          "type": "object",
-          "description": "An object containing details for each completed level.",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "score": { "type": "number", "description": "The score obtained for the level." },
-              "timeTakenSeconds": { "type": "number", "description": "The time in seconds it took to complete the level." },
-              "completedAt": { "type": "string", "format": "date-time", "description": "Timestamp of when the level was completed." }
-            },
-            "required": ["score", "timeTakenSeconds", "completedAt"]
-          }
-        },
-        "lastPlayed": { "type": "string", "format": "date-time", "description": "Timestamp of the last time the user played." }
-      },
-      "required": ["userId", "highestLevelCompleted", "lastPlayed"]
     }
   },
   "auth": {
-    "providers": ["google.com", "password"]
+    "providers": []
   },
   "firestore": {
-    "/users/{userId}": {
-      "schema": { "$ref": "#/entities/UserProfile" },
-      "description": "Stores public profiles for all users."
-    },
     "/posts/{postId}": {
       "schema": { "$ref": "#/entities/Post" },
       "description": "Stores all the forum posts."
@@ -86,10 +38,6 @@
     "/replies/{replyId}": {
       "schema": { "$ref": "#/entities/Reply" },
       "description": "Stores all replies to posts."
-    },
-    "/gameProgress/{userId}": {
-      "schema": { "$ref": "#/entities/GameProgress" },
-      "description": "Stores the game progress for each user."
     }
   }
 }

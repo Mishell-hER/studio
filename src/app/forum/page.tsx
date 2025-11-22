@@ -1,20 +1,16 @@
 
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Post } from '@/lib/types';
 import { continents } from '@/lib/continents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PostCard } from './_components/post-card';
-import { NewPostInline } from './_components/new-post-inline';
 
 export default function ForumPage() {
-  const router = useRouter();
-  const { user } = useUser();
   const firestore = useFirestore();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +70,7 @@ export default function ForumPage() {
         <TabsContent value="preguntas">
              <Card className="mt-6">
                 <CardContent className="p-4">
-                    <NewPostInline user={user} type="question" />
+                    <p className="text-muted-foreground text-sm">La creación de publicaciones estará disponible próximamente.</p>
                 </CardContent>
              </Card>
 
@@ -97,7 +93,7 @@ export default function ForumPage() {
         <TabsContent value="opiniones">
             <Card className="mt-6">
                 <CardContent className="p-4">
-                    <NewPostInline user={user} type="opinion" />
+                     <p className="text-muted-foreground text-sm">La creación de publicaciones estará disponible próximamente.</p>
                 </CardContent>
              </Card>
            <div className="mt-6 text-center text-muted-foreground py-12">

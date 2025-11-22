@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,17 +12,11 @@ import { continents } from '@/lib/continents';
 
 export default function NewPostPage() {
   const router = useRouter();
-  const { user } = useUser();
   const firestore = useFirestore();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [continent, setContinent] = useState('');
   const [error, setError] = useState('');
-
-  if (!user) {
-    router.push('/forum');
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,14 +24,14 @@ export default function NewPostPage() {
       setError('Todos los campos son obligatorios.');
       return;
     }
-    if (!firestore || !user) return;
+    if (!firestore) return;
 
     try {
       await addDoc(collection(firestore, 'posts'), {
         title,
         content,
         continent,
-        authorId: user.uid,
+        authorId: 'anonymous', // Placeholder
         timestamp: serverTimestamp(),
       });
       router.push('/forum');

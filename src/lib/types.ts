@@ -13,7 +13,6 @@ export interface UserProfile {
     sector?: string;
     role: 'normal' | 'expert';
     verified: boolean;
-    createdAt: Timestamp;
 }
 
 export interface Post {

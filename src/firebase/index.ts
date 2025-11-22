@@ -3,7 +3,6 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 export * from './provider';
 export * from './client-provider';
-export * from './auth/use-user';
 export * from './firestore/use-collection';
 export * from './firestore/use-doc';
 

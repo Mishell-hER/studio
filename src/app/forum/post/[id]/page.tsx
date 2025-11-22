@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from 'firebase/firestore';
-import { useFirestore, useUser, useDoc, useCollection } from '@/firebase';
+import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Post, Reply, UserProfile } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Star, MessageSquare } from 'lucide-react';
-import { useLoginModal } from '@/hooks/use-login-modal';
 
 
 function UserAvatar({ userId }: { userId: string }) {
@@ -50,8 +49,9 @@ const StarRating = ({ rating, onRate, commentId }: { rating: number, onRate: (ra
 
 function ReplyCard({ reply }: { reply: Reply }) {
     const firestore = useFirestore();
-    const userRef = useMemo(() => firestore ? doc(firestore, 'users', reply.authorId) : null, [firestore, reply.authorId]);
-    const { data: author, loading } = useDoc<UserProfile>(userRef);
+    // Since users are gone, we can't fetch author details. We'll show "Anónimo".
+    // const userRef = useMemo(() => firestore ? doc(firestore, 'users', reply.authorId) : null, [firestore, reply.authorId]);
+    // const { data: author, loading } = useDoc<UserProfile>(userRef);
     const [currentRating, setCurrentRating] = useState(0); // Simulación
 
     const handleRate = (rating: number) => {
@@ -63,17 +63,10 @@ function ReplyCard({ reply }: { reply: Reply }) {
     return (
         <Card className="bg-card/70">
             <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-4">
-                 {author && <UserAvatar userId={reply.authorId} />}
+                 <Avatar className="h-8 w-8"><AvatarFallback>?</AvatarFallback></Avatar>
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold">{loading ? 'Cargando...' : author?.name}</span>
-                        {author?.role && (
-                             <Badge 
-                                className={cn(author.role === 'expert' ? 'bg-destructive text-destructive-foreground' : 'bg-green-600 text-white', 'border-transparent')}
-                             >
-                                 {author.role === 'expert' ? 'Experto' : 'Usuario'}
-                             </Badge>
-                        )}
+                        <span className="font-semibold">Anónimo</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                         {reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleString() : 'Justo ahora'}
@@ -98,46 +91,21 @@ function ReplyCard({ reply }: { reply: Reply }) {
 }
 
 function ReplyForm({ postId }: { postId: string }) {
-    const { user } = useUser();
     const firestore = useFirestore();
-    const { onOpen } = useLoginModal();
     const [newReply, setNewReply] = useState('');
 
     const handleReplySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newReply.trim() || !user || !firestore) return;
+        if (!newReply.trim() || !firestore) return;
 
         await addDoc(collection(firestore, 'replies'), {
             postId: postId,
-            authorId: user.uid,
+            authorId: 'anonymous', // Placeholder
             content: newReply,
             timestamp: serverTimestamp(),
         });
         setNewReply('');
     };
-
-    if (!user) {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Escribe una respuesta</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div onClick={onOpen} className="cursor-pointer">
-                        <Textarea
-                            placeholder="Inicia sesión para compartir tu conocimiento..."
-                            rows={5}
-                            disabled
-                            className="bg-muted"
-                        />
-                    </div>
-                    <Button onClick={onOpen} className="mt-4">
-                        Inicia sesión para responder
-                    </Button>
-                </CardContent>
-            </Card>
-        );
-    }
     
     return (
         <Card>
@@ -168,8 +136,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const postRef = useMemo(() => firestore ? doc(firestore, 'posts', params.id) : null, [firestore, params.id]);
   const { data: post, loading: postLoading } = useDoc<Post>(postRef);
 
-  const authorRef = useMemo(() => (firestore && post) ? doc(firestore, 'users', post.authorId) : null, [firestore, post]);
-  const { data: author } = useDoc<UserProfile>(authorRef);
+  // Author fetching is removed as there are no users.
+  // const authorRef = useMemo(() => (firestore && post) ? doc(firestore, 'users', post.authorId) : null, [firestore, post]);
+  // const { data: author } = useDoc<UserProfile>(authorRef);
 
   const repliesQuery = useMemo(() => firestore ? query(collection(firestore, 'replies'), where('postId', '==', params.id), orderBy('timestamp', 'asc')) : null, [firestore, params.id]);
   const { data: replies, loading: repliesLoading } = useCollection<Reply>(repliesQuery);
@@ -184,7 +153,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         <CardHeader>
           <CardTitle className="text-3xl">{post.title}</CardTitle>
           <CardDescription>
-            En <span className="font-semibold">{post.continent}</span> por {author?.name || 'Anónimo'} el {post.timestamp ? new Date(post.timestamp?.seconds * 1000).toLocaleDateString() : ''}
+            En <span className="font-semibold">{post.continent}</span> por Anónimo el {post.timestamp ? new Date(post.timestamp?.seconds * 1000).toLocaleDateString() : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
