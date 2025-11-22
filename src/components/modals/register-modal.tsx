@@ -65,7 +65,7 @@ export function RegisterModal() {
         uid: user.uid,
         name: values.name,
         email: values.email,
-        photoURL: user.photoURL
+        photoURL: user.photoURL || ""
       });
 
       toast({ title: "¡Cuenta creada con éxito!" });
