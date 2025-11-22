@@ -7,7 +7,6 @@
 export * from './provider';
 export * from './firestore/use-collection';
 export * from './firestore/use-doc';
-export * from './auth/use-user';
 
 // Export types for convenience
 export type { FirebaseApp, FirebaseOptions } from 'firebase/app';
