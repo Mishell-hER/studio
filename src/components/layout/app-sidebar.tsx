@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -31,6 +32,7 @@ import {
 } from "../ui/dropdown-menu"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useLoginModal } from "@/hooks/use-login-modal"
+import { useRegisterModal } from "@/hooks/use-register-modal"
 
 const menuItems = [
     {
@@ -55,7 +57,8 @@ function UserProfile() {
     const auth = useAuth();
     const { state: sidebarState } = useSidebar()
     const router = useRouter()
-    const { onOpen } = useLoginModal();
+    const loginModal = useLoginModal();
+    const registerModal = useRegisterModal();
 
     const handleSignOut = async () => {
         if (!auth) return;
@@ -112,20 +115,19 @@ function UserProfile() {
                 icon={<LogIn />}
                 className="w-full"
                 tooltip={{ children: "Iniciar Sesión" }}
-                onClick={onOpen}
+                onClick={loginModal.onOpen}
             >
                 <span>Iniciar Sesión</span>
             </SidebarMenuButton>
-             <Link href="/register" className="w-full">
-                <SidebarMenuButton
-                    icon={<UserPlus />}
-                    variant="outline"
-                    className="w-full"
-                     tooltip={{ children: "Registrarse" }}
-                >
-                    <span>Registrarse</span>
-                </SidebarMenuButton>
-            </Link>
+            <SidebarMenuButton
+                icon={<UserPlus />}
+                variant="outline"
+                className="w-full"
+                 tooltip={{ children: "Registrarse" }}
+                 onClick={registerModal.onOpen}
+            >
+                <span>Registrarse</span>
+            </SidebarMenuButton>
         </div>
     )
 }
@@ -189,3 +191,5 @@ export function AppSidebar() {
     </>
   )
 }
+
+    

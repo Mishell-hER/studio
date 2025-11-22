@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -15,12 +16,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useLoginModal } from '@/hooks/use-login-modal';
-import Link from 'next/link';
+import { useRegisterModal } from '@/hooks/use-register-modal';
 
 export function LoginModal() {
   const router = useRouter();
   const auth = useAuth();
-  const { isOpen, onClose, onOpen } = useLoginModal();
+  const { isOpen, onClose } = useLoginModal();
+  const registerModal = useRegisterModal();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,6 +44,11 @@ export function LoginModal() {
       console.error(err);
     }
   };
+  
+  const handleOpenRegister = () => {
+    onClose();
+    registerModal.onOpen();
+  }
 
   const handleClose = () => {
     setError('');
@@ -87,16 +94,17 @@ export function LoginModal() {
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             ¿No tienes una cuenta?{' '}
-            <Link 
-              href="/register" 
-              className="font-medium text-primary hover:underline"
-              onClick={onClose}
+            <button 
+              onClick={handleOpenRegister} 
+              className="font-medium text-primary hover:underline focus:outline-none"
             >
               Regístrate
-            </Link>
+            </button>
           </p>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+    

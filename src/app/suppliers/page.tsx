@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Settings, Star, Award, Loader2, Lock, CheckCircle, Trophy, ArrowLeft } from 'lucide-react';
+import { Play, Star, Award, Loader2, Lock, CheckCircle, Trophy, ArrowLeft } from 'lucide-react';
 import { useUser, useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, setDoc, serverTimestamp, collection, query, orderBy } from 'firebase/firestore';
 import type { GameProgress, UserProfile } from '@/lib/types';
@@ -332,7 +332,6 @@ const GameMenu: React.FC<{ onNavigate: (view: 'playing' | 'levels' | 'ranking') 
                 <MenuCard title="Jugar" description="Inicia una nueva partida y sube de nivel." icon={Play} onClick={handlePlayClick} bgColor="bg-green-500/10" textColor="text-green-500" disabled={loading} />
                 <MenuCard title="Niveles" description="Revisa tu progreso y el tiempo por nivel." icon={Star} onClick={handleLevelsClick} bgColor="bg-blue-500/10" textColor="text-blue-500" disabled={loading} />
                 <MenuCard title="Ranking" description="Mira tu posición en la tabla de líderes." icon={Award} onClick={handleRankingClick} bgColor="bg-yellow-500/10" textColor="text-yellow-500" />
-                <MenuCard title="Ajustes" description="Configura el sonido y otras opciones." icon={Settings} onClick={() => alert("¡Próximamente!")} bgColor="bg-purple-500/10" textColor="text-purple-500" disabled={true} />
             </div>
         </div>
     )
@@ -421,7 +420,7 @@ const LevelsScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) 
 const RankingScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) => {
     const firestore = useFirestore();
     const progressQuery = useMemo(() => firestore ? query(collection(firestore, 'gameProgress'), orderBy('highestLevelCompleted', 'desc')) : null, [firestore]);
-    const { data: allProgress, loading } = useCollection<GameProgress>(allProgress);
+    const { data: allProgress, loading } = useCollection<GameProgress>(progressQuery);
 
     const usersQuery = useMemo(() => firestore ? query(collection(firestore, 'users')) : null, [firestore]);
     const { data: allUsers } = useCollection<UserProfile>(usersQuery);
@@ -533,3 +532,5 @@ export default function SuppliersPage() {
         </div>
     );
 }
+
+    

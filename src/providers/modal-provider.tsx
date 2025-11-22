@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { LoginModal } from "@/components/auth/login-modal";
+import { RegisterModal } from "@/components/auth/register-modal";
 
 export const ModalProvider = () => {
     const [isMounted, setIsMounted] = useState(false);
@@ -17,6 +19,9 @@ export const ModalProvider = () => {
     return (
         <>
             <LoginModal />
+            <RegisterModal />
         </>
     );
 };
+
+    
