@@ -1,7 +1,6 @@
 
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { collection, query, orderBy, onSnapshot, where, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,9 @@ import { continents } from '@/lib/continents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from './_components/post-card';
 import { OpinionCard } from './_components/opinion-card';
+
+// Helper to generate a random user name
+const generateAnonymousUser = () => `Usuario (${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')})`;
 
 function NewPostForm({ onPostCreated }: { onPostCreated: () => void }) {
     const firestore = useFirestore();
@@ -36,7 +38,7 @@ function NewPostForm({ onPostCreated }: { onPostCreated: () => void }) {
                 content,
                 continent,
                 authorId: `anonymous_${Date.now()}`,
-                authorName: "Usuario Anónimo",
+                authorName: generateAnonymousUser(),
                 timestamp: serverTimestamp(),
             });
             setTitle('');
@@ -104,7 +106,7 @@ function NewOpinionForm({ onOpinionCreated }: { onOpinionCreated: () => void }) 
             await addDoc(collection(firestore, 'opinions'), {
                 content,
                 authorId: `anonymous_${Date.now()}`,
-                authorName: "Usuario Anónimo",
+                authorName: generateAnonymousUser(),
                 timestamp: serverTimestamp(),
             });
             setContent('');
@@ -152,6 +154,7 @@ export default function ForumPage() {
   useEffect(() => {
     if (!firestore) return;
 
+    setLoadingPosts(true);
     let postsQuery = query(collection(firestore, 'posts'), orderBy('timestamp', 'desc'));
     if (continentFilter !== 'all') {
       postsQuery = query(postsQuery, where('continent', '==', continentFilter));
@@ -160,14 +163,15 @@ export default function ForumPage() {
       const postsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
       setPosts(postsData);
       setLoadingPosts(false);
-    });
+    }, () => setLoadingPosts(false));
 
+    setLoadingOpinions(true);
     const opinionsQuery = query(collection(firestore, 'opinions'), orderBy('timestamp', 'desc'));
     const unsubscribeOpinions = onSnapshot(opinionsQuery, (snapshot) => {
         const opinionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data()} as Opinion));
         setOpinions(opinionsData);
         setLoadingOpinions(false);
-    });
+    }, () => setLoadingOpinions(false));
 
     return () => {
         unsubscribePosts();

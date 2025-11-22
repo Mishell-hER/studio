@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useMemo } from 'react';
 import { doc, collection, addDoc, query, orderBy, serverTimestamp, where } from 'firebase/firestore';
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import type { Post, Reply } from '@/lib/types';
+import type { Opinion, Reply } from '@/lib/types';
 
 // Helper to generate a random user name
 const generateAnonymousUser = () => `Usuario (${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')})`;
@@ -32,7 +33,7 @@ function ReplyCard({ reply }: { reply: Reply }) {
     );
 }
 
-function ReplyForm({ postId }: { postId: string }) {
+function ReplyForm({ opinionId }: { opinionId: string }) {
     const firestore = useFirestore();
     const [newReply, setNewReply] = useState('');
 
@@ -42,11 +43,14 @@ function ReplyForm({ postId }: { postId: string }) {
         
         const authorName = generateAnonymousUser();
         const authorId = `anonymous_${Date.now()}`;
-
+        
+        // Note: For opinions, we might be storing replies in the same `replies` collection,
+        // but pointing to the opinion's ID. We need a way to distinguish them if needed,
+        // but for now we use `opinionId` as `postId`.
         await addDoc(collection(firestore, 'replies'), {
-            postId: postId,
-            authorId: authorId,
-            authorName: authorName,
+            postId: opinionId, // Re-using postId field for the opinion's ID
+            authorId,
+            authorName,
             content: newReply,
             timestamp: serverTimestamp(),
         });
@@ -75,31 +79,31 @@ function ReplyForm({ postId }: { postId: string }) {
     );
 }
 
-
-export default function PostPage({ params }: { params: { id: string } }) {
+export default function OpinionResponsePage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
   
-  const postRef = useMemo(() => firestore ? doc(firestore, 'posts', params.id) : null, [firestore, params.id]);
-  const { data: post, loading: postLoading } = useDoc<Post>(postRef);
+  // Fetch the opinion
+  const opinionRef = useMemo(() => firestore ? doc(firestore, 'opinions', params.id) : null, [firestore, params.id]);
+  const { data: opinion, loading: opinionLoading } = useDoc<Opinion>(opinionRef);
 
+  // Fetch replies for this opinion
   const repliesQuery = useMemo(() => firestore ? query(collection(firestore, 'replies'), where('postId', '==', params.id), orderBy('timestamp', 'asc')) : null, [firestore, params.id]);
   const { data: replies, loading: repliesLoading } = useCollection<Reply>(repliesQuery);
   
 
-  if (postLoading) return <p>Cargando publicación...</p>;
-  if (!post) return <p>Publicación no encontrada.</p>;
+  if (opinionLoading) return <p>Cargando opinión...</p>;
+  if (!opinion) return <p>Opinión no encontrada.</p>;
 
   return (
     <div className="container mx-auto max-w-3xl space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl">{post.title}</CardTitle>
           <CardDescription>
-            En <span className="font-semibold">{post.continent}</span> por {post.authorName || 'Anónimo'} el {post.timestamp ? new Date(post.timestamp?.seconds * 1000).toLocaleDateString() : ''}
+            Opinión de {opinion.authorName || 'Anónimo'} el {opinion.timestamp ? new Date(opinion.timestamp?.seconds * 1000).toLocaleDateString() : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="whitespace-pre-wrap">{post.content}</p>
+          <p className="whitespace-pre-wrap">{opinion.content}</p>
         </CardContent>
       </Card>
 
@@ -110,7 +114,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         ))}
       </div>
       
-      <ReplyForm postId={params.id} />
+      <ReplyForm opinionId={params.id} />
 
     </div>
   );
