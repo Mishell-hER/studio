@@ -2,7 +2,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { Globe, MessageSquare, Truck } from "lucide-react"
 
 import { cn } from "@/lib/utils"

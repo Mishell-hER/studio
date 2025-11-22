@@ -3,9 +3,7 @@ import Link from 'next/link';
 import { Globe, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/firebase/auth/use-user';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { getAuth, signOut } from 'firebase/auth';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,32 +13,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { useLoginModal } from '@/hooks/use-login-modal';
+import { useRegisterModal } from '@/hooks/use-register-modal';
 
 
 export function Header() {
   const { user, loading } = useUser();
   const auth = getAuth();
-  const firestore = useFirestore();
-
-  const handleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      if (user && firestore) {
-        // Create user profile in Firestore if it doesn't exist
-        const userRef = doc(firestore, 'users', user.uid);
-        await setDoc(userRef, {
-          uid: user.uid,
-          name: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-        }, { merge: true });
-      }
-    } catch (error) {
-      console.error("Error during sign-in:", error);
-    }
-  };
+  const loginModal = useLoginModal();
+  const registerModal = useRegisterModal();
 
   const handleSignOut = async () => {
     try {
@@ -102,10 +83,15 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button onClick={handleSignIn}>
-                <LogIn className="mr-2 h-4 w-4" />
-                Iniciar Sesión
-              </Button>
+               <div className="flex items-center gap-2">
+                <Button onClick={loginModal.onOpen} variant="outline">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Iniciar Sesión
+                </Button>
+                <Button onClick={registerModal.onOpen}>
+                  Registrarse
+                </Button>
+              </div>
             )}
           </nav>
         </div>
