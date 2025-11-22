@@ -1,8 +1,10 @@
 
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Post } from '@/lib/types';
@@ -60,6 +62,9 @@ export default function ForumPage() {
           <h1 className="text-3xl font-bold">Foro Comunitario</h1>
           <p className="text-muted-foreground">Pregunta y comparte tus conocimientos con la comunidad.</p>
         </div>
+        <Button asChild>
+            <Link href="/forum/new-post">Nueva Pregunta</Link>
+        </Button>
       </div>
 
        <Tabs defaultValue="preguntas" className="w-full">
@@ -68,12 +73,6 @@ export default function ForumPage() {
           <TabsTrigger value="opiniones">Opiniones</TabsTrigger>
         </TabsList>
         <TabsContent value="preguntas">
-             <Card className="mt-6">
-                <CardContent className="p-4">
-                    <p className="text-muted-foreground text-sm">La creación de publicaciones estará disponible próximamente.</p>
-                </CardContent>
-             </Card>
-
           <div className="mt-6 flex items-center gap-4">
             <span className="text-sm font-medium">Filtrar por continente:</span>
             <Select value={continentFilter} onValueChange={setContinentFilter}>

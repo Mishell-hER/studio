@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLoginModal } from "@/hooks/use-login-modal";
-import { useRegisterModal } from "@/hooks/use-register-modal";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useFirestore } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { useRegisterModal } from '@/hooks/use-register-modal';
+
 
 export function LoginModal() {
   const loginModal = useLoginModal();
@@ -24,18 +25,22 @@ export function LoginModal() {
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+    if (!firestore) {
+      toast({ variant: 'destructive', title: "Error", description: "La base de datos no está disponible." });
+      return;
+    }
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      if (user && firestore) {
-        const userRef = doc(firestore, 'users', user.uid);
-        await setDoc(userRef, {
-          uid: user.uid,
-          name: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-        }, { merge: true });
-      }
+      
+      const userRef = doc(firestore, 'users', user.uid);
+      await setDoc(userRef, {
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+      }, { merge: true });
+      
       toast({ title: "¡Sesión iniciada con éxito!" });
       loginModal.onClose();
     } catch (error) {

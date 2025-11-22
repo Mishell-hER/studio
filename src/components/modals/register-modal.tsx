@@ -60,12 +60,13 @@ export function RegisterModal() {
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: values.name });
-
-      await setDoc(doc(firestore, "users", user.uid), {
+      
+      const userRef = doc(firestore, "users", user.uid);
+      await setDoc(userRef, {
         uid: user.uid,
         name: values.name,
         email: values.email,
-        photoURL: user.photoURL || ""
+        photoURL: user.photoURL || "",
       });
 
       toast({ title: "¡Cuenta creada con éxito!" });
