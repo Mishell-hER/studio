@@ -109,7 +109,6 @@ export function RegisterModal() {
         sector: values.hasCompany ? values.sector : null,
         role: 'normal',
         verified: false,
-        continent: 'Unknown', // O detectar de alguna manera
         createdAt: serverTimestamp(),
       });
 
@@ -266,5 +265,3 @@ export function RegisterModal() {
     </Dialog>
   );
 }
-
-    

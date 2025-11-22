@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -16,7 +17,6 @@
         "ruc": { "type": "string", "description": "The company's RUC (if applicable)." },
         "sector": { "type": "string", "description": "The company's sector (if applicable)." },
         "role": { "type": "string", "enum": ["normal", "expert"], "description": "The role of the user." },
-        "continent": { "type": "string", "description": "The continent of the user." },
         "verified": { "type": "boolean", "description": "Whether the user is verified." }
       },
       "required": ["uid", "name", "email", "firstName", "lastName", "birthYear", "hasCompany", "role", "verified"]
