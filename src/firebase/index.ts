@@ -1,6 +1,6 @@
-import { initializeApp, getApps, FirebaseOptions } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { initializeApp, getApps, type FirebaseOptions } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 export * from './provider';
 export * from './client-provider';
 export * from './firestore/use-collection';
@@ -14,15 +14,8 @@ export function initializeFirebase(config: FirebaseOptions) {
   const auth = getAuth(app);
   const firestore = getFirestore(app);
 
-  if (process.env.NODE_ENV === 'development') {
-    // Estos condicionales evitan que se reconecte en cada recarga en caliente
-    if (!(auth as any).emulatorConfig) {
-      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-    }
-    if (!(firestore as any)._settings.host) {
-      connectFirestoreEmulator(firestore, 'localhost', 8080);
-    }
-  }
+  // NOTE: Emulator connection is removed as it's not needed for production builds
+  // and can cause issues in environments like Vercel.
 
   return { app, auth, firestore };
 }
