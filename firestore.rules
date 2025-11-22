@@ -4,8 +4,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Allow public read and write for posts and replies
+    // Allow public read and write for posts, opinions and replies
     match /posts/{postId} {
+      allow read, write: if true;
+    }
+
+    match /opinions/{opinionId} {
       allow read, write: if true;
     }
 

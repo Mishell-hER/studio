@@ -14,6 +14,18 @@
       },
       "required": ["title", "content", "authorId", "continent", "timestamp"]
     },
+    "Opinion": {
+      "title": "Forum Opinion",
+      "description": "Represents a single opinion or general discussion topic.",
+      "type": "object",
+      "properties": {
+        "content": { "type": "string", "description": "The content of the opinion." },
+        "authorId": { "type": "string", "description": "The ID of the user who wrote the opinion." },
+        "authorName": { "type": "string", "description": "The display name of the opinion author." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the opinion was created." }
+      },
+      "required": ["content", "authorId", "timestamp"]
+    },
     "Reply": {
       "title": "Post Reply",
       "description": "Represents a reply to a forum post.",
@@ -35,6 +47,10 @@
     "/posts/{postId}": {
       "schema": { "$ref": "#/entities/Post" },
       "description": "Stores all the forum posts."
+    },
+    "/opinions/{opinionId}": {
+      "schema": { "$ref": "#/entities/Opinion" },
+      "description": "Stores all the forum opinions."
     },
     "/replies/{replyId}": {
       "schema": { "$ref": "#/entities/Reply" },

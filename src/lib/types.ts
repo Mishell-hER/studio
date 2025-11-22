@@ -17,6 +17,14 @@ export interface Post {
     timestamp: Timestamp;
 }
 
+export interface Opinion {
+    id: string;
+    content: string;
+    authorId: string;
+    authorName?: string;
+    timestamp: Timestamp;
+}
+
 export interface Reply {
     id: string;
     postId: string;
