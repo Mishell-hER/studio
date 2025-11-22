@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Play, Settings, Star, Award } from 'lucide-react';
+
 
 // --- TIPOS DE DATOS ---
 interface Level {
@@ -288,21 +290,124 @@ const GameComponent: React.FC = () => {
     );
 };
 
-// --- PÁGINA PRINCIPAL ---
-export default function SuppliersPage() {
+const MenuCard: React.FC<{ 
+    title: string; 
+    description: string; 
+    icon: React.ElementType; 
+    onClick: () => void;
+    bgColor: string;
+    textColor: string;
+    disabled?: boolean;
+}> = ({ title, description, icon: Icon, onClick, bgColor, textColor, disabled }) => (
+    <Card 
+        className={cn(
+            "transform transition-all duration-300",
+            disabled ? "bg-muted/50 cursor-not-allowed" : `${bgColor} hover:scale-105 hover:shadow-xl cursor-pointer`
+        )}
+        onClick={!disabled ? onClick : undefined}
+    >
+        <CardHeader className="flex flex-row items-center gap-4">
+            <div className={cn("p-3 rounded-full", disabled ? "bg-muted" : `${bgColor} border-2 border-current`)}>
+                <Icon className={cn("w-8 h-8", disabled ? "text-muted-foreground" : textColor)} />
+            </div>
+            <div>
+                <CardTitle className={cn(disabled ? "text-muted-foreground" : textColor)}>{title}</CardTitle>
+                <CardDescription className={cn(disabled ? "text-muted-foreground/80" : `${textColor} opacity-80`)}>
+                    {description}
+                </CardDescription>
+            </div>
+        </CardHeader>
+    </Card>
+);
+
+const GameMenu: React.FC<{ onStartGame: () => void }> = ({ onStartGame }) => {
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-4">
-             <div className="text-center max-w-2xl mx-auto mb-8">
+        <div className="w-full max-w-4xl mx-auto space-y-8">
+            <div className="text-center">
                 <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground mb-3">
                     ¿Sabes o Estás Perdido?
                 </h1>
                 <p className="text-lg text-muted-foreground">
-                    Pon a prueba tus conocimientos de logística y comercio exterior. ¡Avanza de nivel y conviértete en una leyenda!
+                    Pon a prueba tus conocimientos de logística y comercio exterior.
                 </p>
             </div>
-            <GameComponent />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <MenuCard 
+                    title="Jugar"
+                    description="Inicia una nueva partida y sube de nivel."
+                    icon={Play}
+                    onClick={onStartGame}
+                    bgColor="bg-green-500/10"
+                    textColor="text-green-500"
+                />
+                 <MenuCard 
+                    title="Niveles"
+                    description="Selecciona un nivel específico para practicar."
+                    icon={Star}
+                    onClick={() => alert("¡Próximamente!")}
+                    bgColor="bg-blue-500/10"
+                    textColor="text-blue-500"
+                    disabled={true}
+                />
+                 <MenuCard 
+                    title="Ajustes"
+                    description="Configura el sonido y otras opciones."
+                    icon={Settings}
+                    onClick={() => alert("¡Próximamente!")}
+                    bgColor="bg-purple-500/10"
+                    textColor="text-purple-500"
+                    disabled={true}
+                />
+                <MenuCard 
+                    title="Ranking"
+                    description="Mira tu posición en la tabla de líderes."
+                    icon={Award}
+                    onClick={() => alert("¡Próximamente!")}
+                    bgColor="bg-yellow-500/10"
+                    textColor="text-yellow-500"
+                    disabled={true}
+                />
+            </div>
+        </div>
+    )
+}
+
+// --- PÁGINA PRINCIPAL ---
+export default function SuppliersPage() {
+    const [gameState, setGameState] = useState<'menu' | 'playing'>('menu');
+
+    const handleStartGame = () => {
+        setGameState('playing');
+    };
+
+    return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-4">
+            <AnimatePresence mode="wait">
+                {gameState === 'menu' ? (
+                    <motion.div
+                        key="menu"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full"
+                    >
+                        <GameMenu onStartGame={handleStartGame} />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="game"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full"
+                    >
+                        <GameComponent />
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
-
-    
