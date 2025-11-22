@@ -1,13 +1,13 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Star, Award, Loader2, Lock, CheckCircle, Trophy, ArrowLeft } from 'lucide-react';
+import { Play, Star, Award, Loader2, Lock, CheckCircle, Trophy, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import { useUser, useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, setDoc, serverTimestamp, collection, query, orderBy } from 'firebase/firestore';
 import type { GameProgress, UserProfile } from '@/lib/types';
@@ -86,9 +86,51 @@ const questions: { [key: number]: Question[] } = {
 
 const TIME_PER_QUESTION = 15;
 
+// --- COMPONENTES DE AUDIO ---
+const GameAudio: React.FC<{
+  play: 'background' | 'lose' | 'none';
+  isMuted: boolean;
+}> = ({ play, isMuted }) => {
+    const backgroundAudioRef = useRef<HTMLAudioElement>(null);
+    const loseAudioRef = useRef<HTMLAudioElement>(null);
+
+    useEffect(() => {
+        const backgroundAudio = backgroundAudioRef.current;
+        const loseAudio = loseAudioRef.current;
+        
+        if (!backgroundAudio || !loseAudio) return;
+
+        backgroundAudio.muted = isMuted;
+        loseAudio.muted = isMuted;
+
+        if (play === 'background') {
+            loseAudio.pause();
+            loseAudio.currentTime = 0;
+            backgroundAudio.play().catch(e => console.error("Audio playback failed:", e));
+        } else if (play === 'lose') {
+            backgroundAudio.pause();
+            loseAudio.play().catch(e => console.error("Audio playback failed:", e));
+        } else {
+            backgroundAudio.pause();
+            loseAudio.pause();
+        }
+    }, [play, isMuted]);
+
+    return (
+        <>
+            <audio ref={backgroundAudioRef} src="https://actions.google.com/sounds/v1/ambiences/arcade_room.ogg" loop />
+            <audio ref={loseAudioRef} src="https://actions.google.com/sounds/v1/cartoon/game_over.ogg" />
+        </>
+    );
+};
+
+
 // --- COMPONENTES DE PANTALLA ---
 
-const GameComponent: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu }) => {
+const GameComponent: React.FC<{ 
+    onBackToMenu: () => void,
+    onPlayAudio: (sound: 'background' | 'lose' | 'none') => void 
+}> = ({ onBackToMenu, onPlayAudio }) => {
     const { user } = useUser();
     const firestore = useFirestore();
 
@@ -109,6 +151,11 @@ const GameComponent: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu })
     
     const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
     const [timerKey, setTimerKey] = useState(0);
+
+    useEffect(() => {
+        onPlayAudio('background');
+        return () => { onPlayAudio('none'); }; // Stop audio on component unmount
+    }, []);
 
     useEffect(() => {
         if (!loadingProgress) {
@@ -143,6 +190,7 @@ const GameComponent: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu })
     }, [timerKey, isAnswered, questionData]);
 
     const handleTimeOut = () => {
+        onPlayAudio('lose');
         setIsAnswered(true);
         setIsCorrect(false);
         setSelectedAnswer(null);
@@ -161,12 +209,15 @@ const GameComponent: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu })
     const handleVerify = () => {
         if (!selectedAnswer) return;
         const correct = selectedAnswer === questionData.correctAnswer;
+        if(!correct) onPlayAudio('lose');
+
         setIsAnswered(true);
         setIsCorrect(correct);
         if (correct) setScore(prev => prev + 1);
     };
     
     const handleNextQuestion = async () => {
+        onPlayAudio('background');
         const isLastQuestion = currentQuestionIndex === levelData.questions - 1;
 
         if (isLastQuestion) {
@@ -189,7 +240,6 @@ const GameComponent: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu })
                 
                 try {
                     await setDoc(gameProgressRef, newProgress, { merge: true });
-                    alert(`Nivel ${currentLevel} completado! Puntuación: ${finalScore}/${levelData.questions}. Tu progreso ha sido guardado.`);
                 } catch(e) { console.error("Error saving progress: ", e); alert("Hubo un error al guardar tu progreso."); }
             }
 
@@ -489,12 +539,48 @@ const RankingScreen: React.FC<{ onBackToMenu: () => void }> = ({ onBackToMenu })
     )
 }
 
+const LevelIntro: React.FC<{ level: number, onStart: () => void }> = ({ level, onStart }) => {
+    useEffect(() => {
+        const timer = setTimeout(onStart, 3000); // Muestra la pantalla por 3 segundos
+        return () => clearTimeout(timer);
+    }, [onStart]);
+
+    return (
+        <div className="flex flex-col items-center justify-center h-full">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+            >
+                <h1 className="text-6xl font-bold text-primary">Nivel {level}</h1>
+                <p className="text-xl text-muted-foreground mt-2">¡Prepárate!</p>
+            </motion.div>
+        </div>
+    );
+};
+
+
 // --- PÁGINA PRINCIPAL ---
 export default function SuppliersPage() {
-    const [gameState, setGameState] = useState<'menu' | 'playing' | 'levels' | 'ranking'>('menu');
+    const [gameState, setGameState] = useState<'menu' | 'intro' | 'playing' | 'levels' | 'ranking'>('menu');
+    const [audioState, setAudioState] = useState<'background' | 'lose' | 'none'>('none');
+    const [isMuted, setIsMuted] = useState(false);
+    
+    const { user, loading } = useUser();
+    const { data: gameProgress } = useDoc<GameProgress>(useMemo(() => {
+        const firestore = useFirestore();
+        if (!firestore || !user) return null;
+        return doc(firestore, 'gameProgress', user.uid);
+    }, [user]));
+    const currentLevel = (gameProgress?.highestLevelCompleted || 0) + 1;
+
 
     const handleNavigate = (view: 'playing' | 'levels' | 'ranking') => {
-        setGameState(view);
+        if (view === 'playing') {
+            setGameState('intro');
+        } else {
+            setGameState(view);
+        }
     };
 
     const handleBackToMenu = () => {
@@ -503,8 +589,10 @@ export default function SuppliersPage() {
 
     const renderContent = () => {
         switch (gameState) {
+            case 'intro':
+                return <LevelIntro level={currentLevel} onStart={() => setGameState('playing')} />;
             case 'playing':
-                return <GameComponent onBackToMenu={handleBackToMenu} />;
+                return <GameComponent onBackToMenu={handleBackToMenu} onPlayAudio={setAudioState} />;
             case 'levels':
                 return <LevelsScreen onBackToMenu={handleBackToMenu} />;
             case 'ranking':
@@ -516,7 +604,16 @@ export default function SuppliersPage() {
     }
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-4">
+        <div className="w-full h-full flex flex-col items-center justify-center p-4 relative">
+             <GameAudio play={audioState} isMuted={isMuted} />
+             <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 z-10"
+                onClick={() => setIsMuted(prev => !prev)}
+            >
+                {isMuted ? <VolumeX /> : <Volume2 />}
+            </Button>
             <AnimatePresence mode="wait">
                 <motion.div
                     key={gameState}
