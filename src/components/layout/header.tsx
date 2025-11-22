@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Globe, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useUser } from '@/firebase';
+import { useUser } from '@/firebase/auth/use-user';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
@@ -35,9 +35,6 @@ export function Header() {
           name: user.displayName,
           email: user.email,
           photoURL: user.photoURL,
-          role: 'normal',
-          verified: false, // Or based on your logic
-          continent: 'Unknown' // Or detect from user's settings/IP
         }, { merge: true });
       }
     } catch (error) {

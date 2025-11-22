@@ -1,6 +1,17 @@
-
 {
   "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "name": { "type": "string", "description": "The user's display name." },
+        "email": { "type": "string", "description": "The user's email address." },
+        "photoURL": { "type": "string", "description": "The URL of the user's profile picture." }
+      },
+      "required": ["uid", "name", "email"]
+    },
     "Post": {
       "title": "Forum Post",
       "description": "Represents a single post or question in the forum.",
@@ -28,9 +39,13 @@
     }
   },
   "auth": {
-    "providers": []
+    "providers": ["Google"]
   },
   "firestore": {
+     "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores user profile information."
+    },
     "/posts/{postId}": {
       "schema": { "$ref": "#/entities/Post" },
       "description": "Stores all the forum posts."

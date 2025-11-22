@@ -2,17 +2,9 @@ import type { Timestamp } from "firebase/firestore";
 
 export interface UserProfile {
     uid: string;
-    name: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    photoURL?: string;
-    birthYear: number;
-    hasCompany: boolean;
-    ruc?: string;
-    sector?: string;
-    role: 'normal' | 'expert';
-    verified: boolean;
+    name: string | null;
+    email: string | null;
+    photoURL?: string | null;
 }
 
 export interface Post {

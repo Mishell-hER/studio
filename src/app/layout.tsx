@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { AppSidebar } from '@/components/layout/app-sidebar';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
+import { Header } from '@/components/layout/header';
+import { AppSidebar } from '@/components/layout/app-sidebar';
 import { Sidebar } from '@/components/ui/sidebar';
 
 const inter = Inter({
@@ -24,18 +25,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="dark">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
+       <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
         <FirebaseClientProvider>
-          <div className="flex min-h-screen">
-            <Sidebar>
-              <AppSidebar />
-            </Sidebar>
-            <main className="flex-1 flex-col p-4 md:p-8 overflow-y-auto ml-16">
-              {children}
-            </main>
+          <div className="relative flex min-h-screen flex-col">
+            <Header />
+            <div className="flex-1">
+              <div className="flex min-h-screen">
+                <Sidebar>
+                  <AppSidebar />
+                </Sidebar>
+                <main className="flex-1 flex-col p-4 md:p-8 overflow-y-auto ml-16">
+                  {children}
+                </main>
+              </div>
+            </div>
           </div>
           <Toaster />
         </FirebaseClientProvider>

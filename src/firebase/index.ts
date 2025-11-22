@@ -5,6 +5,8 @@ export * from './provider';
 export * from './client-provider';
 export * from './firestore/use-collection';
 export * from './firestore/use-doc';
+export * from './auth/use-user';
+
 
 export function initializeFirebase(config: FirebaseOptions) {
   const apps = getApps();
