@@ -1,14 +1,15 @@
 'use client';
-import { initializeApp, getApps, type FirebaseOptions, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+
+// Barrel file for client-side Firebase utilities.
+// The actual initialization is handled in FirebaseClientProvider
+// to ensure it only runs on the client.
 
 export * from './provider';
-export * from './client-provider';
 export * from './firestore/use-collection';
 export * from './firestore/use-doc';
 export * from './auth/use-user';
 
-
-export { getApps, initializeApp, getAuth, getFirestore };
-export type { FirebaseApp, FirebaseOptions, Auth, Firestore };
+// Export types for convenience
+export type { FirebaseApp, FirebaseOptions } from 'firebase/app';
+export type { Auth } from 'firebase/auth';
+export type { Firestore } from 'firebase/firestore';
