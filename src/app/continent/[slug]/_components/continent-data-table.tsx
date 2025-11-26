@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -120,6 +121,17 @@ const renderCellContent = (item: CountryData, header: HeaderConfig) => {
     return (
       <Button asChild variant="link" className="p-0 h-auto justify-start">
         <a href={linkUrl} target="_blank" rel="noopener noreferrer">
+          {String(value)}
+          <ExternalLink className="ml-2 h-3 w-3" />
+        </a>
+      </Button>
+    );
+  }
+  
+  if (header.dataKey === 'exchangeRate' && value === 'Euro (EUR)') {
+    return (
+      <Button asChild variant="link" className="p-0 h-auto justify-start">
+        <a href="https://wise.com/es/currency-converter/eur-to-pen-rate?amount=1" target="_blank" rel="noopener noreferrer">
           {String(value)}
           <ExternalLink className="ml-2 h-3 w-3" />
         </a>
