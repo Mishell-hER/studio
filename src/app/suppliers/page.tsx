@@ -40,9 +40,22 @@ interface LocalGameProgress {
 }
 
 // --- DATOS DEL JUEGO ---
+const levelTitles = [
+  "Novato Navegante",
+  "Aprendiz Aterrizado",
+  "Comerciante Curioso",
+  "Exportador Ensayista",
+  "Navegante Novato",
+  "Vendedor Viajero",
+  "Agente Agudo",
+  "Comerciante Comedido",
+  "Exportador Experimentado",
+  "Tigre de Tráficas",
+];
+
 const levels: Level[] = Array.from({ length: 20 }, (_, i) => ({
   level: i + 1,
-  title: `Nivel ${i + 1}`,
+  title: i < 10 ? levelTitles[i] : `Nivel ${i + 1}`,
   questions: (i < 10) ? 5 : (i < 15) ? 10 : (i < 18) ? 15 : (i < 19) ? 20 : 25,
   bgColor: 'bg-gray-100',
   textColor: 'text-gray-800'
