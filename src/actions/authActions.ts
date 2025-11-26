@@ -2,7 +2,6 @@
 
 import { adminAuth, adminFirestore } from '@/firebase/admin/config';
 import * as z from 'zod';
-import * as admin from 'firebase-admin';
 
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
@@ -27,15 +26,18 @@ type RegistrationData = z.infer<typeof formSchema>;
 
 
 export async function registerUser(data: RegistrationData) {
+    // Si el admin SDK no está inicializado, no podemos continuar.
+    if (!adminAuth || !adminFirestore) {
+        return { success: false, error: 'La configuración del servidor de Firebase no está completa.' };
+    }
+
     const result = formSchema.safeParse(data);
     if (!result.success) {
-        // Extraer y formatear los errores de Zod
         const errorMessages = result.error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join('; ');
         return { success: false, error: `Datos de formulario inválidos: ${errorMessages}` };
     }
     const { correo, password, ...profileData } = result.data;
     
-    // Verificar si el username ya existe
     try {
         const usernameSnapshot = await adminFirestore.collection('users').where('username', '==', profileData.username).get();
         if (!usernameSnapshot.empty) {
@@ -45,7 +47,6 @@ export async function registerUser(data: RegistrationData) {
         console.error("Error checking username:", e);
         return { success: false, error: 'Error al verificar el nombre de usuario.' };
     }
-
 
     try {
         const userRecord = await adminAuth.createUser({
@@ -59,7 +60,7 @@ export async function registerUser(data: RegistrationData) {
 
         const firestoreProfile: any = {
             uid: userId,
-            ...profileData, // nombre, apellido, username, esEmpresario
+            ...profileData, 
             correo: correo,
         };
 
