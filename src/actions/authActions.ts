@@ -27,7 +27,7 @@ type RegistrationData = z.infer<typeof formSchema>;
 
 
 export async function registerUser(data: RegistrationData) {
-    // Si el admin SDK no está inicializado, no podemos continuar.
+    // Barrera de seguridad: si el admin SDK no está inicializado, no podemos continuar.
     if (!adminAuth || !adminFirestore) {
         return { success: false, error: 'La configuración del servidor de Firebase no está completa.' };
     }

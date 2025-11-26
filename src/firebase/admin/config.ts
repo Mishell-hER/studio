@@ -28,7 +28,6 @@ if (!admin.apps.length) {
             console.log("🟢 Firebase Admin SDK inicializado exitosamente.");
         } catch (error: any) {
             console.error('❌ Fallo al inicializar Firebase Admin SDK:', error.message);
-            throw new Error("Error al inicializar el Admin SDK.");
         }
     } else {
         console.warn('🔴 ERROR: Credenciales de Firebase Admin SDK faltantes. Verifica tus variables de entorno.');
