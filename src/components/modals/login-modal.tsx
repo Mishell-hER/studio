@@ -16,7 +16,6 @@ import { useAuth, useFirestore } from '@/firebase';
 import { sendSignInLinkToEmail, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Separator } from '../ui/separator';
-// Importamos el proveedor directamente
 import { googleProvider } from '@/firebase/client';
 import { Input } from '../ui/input';
 
@@ -31,7 +30,7 @@ export function LoginModal() {
   
   async function call_login_google() {
     if (!auth || !firestore || !googleProvider) {
-      toast({ variant: 'destructive', title: "Error de configuración", description: "La autenticación no está disponible en este momento." });
+      toast({ variant: 'destructive', title: "Error de configuración", description: "La autenticación no está disponible. Asegúrate de que las credenciales de Firebase son correctas." });
       return;
     }
     
@@ -166,4 +165,3 @@ export function LoginModal() {
     </Dialog>
   );
 }
-

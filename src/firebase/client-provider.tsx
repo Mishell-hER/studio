@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, ReactNode } from 'react';
@@ -20,24 +21,20 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     firestore: undefined,
   });
 
+  // Este efecto se ejecuta solo una vez en el cliente para obtener las instancias
+  // que ya deberían haber sido inicializadas por client.ts
   useEffect(() => {
-    // Esta función se ejecutará solo en el cliente, después del montaje.
     const { app, auth, firestore } = getFirebaseInstances();
-    if (app && auth && firestore) {
-      setInstances({ app, auth, firestore });
-    }
+    setInstances({ app, auth, firestore });
   }, []);
 
-  if (!instances.app || !instances.auth || !instances.firestore) {
-    // Muestra un loader o nada mientras Firebase se inicializa
-    return <>{children}</>;
-  }
-
+  // Pasamos las instancias al proveedor. Si aún no están listas, 
+  // los hooks que dependen de ellas devolverán null, lo cual es manejado por los componentes.
   return (
     <FirebaseProvider
-      app={instances.app}
-      auth={instances.auth}
-      firestore={instances.firestore}
+      app={instances.app || null}
+      auth={instances.auth || null}
+      firestore={instances.firestore || null}
     >
       {children}
     </FirebaseProvider>

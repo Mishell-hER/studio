@@ -1,3 +1,4 @@
+
 // /src/firebase/config.ts
 
 // IMPORTANT: These are the hardcoded credentials for debugging purposes.

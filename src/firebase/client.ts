@@ -9,36 +9,35 @@ import { firebaseConfig } from './config';
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let firestore: Firestore | undefined;
-// Exportamos directamente el proveedor para un acceso garantizado
 export let googleProvider: GoogleAuthProvider | undefined;
 
-// Verificamos que las credenciales no sean los valores por defecto
-const isConfigValid = firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('TU_VALOR_AQUI');
-
+// Esta función se asegura de que Firebase se inicialice solo una vez y solo en el cliente.
 function initializeFirebase() {
-  if (typeof window !== 'undefined') {
-    if (isConfigValid) {
-        if (getApps().length === 0) {
-            app = initializeApp(firebaseConfig);
-        } else {
-            app = getApp();
-        }
-        auth = getAuth(app);
-        firestore = getFirestore(app);
-        
-        // Creamos la instancia del proveedor y la asignamos
-        googleProvider = new GoogleAuthProvider();
-        googleProvider.addScope('profile');
-        googleProvider.addScope('email');
+  if (typeof window !== 'undefined' && getApps().length === 0) {
+    if (firebaseConfig && firebaseConfig.apiKey) {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      firestore = getFirestore(app);
+      googleProvider = new GoogleAuthProvider();
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
+    }
+  } else if (typeof window !== 'undefined') {
+    app = getApp();
+    auth = getAuth(app);
+    firestore = getFirestore(app);
+    if (!googleProvider) {
+      googleProvider = new GoogleAuthProvider();
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
     }
   }
 }
 
-// Llama a la inicialización para que se ejecute una vez al cargar el script
+// Inicializamos Firebase al cargar este módulo en el cliente
 initializeFirebase();
 
 export function getFirebaseInstances() {
-  // Esta función ahora solo devuelve las instancias principales.
-  // El proveedor se importa directamente.
+  // Ahora esta función simplemente devuelve las instancias ya creadas.
   return { app, auth, firestore };
 }
