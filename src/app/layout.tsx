@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -65,12 +64,6 @@ function LocalUserProvider({ children }: { children: React.ReactNode }) {
         </LocalAuthContext.Provider>
     );
 }
-
-
-// export const metadata: Metadata = {
-//   title: 'LogisticX',
-//   description: 'Tu centro de información para la logística de exportación.',
-// };
 
 export default function RootLayout({
   children,
