@@ -1,4 +1,5 @@
 
+
 // Mantendremos Timestamp para compatibilidad futura si se vuelve a Firebase
 import type { Timestamp } from "firebase/firestore";
 
