@@ -1,15 +1,14 @@
-
 'use server';
 
 import { adminAuth, adminFirestore } from '@/firebase/admin/config';
 import * as z from 'zod';
+import { getAuth } from 'firebase-admin/auth';
 
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
   apellido: z.string().min(2, { message: "El apellido debe tener al menos 2 caracteres." }),
   username: z.string().min(3, { message: "El nombre de usuario debe tener al menos 3 caracteres." }),
   correo: z.string().email({ message: "Por favor, introduce un correo válido." }),
-  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
   esEmpresario: z.boolean().default(false),
   RUC: z.string().optional(),
   sector: z.string().optional(),
@@ -25,9 +24,13 @@ const formSchema = z.object({
 
 type RegistrationData = z.infer<typeof formSchema>;
 
-
+/**
+ * Server Action para registrar el perfil de un nuevo usuario en Firestore.
+ * Ya no crea el usuario en Auth, solo el perfil. La autenticación se maneja
+ * por separado con el flujo de Email Link.
+ * @param data Los datos del formulario de registro.
+ */
 export async function registerUser(data: RegistrationData) {
-    // Barrera de seguridad: si el admin SDK no está inicializado, no podemos continuar.
     if (!adminAuth || !adminFirestore) {
         return { success: false, error: 'La configuración del servidor de Firebase no está completa. Revisa las credenciales del entorno.' };
     }
@@ -37,26 +40,38 @@ export async function registerUser(data: RegistrationData) {
         const errorMessages = result.error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join('; ');
         return { success: false, error: `Datos de formulario inválidos: ${errorMessages}` };
     }
-    const { correo, password, ...profileData } = result.data;
     
+    const { correo, ...profileData } = result.data;
+
     try {
+        // Verificar si el nombre de usuario ya está en uso
         const usernameSnapshot = await adminFirestore.collection('users').where('username', '==', profileData.username).get();
         if (!usernameSnapshot.empty) {
             return { success: false, error: 'Este nombre de usuario ya está en uso.' };
         }
-    } catch(e: any) {
-        console.error("Error checking username:", e);
-        return { success: false, error: 'Error al verificar el nombre de usuario.' };
-    }
 
-    try {
+        // Verificar si el correo ya está en uso en Firestore (y por lo tanto en Auth)
+        const emailSnapshot = await adminFirestore.collection('users').where('correo', '==', correo).get();
+        if (!emailSnapshot.empty) {
+            return { success: false, error: 'Este correo electrónico ya está registrado.' };
+        }
+        
+        // ¡Importante! El usuario aún no existe en Firebase Auth.
+        // El flujo de Email Link lo creará la primera vez que inicie sesión.
+        // Lo que hacemos aquí es PRE-CREAR el perfil en Firestore,
+        // pero necesitamos un UID. Vamos a usar un UID temporal que luego
+        // puede ser actualizado, o mejor, simplemente usamos el email como ID
+        // temporal si el modelo de datos lo permite.
+        // 
+        // Para este caso, vamos a crear un usuario en Auth pero sin contraseña,
+        // para tener un UID estable desde el principio.
+        
         const userRecord = await adminAuth.createUser({
             email: correo,
-            password: password,
-            emailVerified: false,
+            emailVerified: false, // Se verificará con el primer inicio de sesión
             displayName: `${profileData.nombre} ${profileData.apellido}`,
         });
-        
+
         const userId = userRecord.uid;
 
         const firestoreProfile: any = {
@@ -72,7 +87,7 @@ export async function registerUser(data: RegistrationData) {
 
         await adminFirestore.collection('users').doc(userId).set(firestoreProfile);
 
-        return { success: true, userId, message: 'Registro exitoso.' };
+        return { success: true, userId, message: 'Perfil creado exitosamente.' };
 
     } catch (error: any) {
         let errorMessage = 'Error desconocido durante el registro.';

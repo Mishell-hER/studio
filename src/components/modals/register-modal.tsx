@@ -29,12 +29,12 @@ import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { registerUser } from '@/actions/authActions';
 
+// El esquema ahora solo valida los datos del perfil, ya que la contraseña no es necesaria.
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
   apellido: z.string().min(2, { message: "El apellido debe tener al menos 2 caracteres." }),
   username: z.string().min(3, { message: "El nombre de usuario debe tener al menos 3 caracteres." }),
   correo: z.string().email({ message: "Por favor, introduce un correo válido." }),
-  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
   esEmpresario: z.boolean().default(false),
   RUC: z.string().optional(),
   sector: z.string().optional(),
@@ -61,7 +61,6 @@ export function RegisterModal() {
         apellido: "",
         username: "",
         correo: "",
-        password: "",
         esEmpresario: false,
         RUC: "",
         sector: ""
@@ -73,12 +72,17 @@ export function RegisterModal() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     
+    // La Server Action ahora solo crea el perfil de usuario.
     const response = await registerUser(values);
 
     if (response.success) {
-      toast({ title: response.message });
+      toast({ 
+        title: "¡Perfil creado!",
+        description: "Ahora, por favor, inicia sesión con el enlace que te enviaremos.",
+      });
       registerModal.onClose();
-      loginModal.onOpen();
+      // Abrimos el modal de login para que el usuario pida su enlace de acceso.
+      loginModal.onOpen(); 
     } else {
       toast({
         variant: 'destructive',
@@ -87,7 +91,9 @@ export function RegisterModal() {
       });
        if(response.error?.includes('nombre de usuario')) {
         form.setError("username", { message: response.error });
-      }
+       } else if (response.error?.includes('correo')) {
+        form.setError("correo", { message: response.error });
+       }
     }
     
     setIsLoading(false);
@@ -114,8 +120,7 @@ export function RegisterModal() {
                 <FormField control={form.control} name="apellido" render={({ field }) => ( <FormItem><FormLabel>Apellido</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
             </div>
             <FormField control={form.control} name="username" render={({ field }) => ( <FormItem><FormLabel>Nombre de Usuario</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="correo" render={({ field }) => ( <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="password" render={({ field }) => ( <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="correo" render={({ field }) => ( <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input type="email" {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
 
             <FormField
               control={form.control}
@@ -164,7 +169,7 @@ export function RegisterModal() {
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creando cuenta..." : "Registrarse"}
+              {isLoading ? "Creando perfil..." : "Crear Cuenta"}
             </Button>
           </form>
         </Form>
