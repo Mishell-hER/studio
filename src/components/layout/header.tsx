@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Globe, LogIn, LogOut } from 'lucide-react';
+import { Globe, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useLoginModal } from '@/hooks/use-login-modal';
 import { useUser } from '@/firebase/auth/use-user';
