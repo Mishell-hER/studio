@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -6,8 +7,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { Sidebar } from '@/components/ui/sidebar';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { ModalProvider } from '@/providers/modal-provider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,8 +26,6 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
-        <FirebaseClientProvider>
-          <ModalProvider />
           <div className="relative flex min-h-screen flex-col">
             <Header />
             <div className="flex-1">
@@ -43,7 +40,6 @@ export default function RootLayout({
             </div>
           </div>
           <Toaster />
-        </FirebaseClientProvider>
       </body>
     </html>
   );

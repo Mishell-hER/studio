@@ -1,7 +1,5 @@
+
 'use client';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Post, Reply } from '@/lib/types';
@@ -48,41 +46,6 @@ function ReplyCard({ reply }: { reply: Reply }) {
     );
 }
 
-function ReplyForm({ postId }: { postId: string }) {
-    const [newReply, setNewReply] = useState('');
-
-    const handleReplySubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newReply.trim()) return;
-        
-        console.log(`Nueva respuesta para ${postId}: ${newReply}`);
-        setNewReply('');
-        alert('Respuesta enviada (simulación)');
-    };
-    
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Escribe una respuesta</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleReplySubmit} className="space-y-4">
-                    <Textarea
-                        value={newReply}
-                        onChange={(e) => setNewReply(e.target.value)}
-                        placeholder="Comparte tu conocimiento..."
-                        rows={5}
-                    />
-                    <Button type="submit" disabled={!newReply.trim()}>
-                        Publicar Respuesta
-                    </Button>
-                </form>
-            </CardContent>
-        </Card>
-    );
-}
-
-
 export default function PostPage({ params }: { params: { id: string } }) {
   // Simulación: encontrar el post por ID. En una app real, esto sería una llamada a la API/DB.
   const post = params.id === samplePost.id ? samplePost : null;
@@ -112,7 +75,11 @@ export default function PostPage({ params }: { params: { id: string } }) {
         ))}
       </div>
       
-      <ReplyForm postId={params.id} />
+       <Card className="mt-8 p-4 bg-muted/20 border-dashed">
+            <CardDescription className="text-center">
+                La creación de nuevas respuestas se ha desactivado temporalmente.
+            </CardDescription>
+       </Card>
 
     </div>
   );

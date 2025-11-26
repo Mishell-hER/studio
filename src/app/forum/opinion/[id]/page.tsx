@@ -1,9 +1,6 @@
 
 'use client';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Opinion, Reply } from '@/lib/types';
 import { notFound } from 'next/navigation';
@@ -47,40 +44,6 @@ function ReplyCard({ reply }: { reply: Reply }) {
     );
 }
 
-function ReplyForm({ opinionId }: { opinionId: string }) {
-    const [newReply, setNewReply] = useState('');
-
-    const handleReplySubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newReply.trim()) return;
-        
-        console.log(`Nueva respuesta para ${opinionId}: ${newReply}`);
-        setNewReply('');
-        alert('Respuesta enviada (simulación)');
-    };
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Escribe una respuesta</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleReplySubmit} className="space-y-4">
-                    <Textarea
-                        value={newReply}
-                        onChange={(e) => setNewReply(e.target.value)}
-                        placeholder="Comparte tu conocimiento..."
-                        rows={5}
-                    />
-                    <Button type="submit" disabled={!newReply.trim()}>
-                        Publicar Respuesta
-                    </Button>
-                </form>
-            </CardContent>
-        </Card>
-    );
-}
-
 export default function OpinionResponsePage({ params }: { params: { id: string } }) {
   // Simulación: encontrar la opinión por ID. En una app real, esto sería una llamada a la API/DB.
   const opinion = params.id === sampleOpinion.id ? sampleOpinion : null;
@@ -109,7 +72,11 @@ export default function OpinionResponsePage({ params }: { params: { id: string }
         ))}
       </div>
       
-      <ReplyForm opinionId={params.id} />
+       <Card className="mt-8 p-4 bg-muted/20 border-dashed">
+            <CardDescription className="text-center">
+                La creación de nuevas respuestas se ha desactivado temporalmente.
+            </CardDescription>
+       </Card>
 
     </div>
   );
