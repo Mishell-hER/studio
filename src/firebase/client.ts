@@ -1,3 +1,4 @@
+
 'use client';
 
 import { initializeApp, getApps, FirebaseApp, getApp } from 'firebase/app';
@@ -10,32 +11,34 @@ let auth: Auth | undefined;
 let firestore: Firestore | undefined;
 let googleProvider: GoogleAuthProvider | undefined;
 
-const requiredKeys: (keyof typeof firebaseConfig)[] = ['apiKey', 'authDomain', 'projectId'];
-const isConfigValid = requiredKeys.every(key => !!firebaseConfig[key] && !firebaseConfig[key].includes('TU_VALOR_AQUI'));
-
+// Verificamos que las credenciales no sean los valores por defecto
+const isConfigValid = firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('AIzaSyA');
 
 function initializeFirebase() {
-  if (typeof window !== 'undefined' && isConfigValid) {
-    if (getApps().length === 0) {
-      app = initializeApp(firebaseConfig);
+  if (typeof window !== 'undefined') {
+    if (isConfigValid) {
+        if (getApps().length === 0) {
+            app = initializeApp(firebaseConfig);
+        } else {
+            app = getApp();
+        }
+        auth = getAuth(app);
+        firestore = getFirestore(app);
+        googleProvider = new GoogleAuthProvider();
+        googleProvider.addScope('profile');
+        googleProvider.addScope('email');
     } else {
-      app = getApp();
+        // No intentes inicializar si la configuración no es válida.
+        // Las funciones getFirebaseInstances devolverán undefined y la UI lo manejará.
+        console.warn("FIREBASE CLIENT WARNING: Firebase config is missing or invalid. Please update src/firebase/config.ts with your project credentials. Firebase features will not work.");
     }
-    auth = getAuth(app);
-    firestore = getFirestore(app);
-    googleProvider = new GoogleAuthProvider();
-    googleProvider.addScope('profile');
-    googleProvider.addScope('email');
-  } else if (typeof window !== 'undefined') {
-    console.warn("FIREBASE CLIENT WARNING: Firebase config is missing or invalid. Please update src/firebase/config.ts with your project credentials. Firebase features will not work.");
   }
 }
 
-// Llama a la inicialización para que se ejecute una vez
+// Llama a la inicialización para que se ejecute una vez al cargar el script
 initializeFirebase();
 
-function getFirebaseInstances() {
+export function getFirebaseInstances() {
+  // Esta función simplemente devuelve las instancias ya creadas (o undefined si la config no era válida)
   return { app, auth, firestore, googleProvider };
 }
-
-export { getFirebaseInstances };

@@ -1,3 +1,4 @@
+
 // src/app/finish-login/page.tsx
 'use client';
 
@@ -18,13 +19,19 @@ function FinishLoginPageContent() {
 
   useEffect(() => {
     const completeSignIn = async () => {
-      if (!auth || !firestore || !window.location.href) return;
+      if (!auth || !firestore || !window.location.href) {
+        // Espera a que Firebase se inicialice en el cliente.
+        // Si no se inicializa, las funciones de hook devolverán null.
+        if(!auth || !firestore){
+            setStatus("Esperando la inicialización de Firebase...");
+            return;
+        }
+        return;
+      }
 
       if (isSignInWithEmailLink(auth, window.location.href)) {
         let email = window.localStorage.getItem('emailForSignIn');
         if (!email) {
-          // Si el usuario abre el enlace en un dispositivo diferente,
-          // le pedimos su correo para mayor seguridad.
           email = window.prompt('Por favor, ingresa tu correo electrónico para confirmar.');
         }
 
