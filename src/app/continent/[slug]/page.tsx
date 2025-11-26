@@ -1,9 +1,10 @@
+
 import { ContinentDataTable } from '@/app/continent/[slug]/_components/continent-data-table';
 import { OtrosPaisesGrid } from '@/app/continent/[slug]/_components/otros-paises-grid';
 import { logisticData } from '@/lib/data';
 import { continents } from '@/lib/continents';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, FileText, Calculator, Lightbulb, ListChecks } from 'lucide-react';
+import { ArrowLeft, MapPin, FileText, Calculator, Lightbulb, ListChecks, Route } from 'lucide-react';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
@@ -95,6 +96,14 @@ export default function ContinentPage({
                 Criterios de Proveedores
               </Link>
             </Button>
+            {params.slug === 'south-america' && (
+               <Button asChild variant="outline">
+                <Link href="/peru-routes">
+                  <Route className="mr-2" />
+                  Rutas Internas
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -103,3 +112,4 @@ export default function ContinentPage({
     </div>
   );
 }
+
