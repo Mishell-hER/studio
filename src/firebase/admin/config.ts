@@ -1,5 +1,5 @@
+// src/firebase/admin/config.ts
 
-// src/firebase/admin/config.ts (¡Solo se usa en el lado del servidor!)
 import * as admin from 'firebase-admin';
 
 // Define la forma de las credenciales de la cuenta de servicio
@@ -9,16 +9,15 @@ interface ServiceAccount {
   privateKey: string;
 }
 
-// Lee las credenciales de las variables de entorno
+// 1. Obtener y preparar las variables de entorno
 const serviceAccount: Partial<ServiceAccount> = {
   projectId: process.env.FIREBASE_PROJECT_ID,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  // Reemplaza los '\\n' por '\n' para restaurar los saltos de línea originales.
+  // ⚠️ CORRECCIÓN CLAVE: Reemplazamos los '\\n' por '\n' para restaurar los saltos de línea originales.
   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
 };
 
-// Inicializa Firebase Admin solo si no ha sido inicializado
-// y si las credenciales están completas.
+// 2. Inicializar el Admin SDK si aún no se ha hecho y las credenciales están completas
 if (!admin.apps.length) {
     if (serviceAccount.projectId && serviceAccount.clientEmail && serviceAccount.privateKey) {
         try {
@@ -27,16 +26,15 @@ if (!admin.apps.length) {
             });
             console.log("🟢 Firebase Admin SDK inicializado exitosamente.");
         } catch (error: any) {
-            console.error('❌ Fallo al inicializar Firebase Admin SDK:', error.message);
+            console.error("❌ Fallo al inicializar Firebase Admin SDK:", error);
+            // Lanzar un error aquí es opcional, pero ayuda a diagnosticar
         }
     } else {
-        console.warn('🔴 ERROR: Credenciales de Firebase Admin SDK faltantes. Verifica tus variables de entorno.');
+        console.warn("🔴 ADVERTENCIA: Credenciales de Firebase Admin SDK faltantes. Las funciones de administrador no estarán disponibles. Verifica tu archivo .env");
     }
 }
 
-
-// Exporta las instancias de admin de forma segura, incluso si la inicialización falló.
-// El código que las use debe estar preparado para que no estén disponibles si las credenciales no se proporcionaron.
+// 3. Exportar las instancias (serán 'null' si la inicialización falló o se omitió)
 const adminAuth = admin.apps.length ? admin.auth() : null;
 const adminFirestore = admin.apps.length ? admin.firestore() : null;
 
