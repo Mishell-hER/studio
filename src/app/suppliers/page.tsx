@@ -7,7 +7,10 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { Play, ArrowLeft, Volume2, VolumeX, Lock } from 'lucide-react';
+import { useLocalAuth } from '@/hooks/use-local-auth';
+import { useLoginModal } from '@/hooks/use-login-modal';
+import type { Timestamp } from 'firebase/firestore'; // Mantengo el tipo para la estructura de datos
 
 // --- TIPOS DE DATOS ---
 interface Level {
@@ -23,6 +26,13 @@ interface Question {
   options: string[];
   correctAnswer: string;
   explanation: string;
+}
+
+// Interfaz para el progreso del juego local
+interface LocalGameProgress {
+  userId: string;
+  highestLevelCompleted: number;
+  lastPlayed: string; // Usamos string para ISO date
 }
 
 // --- DATOS DEL JUEGO ---
@@ -79,6 +89,7 @@ const questions: { [key: number]: Question[] } = {
 };
 
 const TIME_PER_QUESTION = 15;
+const LOCAL_STORAGE_GAME_KEY = 'localGameProgress';
 
 // --- COMPONENTES DE AUDIO ---
 const GameAudio: React.FC<{
@@ -122,10 +133,12 @@ const GameAudio: React.FC<{
 // --- COMPONENTES DE PANTALLA ---
 
 const GameComponent: React.FC<{ 
-    onBackToMenu: () => void,
-    onPlayAudio: (sound: 'background' | 'lose' | 'none') => void 
-}> = ({ onBackToMenu, onPlayAudio }) => {
-    const [currentLevel, setCurrentLevel] = useState(1);
+    onBackToMenu: () => void;
+    onPlayAudio: (sound: 'background' | 'lose' | 'none') => void;
+    initialLevel: number;
+    userId: string;
+}> = ({ onBackToMenu, onPlayAudio, initialLevel, userId }) => {
+    const [currentLevel, setCurrentLevel] = useState(initialLevel);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
@@ -190,10 +203,23 @@ const GameComponent: React.FC<{
     const handleNextQuestion = async () => {
         onPlayAudio('background');
         const isLastQuestion = currentQuestionIndex === levelData.questions - 1;
+        const finalScore = score + (isCorrect ? 1 : 0);
 
         if (isLastQuestion) {
-            alert(`Nivel ${currentLevel} completado! Puntuación: ${score + (isCorrect ? 1 : 0)}`);
+            // Guardar progreso localmente
+            const storedProgress = localStorage.getItem(`${LOCAL_STORAGE_GAME_KEY}_${userId}`);
+            const progress: LocalGameProgress = storedProgress 
+                ? JSON.parse(storedProgress) 
+                : { userId, highestLevelCompleted: 0, lastPlayed: '' };
+            
+            if (finalScore >= levelData.questions * 0.6 && currentLevel > progress.highestLevelCompleted) {
+                progress.highestLevelCompleted = currentLevel;
+            }
+            progress.lastPlayed = new Date().toISOString();
+            localStorage.setItem(`${LOCAL_STORAGE_GAME_KEY}_${userId}`, JSON.stringify(progress));
 
+            alert(`Nivel ${currentLevel} completado! Puntuación: ${finalScore}`);
+            
             if(currentLevel < levels.length) {
                 setCurrentLevel(prev => prev + 1);
             } else {
@@ -299,7 +325,27 @@ const MenuCard: React.FC<{ title: string; description: string; icon: React.Eleme
     </Card>
 );
 
-const GameMenu: React.FC<{ onNavigate: (view: 'playing') => void }> = ({ onNavigate }) => {
+const GameMenu: React.FC<{ onNavigate: (view: 'playing') => void; user: any; }> = ({ onNavigate, user }) => {
+    const loginModal = useLoginModal();
+
+    if (!user) {
+        return (
+            <div className="w-full max-w-4xl mx-auto space-y-8 text-center">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground mb-3">
+                    ¿Sabes o Estás Perdido?
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                    Inicia sesión para poner a prueba tus conocimientos de logística y comercio exterior.
+                </p>
+                <Card className="max-w-md mx-auto bg-card/70 backdrop-blur-sm p-8">
+                    <Lock className="mx-auto h-12 w-12 text-primary mb-4" />
+                    <CardTitle className="mb-2">Contenido Bloqueado</CardTitle>
+                    <CardDescription className="mb-6">Necesitas iniciar sesión para jugar.</CardDescription>
+                    <Button onClick={loginModal.onOpen}>Iniciar Sesión</Button>
+                </Card>
+            </div>
+        );
+    }
     
     return (
         <div className="w-full max-w-4xl mx-auto space-y-8">
@@ -341,13 +387,23 @@ const LevelIntro: React.FC<{ level: number, onStart: () => void }> = ({ level, o
 
 // --- PÁGINA PRINCIPAL ---
 export default function SuppliersPage() {
+    const { user, isLoading } = useLocalAuth();
     const [gameState, setGameState] = useState<'menu' | 'intro' | 'playing'>('menu');
     const [audioState, setAudioState] = useState<'background' | 'lose' | 'none'>('none');
-    const [isMuted, setIsMuted] = useState(false);
-    
-    // Hardcoded level for now
-    const currentLevel = 1;
+    const [isMuted, setIsMuted] = useState(true);
+    const [currentLevel, setCurrentLevel] = useState(1);
 
+    useEffect(() => {
+        if (user) {
+            const storedProgress = localStorage.getItem(`${LOCAL_STORAGE_GAME_KEY}_${user.uid}`);
+            if (storedProgress) {
+                const progress: LocalGameProgress = JSON.parse(storedProgress);
+                setCurrentLevel(progress.highestLevelCompleted + 1);
+            } else {
+                setCurrentLevel(1);
+            }
+        }
+    }, [user]);
 
     const handleNavigate = (view: 'playing') => {
         if (view === 'playing') {
@@ -359,6 +415,17 @@ export default function SuppliersPage() {
 
     const handleBackToMenu = () => {
         setGameState('menu');
+        if (user) {
+             const storedProgress = localStorage.getItem(`${LOCAL_STORAGE_GAME_KEY}_${user.uid}`);
+             if (storedProgress) {
+                const progress: LocalGameProgress = JSON.parse(storedProgress);
+                setCurrentLevel(progress.highestLevelCompleted + 1);
+             }
+        }
+    }
+
+    if (isLoading) {
+        return <div className="flex justify-center items-center h-full">Cargando...</div>
     }
 
     const renderContent = () => {
@@ -366,10 +433,11 @@ export default function SuppliersPage() {
             case 'intro':
                 return <LevelIntro level={currentLevel} onStart={() => setGameState('playing')} />;
             case 'playing':
-                return <GameComponent onBackToMenu={handleBackToMenu} onPlayAudio={setAudioState} />;
+                if (!user) return <GameMenu onNavigate={handleNavigate} user={user} />;
+                return <GameComponent onBackToMenu={handleBackToMenu} onPlayAudio={setAudioState} initialLevel={currentLevel} userId={user.uid} />;
             case 'menu':
             default:
-                return <GameMenu onNavigate={handleNavigate} />;
+                return <GameMenu onNavigate={handleNavigate} user={user} />;
         }
     }
 

@@ -1,15 +1,12 @@
+
+// Mantendremos Timestamp para compatibilidad futura si se vuelve a Firebase
 import type { Timestamp } from "firebase/firestore";
 
+// Perfil de usuario local, puede ser extendido
 export interface UserProfile {
     uid: string;
     nombre: string;
-    apellido: string;
-    username: string;
-    correo: string;
-    photoURL?: string;
-    esEmpresario: boolean;
-    RUC?: string;
-    sector?: string;
+    // se pueden añadir más campos si se necesita
 }
 
 export interface Post {
@@ -19,7 +16,7 @@ export interface Post {
     authorId: string;
     authorName?: string;
     continent: string;
-    timestamp: Timestamp;
+    timestamp: Timestamp; // Mantenido por si se reutiliza
 }
 
 export interface Opinion {
@@ -27,7 +24,7 @@ export interface Opinion {
     content: string;
     authorId: string;
     authorName?: string;
-    timestamp: Timestamp;
+    timestamp: Timestamp; // Mantenido
 }
 
 export interface Reply {
@@ -36,8 +33,8 @@ export interface Reply {
     content: string;
     authorId: string;
     authorName?: string;
-    authorPhotoURL?: string;
-    timestamp: Timestamp;
+    authorPhotoURL?: string; // Mantenido
+    timestamp: Timestamp; // Mantenido
 }
 
 export interface GameProgress {
@@ -48,8 +45,8 @@ export interface GameProgress {
         [level: number]: {
             score: number;
             timeTakenSeconds: number;
-            completedAt: Timestamp;
+            completedAt: Timestamp; // Mantenido
         }
     };
-    lastPlayed: Timestamp;
+    lastPlayed: Timestamp; // Mantenido
 }

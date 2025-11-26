@@ -7,6 +7,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { Sidebar } from '@/components/ui/sidebar';
+import { ModalProvider } from '@/providers/modal-provider';
+import { LocalUserProvider } from '@/hooks/use-local-auth';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,6 +28,8 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
+        <LocalUserProvider>
+          <ModalProvider />
           <div className="relative flex min-h-screen flex-col">
             <Header />
             <div className="flex-1">
@@ -40,6 +44,7 @@ export default function RootLayout({
             </div>
           </div>
           <Toaster />
+        </LocalUserProvider>
       </body>
     </html>
   );
