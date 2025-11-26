@@ -1,12 +1,17 @@
 
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, useCallback } from 'react';
 import { FirebaseProvider } from './provider';
-import { getFirebaseInstances } from './client';
+import { getFirebaseInstances, googleProvider } from './client';
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
+import { getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
+import { useLoginModal } from '@/hooks/use-login-modal';
+
 
 interface FirebaseInstancesState {
   app: FirebaseApp | undefined;
@@ -21,15 +26,68 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     firestore: undefined,
   });
 
-  // Este efecto se ejecuta solo una vez en el cliente para obtener las instancias
-  // que ya deberían haber sido inicializadas por client.ts
+  const { toast } = useToast();
+  const loginModal = useLoginModal();
+
+  const handleRedirectResult = useCallback(async (auth: Auth, firestore: Firestore) => {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result) {
+        loginModal.onClose(); // Cerrar el modal si estuviera abierto
+
+        const user = result.user;
+        const userDocRef = doc(firestore, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          const username = user.email?.split('@')[0] || `user${Date.now()}`;
+          const nameParts = user.displayName?.split(' ') || [username];
+          
+          await setDoc(userDocRef, {
+              uid: user.uid,
+              nombre: nameParts[0] || '',
+              apellido: nameParts.slice(1).join(' ') || '',
+              username: username,
+              correo: user.email,
+              photoURL: user.photoURL || `https://i.pravatar.cc/150?u=${user.uid}`,
+              esEmpresario: false,
+              createdAt: serverTimestamp()
+          });
+
+           toast({
+              title: '¡Bienvenido/a a LogisticX!',
+              description: 'Hemos creado un perfil para ti.',
+          });
+
+        } else {
+          toast({
+              title: `¡Bienvenido/a de nuevo, ${user.displayName}!`,
+              description: 'Has iniciado sesión correctamente.',
+          });
+        }
+      }
+    } catch (error: any) {
+      if (error.code !== 'auth/web-storage-unsupported' && error.code !== 'auth/operation-not-supported-in-this-environment') {
+        console.error("Error al obtener resultado de redirección:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error de inicio de sesión',
+          description: "No se pudo completar el inicio de sesión con Google. Por favor, inténtalo de nuevo.",
+        });
+      }
+    }
+  }, [toast, loginModal]);
+
+
   useEffect(() => {
     const { app, auth, firestore } = getFirebaseInstances();
     setInstances({ app, auth, firestore });
-  }, []);
 
-  // Pasamos las instancias al proveedor. Si aún no están listas, 
-  // los hooks que dependen de ellas devolverán null, lo cual es manejado por los componentes.
+    if(auth && firestore){
+      handleRedirectResult(auth, firestore);
+    }
+  }, [handleRedirectResult]);
+
   return (
     <FirebaseProvider
       app={instances.app || null}
