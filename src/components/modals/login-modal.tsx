@@ -13,7 +13,7 @@ import { Input } from '../ui/input';
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { useRegisterModal } from '@/hooks/use-register-modal';
 import { useToast } from '@/hooks/use-toast';
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult, UserCredential } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult, type UserCredential } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore, useAuth } from '@/firebase';
 

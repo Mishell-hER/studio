@@ -15,10 +15,10 @@ function getFirebaseInstances() {
     // Check if Firebase has already been initialized
     if (getApps().length === 0) {
       // Check if the config keys are valid before initializing
-      if (firebaseConfig && firebaseConfig.apiKey) {
+      if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== "TU_VALOR_AQUI") {
         app = initializeApp(firebaseConfig);
       } else {
-        console.error("FIREBASE CLIENT ERROR: Firebase config is missing or invalid. Check src/firebase/config.ts");
+        console.error("FIREBASE CLIENT ERROR: Firebase config is missing or invalid. Please update src/firebase/config.ts with your project credentials.");
       }
     } else {
       // If already initialized, get the existing app instance
