@@ -13,7 +13,7 @@ import { Input } from '../ui/input';
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { useRegisterModal } from '@/hooks/use-register-modal';
 import { useToast } from '@/hooks/use-toast';
-import { getAuth, sendSignInLinkToEmail, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 
@@ -25,10 +25,11 @@ export function LoginModal() {
   const { toast } = useToast();
 
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleEmailLinkSignIn = async (e: React.FormEvent) => {
+  const handleEmailPasswordSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -39,31 +40,22 @@ export function LoginModal() {
         return;
     }
 
-    // Como se especifica en la documentación, creamos el ActionCodeSettings
-    const actionCodeSettings = {
-      // La URL a la que se redirigirá al usuario después de hacer clic en el enlace.
-      url: `${window.location.origin}/finish-login`,
-      handleCodeInApp: true,
-    };
-
     try {
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      // Guardamos el email en localStorage para usarlo en la página de destino.
-      window.localStorage.setItem('emailForSignIn', email);
-      
+      await signInWithEmailAndPassword(auth, email, password);
       toast({
-        title: "¡Revisa tu correo!",
-        description: `Hemos enviado un enlace para iniciar sesión a ${email}.`,
+        title: "¡Inicio de sesión exitoso!",
+        description: "Has accedido a tu cuenta correctamente.",
       });
       loginModal.onClose();
       setEmail('');
+      setPassword('');
 
     } catch (error: any) {
-      console.error("Error al enviar el enlace de inicio de sesión:", error);
-      if (error.code === 'auth/invalid-email') {
-        setError('El correo electrónico no es válido.');
+      console.error("Error al iniciar sesión:", error);
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        setError('El correo o la contraseña son incorrectos.');
       } else {
-        setError('No se pudo enviar el enlace. Inténtalo de nuevo.');
+        setError('No se pudo iniciar sesión. Inténtalo de nuevo.');
       }
     } finally {
       setIsLoading(false);
@@ -117,21 +109,29 @@ export function LoginModal() {
     <Dialog open={loginModal.isOpen} onOpenChange={loginModal.onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Iniciar Sesión o Registrarse</DialogTitle>
-          <DialogDescription>Ingresa tu correo para recibir un enlace de acceso.</DialogDescription>
+          <DialogTitle>Iniciar Sesión</DialogTitle>
+          <DialogDescription>Ingresa tus credenciales para acceder a tu cuenta.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleEmailLinkSignIn} className="space-y-4">
+        <form onSubmit={handleEmailPasswordSignIn} className="space-y-4">
             <Input 
                 type="email"
-                placeholder="tu.correo@example.com"
+                placeholder="Correo electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
             />
+            <Input 
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                required
+            />
             {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Enviando...' : 'Enviar enlace de acceso'}
+                {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
         </form>
 

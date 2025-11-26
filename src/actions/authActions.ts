@@ -2,13 +2,13 @@
 
 import { adminAuth, adminFirestore } from '@/firebase/admin/config';
 import * as z from 'zod';
-import { getAuth } from 'firebase-admin/auth';
 
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
   apellido: z.string().min(2, { message: "El apellido debe tener al menos 2 caracteres." }),
   username: z.string().min(3, { message: "El nombre de usuario debe tener al menos 3 caracteres." }),
   correo: z.string().email({ message: "Por favor, introduce un correo válido." }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
   esEmpresario: z.boolean().default(false),
   RUC: z.string().optional(),
   sector: z.string().optional(),
@@ -25,10 +25,9 @@ const formSchema = z.object({
 type RegistrationData = z.infer<typeof formSchema>;
 
 /**
- * Server Action para registrar el perfil de un nuevo usuario en Firestore.
- * Ya no crea el usuario en Auth, solo el perfil. La autenticación se maneja
- * por separado con el flujo de Email Link.
- * @param data Los datos del formulario de registro.
+ * Server Action para registrar un nuevo usuario y su perfil en Firestore.
+ * Utiliza el Admin SDK para crear el usuario en Auth y su documento en Firestore.
+ * @param data Los datos del formulario de registro, incluyendo la contraseña.
  */
 export async function registerUser(data: RegistrationData) {
     if (!adminAuth || !adminFirestore) {
@@ -41,7 +40,7 @@ export async function registerUser(data: RegistrationData) {
         return { success: false, error: `Datos de formulario inválidos: ${errorMessages}` };
     }
     
-    const { correo, ...profileData } = result.data;
+    const { correo, password, ...profileData } = result.data;
 
     try {
         // Verificar si el nombre de usuario ya está en uso
@@ -50,30 +49,17 @@ export async function registerUser(data: RegistrationData) {
             return { success: false, error: 'Este nombre de usuario ya está en uso.' };
         }
 
-        // Verificar si el correo ya está en uso en Firestore (y por lo tanto en Auth)
-        const emailSnapshot = await adminFirestore.collection('users').where('correo', '==', correo).get();
-        if (!emailSnapshot.empty) {
-            return { success: false, error: 'Este correo electrónico ya está registrado.' };
-        }
-        
-        // ¡Importante! El usuario aún no existe en Firebase Auth.
-        // El flujo de Email Link lo creará la primera vez que inicie sesión.
-        // Lo que hacemos aquí es PRE-CREAR el perfil en Firestore,
-        // pero necesitamos un UID. Vamos a usar un UID temporal que luego
-        // puede ser actualizado, o mejor, simplemente usamos el email como ID
-        // temporal si el modelo de datos lo permite.
-        // 
-        // Para este caso, vamos a crear un usuario en Auth pero sin contraseña,
-        // para tener un UID estable desde el principio.
-        
+        // Crear el usuario en Firebase Authentication con el Admin SDK
         const userRecord = await adminAuth.createUser({
             email: correo,
-            emailVerified: false, // Se verificará con el primer inicio de sesión
+            password: password,
+            emailVerified: false,
             displayName: `${profileData.nombre} ${profileData.apellido}`,
         });
 
         const userId = userRecord.uid;
 
+        // Preparar el perfil para Firestore
         const firestoreProfile: any = {
             uid: userId,
             ...profileData, 
@@ -85,9 +71,10 @@ export async function registerUser(data: RegistrationData) {
             delete firestoreProfile.sector;
         }
 
+        // Crear el documento del usuario en Firestore
         await adminFirestore.collection('users').doc(userId).set(firestoreProfile);
 
-        return { success: true, userId, message: 'Perfil creado exitosamente.' };
+        return { success: true, userId, message: '¡Registro exitoso! Ahora puedes iniciar sesión.' };
 
     } catch (error: any) {
         let errorMessage = 'Error desconocido durante el registro.';
