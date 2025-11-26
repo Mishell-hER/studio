@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Globe, MessageSquare, Truck } from "lucide-react"
+import { Globe, MessageSquare, Truck, BookOpen } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "../ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { IncotermsIcon } from "../icons/IncotermsIcon"
 
 const menuItems = [
     {
@@ -36,6 +37,11 @@ const menuItems = [
         href: "/suppliers",
         label: "¿Sabes o Estás Perdido?",
         icon: Truck,
+    },
+    {
+        href: "/incoterms",
+        label: "¿Hay un Incoterm perfecto?",
+        icon: IncotermsIcon,
     }
 ]
 
