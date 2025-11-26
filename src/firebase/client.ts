@@ -9,10 +9,11 @@ import { firebaseConfig } from './config';
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let firestore: Firestore | undefined;
-let googleProvider: GoogleAuthProvider | undefined;
+// Exportamos directamente el proveedor para un acceso garantizado
+export let googleProvider: GoogleAuthProvider | undefined;
 
 // Verificamos que las credenciales no sean los valores por defecto
-const isConfigValid = firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('AIzaSyA');
+const isConfigValid = firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('TU_VALOR_AQUI');
 
 function initializeFirebase() {
   if (typeof window !== 'undefined') {
@@ -24,13 +25,11 @@ function initializeFirebase() {
         }
         auth = getAuth(app);
         firestore = getFirestore(app);
+        
+        // Creamos la instancia del proveedor y la asignamos
         googleProvider = new GoogleAuthProvider();
         googleProvider.addScope('profile');
         googleProvider.addScope('email');
-    } else {
-        // No intentes inicializar si la configuración no es válida.
-        // Las funciones getFirebaseInstances devolverán undefined y la UI lo manejará.
-        console.warn("FIREBASE CLIENT WARNING: Firebase config is missing or invalid. Please update src/firebase/config.ts with your project credentials. Firebase features will not work.");
     }
   }
 }
@@ -39,6 +38,7 @@ function initializeFirebase() {
 initializeFirebase();
 
 export function getFirebaseInstances() {
-  // Esta función simplemente devuelve las instancias ya creadas (o undefined si la config no era válida)
-  return { app, auth, firestore, googleProvider };
+  // Esta función ahora solo devuelve las instancias principales.
+  // El proveedor se importa directamente.
+  return { app, auth, firestore };
 }
