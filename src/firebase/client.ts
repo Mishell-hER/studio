@@ -19,7 +19,11 @@ function getFirebaseInstances() {
       if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== "TU_VALOR_AQUI") {
         app = initializeApp(firebaseConfig);
       } else {
-        console.error("FIREBASE CLIENT ERROR: Firebase config is missing or invalid. Please update src/firebase/config.ts with your project credentials.");
+        // Log the error but don't prevent the rest of the app from rendering.
+        // The UI will show a banner to the user.
+        console.warn("FIREBASE CLIENT WARNING: Firebase config is missing or invalid. Please update src/firebase/config.ts with your project credentials. Firebase features will not work.");
+        // We initialize with a dummy config to prevent crashing, but features will fail.
+        app = initializeApp({apiKey: "invalid-key-placeholder"});
       }
     } else {
       // If already initialized, get the existing app instance

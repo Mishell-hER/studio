@@ -5,15 +5,41 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, AlertTriangle } from 'lucide-react';
 import { continents } from '@/lib/continents';
 import { CreatorsSection } from '@/components/sections/creators-section';
+import { firebaseConfig } from '@/firebase/config';
+
+
+function ConfigWarningBanner() {
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "TU_VALOR_AQUI") {
+    return null;
+  }
+
+  return (
+    <div className="w-full bg-yellow-500/20 border-l-4 border-yellow-500 text-yellow-200 p-4 fixed top-14 left-0 z-50">
+      <div className="flex">
+        <div className="flex-shrink-0">
+          <AlertTriangle className="h-5 w-5 text-yellow-400" />
+        </div>
+        <div className="ml-3">
+          <p className="text-sm">
+            <strong>Atención:</strong> La configuración de Firebase no es válida.
+            Por favor, actualiza el archivo <strong>`src/firebase/config.ts`</strong> con tus credenciales de proyecto para habilitar el inicio de sesión y otras funciones.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 
 export default function Home() {
+  const isConfigMissing = !firebaseConfig.apiKey || firebaseConfig.apiKey === "TU_VALOR_AQUI";
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+      <ConfigWarningBanner />
+      <div className={`flex flex-col items-center justify-center min-h-screen p-4 md:p-8 ${isConfigMissing ? 'pt-24' : ''}`}>
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground mb-4">
             Logística global, simplificada.
