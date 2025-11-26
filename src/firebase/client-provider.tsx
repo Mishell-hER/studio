@@ -3,15 +3,13 @@
 
 import { useState, useEffect, ReactNode, useCallback } from 'react';
 import { FirebaseProvider } from './provider';
-import { getFirebaseInstances, googleProvider } from './client';
-import type { FirebaseApp } from 'firebase/app';
-import type { Auth } from 'firebase/auth';
-import type { Firestore } from 'firebase/firestore';
-import { getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
+import { initializeApp, getApps, FirebaseApp, getApp } from 'firebase/app';
+import { getAuth, Auth, getRedirectResult } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useLoginModal } from '@/hooks/use-login-modal';
-
+import { firebaseConfig } from './config'; // ¡¡¡ESTA ERA LA IMPORTACIÓN QUE FALTABA!!!
 
 interface FirebaseInstancesState {
   app: FirebaseApp | undefined;
@@ -29,11 +27,12 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const loginModal = useLoginModal();
 
+  // Función para manejar el resultado de la redirección de Google
   const handleRedirectResult = useCallback(async (auth: Auth, firestore: Firestore) => {
     try {
       const result = await getRedirectResult(auth);
       if (result) {
-        loginModal.onClose(); // Cerrar el modal si estuviera abierto
+        loginModal.onClose();
 
         const user = result.user;
         const userDocRef = doc(firestore, 'users', user.uid);
@@ -80,10 +79,21 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
 
   useEffect(() => {
-    const { app, auth, firestore } = getFirebaseInstances();
-    setInstances({ app, auth, firestore });
+    // Asegurarse de que este código solo se ejecute en el navegador
+    if (typeof window !== 'undefined') {
+      let app: FirebaseApp;
+      if (getApps().length === 0) {
+        // Inicializamos Firebase CON la configuración
+        app = initializeApp(firebaseConfig);
+      } else {
+        app = getApp();
+      }
 
-    if(auth && firestore){
+      const auth = getAuth(app);
+      const firestore = getFirestore(app);
+      setInstances({ app, auth, firestore });
+
+      // Una vez inicializado, comprobamos si hay un resultado de redirección pendiente
       handleRedirectResult(auth, firestore);
     }
   }, [handleRedirectResult]);
