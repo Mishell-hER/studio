@@ -1,8 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, where, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,43 +11,45 @@ import { continents } from '@/lib/continents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from './_components/post-card';
 import { OpinionCard } from './_components/opinion-card';
-import { useUser } from '@/firebase/auth/use-user';
-import { useLoginModal } from '@/hooks/use-login-modal';
 
-function NewPostForm({ onPostCreated }: { onPostCreated: () => void }) {
-    const firestore = useFirestore();
-    const { user, userProfile } = useUser();
+// Datos de ejemplo para el foro
+const samplePosts: Post[] = [
+    { id: '1', title: '¿Cómo afecta el Brexit al transporte terrestre desde España?', content: 'Tengo un envío programado para la próxima semana y no estoy seguro de qué documentos adicionales necesito...', authorId: 'user1', authorName: 'Carlos M.', continent: 'Europa', timestamp: { seconds: 1678886400, nanoseconds: 0 } },
+    { id: '2', title: 'Mejor ruta para exportar a Bolivia desde Perú', content: 'Estoy evaluando si es mejor ir por Desaguadero o por otra ruta alternativa. ¿Alguien tiene experiencia reciente?', authorId: 'user2', authorName: 'Ana P.', continent: 'América del Sur', timestamp: { seconds: 1678800000, nanoseconds: 0 } },
+];
+
+const sampleOpinions: Opinion[] = [
+    { id: 'o1', content: 'Creo que la digitalización de las aduanas en América Latina va muy lenta. Deberíamos presionar más como sector.', authorId: 'user3', authorName: 'Juan D.', timestamp: { seconds: 1678963200, nanoseconds: 0 } },
+];
+
+
+function NewPostForm({ onPostCreated }: { onPostCreated: (post: Post) => void }) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [continent, setContinent] = useState('');
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!title || !content || !continent) {
             setError('Todos los campos son obligatorios.');
             return;
         }
-        if (!firestore || !user) return;
-
-        try {
-            await addDoc(collection(firestore, 'posts'), {
-                title,
-                content,
-                continent,
-                authorId: user.uid,
-                authorName: userProfile?.nombre || user.displayName || 'Anónimo',
-                timestamp: serverTimestamp(),
-            });
-            setTitle('');
-            setContent('');
-            setContinent('');
-            setError('');
-            onPostCreated();
-        } catch (err) {
-            console.error(err);
-            setError('No se pudo crear la publicación.');
-        }
+        
+        const newPost: Post = {
+            id: `post-${Date.now()}`,
+            title,
+            content,
+            continent,
+            authorId: 'currentUser', // Placeholder
+            authorName: 'Usuario Actual', // Placeholder
+            timestamp: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 },
+        };
+        onPostCreated(newPost);
+        setTitle('');
+        setContent('');
+        setContinent('');
+        setError('');
     };
     
     return (
@@ -89,34 +89,28 @@ function NewPostForm({ onPostCreated }: { onPostCreated: () => void }) {
     );
 }
 
-function NewOpinionForm({ onOpinionCreated }: { onOpinionCreated: () => void }) {
-    const firestore = useFirestore();
-    const { user, userProfile } = useUser();
+function NewOpinionForm({ onOpinionCreated }: { onOpinionCreated: (opinion: Opinion) => void }) {
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!content) {
             setError('La opinión no puede estar vacía.');
             return;
         }
-        if (!firestore || !user) return;
 
-        try {
-            await addDoc(collection(firestore, 'opinions'), {
-                content,
-                authorId: user.uid,
-                authorName: userProfile?.nombre || user.displayName || 'Anónimo',
-                timestamp: serverTimestamp(),
-            });
-            setContent('');
-            setError('');
-            onOpinionCreated();
-        } catch (err) {
-            console.error(err);
-            setError('No se pudo publicar la opinión.');
-        }
+        const newOpinion: Opinion = {
+            id: `opinion-${Date.now()}`,
+            content,
+            authorId: 'currentUser', // Placeholder
+            authorName: 'Usuario Actual', // Placeholder
+            timestamp: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 },
+        };
+
+        onOpinionCreated(newOpinion);
+        setContent('');
+        setError('');
     };
 
     return (
@@ -143,87 +137,34 @@ function NewOpinionForm({ onOpinionCreated }: { onOpinionCreated: () => void }) 
     );
 }
 
-const AuthWall = ({ children }: { children: React.ReactNode }) => {
-    const { user, loading } = useUser();
-    const loginModal = useLoginModal();
-
-    if (loading) {
-        return (
-             <Card className="mb-8">
-                <CardContent className="p-6 text-center text-muted-foreground">
-                    Cargando...
-                </CardContent>
-            </Card>
-        )
-    }
-
-    if (!user) {
-        return (
-            <Card className="mb-8">
-                <CardHeader>
-                    <CardTitle>Únete a la Conversación</CardTitle>
-                    <CardDescription>Inicia sesión para crear publicaciones y compartir tu opinión con la comunidad.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center">
-                    <Button onClick={() => loginModal.onOpen()}>Iniciar Sesión o Registrarse</Button>
-                </CardContent>
-            </Card>
-        )
-    }
-
-    return <>{children}</>;
-}
-
-
 export default function ForumPage() {
-  const firestore = useFirestore();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [opinions, setOpinions] = useState<Opinion[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [loadingOpinions, setLoadingOpinions] = useState(true);
+  const [posts, setPosts] = useState<Post[]>(samplePosts);
+  const [opinions, setOpinions] = useState<Opinion[]>(sampleOpinions);
   const [continentFilter, setContinentFilter] = useState('all');
 
-  useEffect(() => {
-    if (!firestore) return;
+  const handlePostCreated = (newPost: Post) => {
+    setPosts(prev => [newPost, ...prev]);
+  }
 
-    setLoadingPosts(true);
-    let postsQuery = query(collection(firestore, 'posts'), orderBy('timestamp', 'desc'));
-    if (continentFilter !== 'all') {
-      postsQuery = query(postsQuery, where('continent', '==', continentFilter));
-    }
-    const unsubscribePosts = onSnapshot(postsQuery, (querySnapshot) => {
-      const postsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
-      setPosts(postsData);
-      setLoadingPosts(false);
-    }, () => setLoadingPosts(false));
+  const handleOpinionCreated = (newOpinion: Opinion) => {
+    setOpinions(prev => [newOpinion, ...prev]);
+  }
 
-    setLoadingOpinions(true);
-    const opinionsQuery = query(collection(firestore, 'opinions'), orderBy('timestamp', 'desc'));
-    const unsubscribeOpinions = onSnapshot(opinionsQuery, (snapshot) => {
-        const opinionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data()} as Opinion));
-        setOpinions(opinionsData);
-        setLoadingOpinions(false);
-    }, () => setLoadingOpinions(false));
-
-    return () => {
-        unsubscribePosts();
-        unsubscribeOpinions();
-    };
-  }, [firestore, continentFilter]);
+  const filteredPosts = continentFilter === 'all'
+    ? posts
+    : posts.filter(post => post.continent === continentFilter);
 
   const renderPosts = () => {
-    if (loadingPosts) return <p>Cargando publicaciones...</p>;
-    if (posts.length === 0) return <p className="text-muted-foreground py-8 text-center">No hay preguntas aún. ¡Sé el primero en preguntar!</p>;
+    if (filteredPosts.length === 0) return <p className="text-muted-foreground py-8 text-center">No hay preguntas para este filtro. ¡Sé el primero en preguntar!</p>;
     
     return (
       <div className="space-y-4">
-        {posts.map(post => <PostCard post={post} key={post.id} />)}
+        {filteredPosts.map(post => <PostCard post={post} key={post.id} />)}
       </div>
     );
   }
 
   const renderOpinions = () => {
-    if (loadingOpinions) return <p>Cargando opiniones...</p>;
     if (opinions.length === 0) return <p className="text-muted-foreground py-8 text-center">No hay opiniones todavía. ¡Comparte la tuya!</p>;
 
     return (
@@ -246,9 +187,7 @@ export default function ForumPage() {
           <TabsTrigger value="opiniones">Opiniones</TabsTrigger>
         </TabsList>
         <TabsContent value="preguntas" className="mt-6">
-            <AuthWall>
-                <NewPostForm onPostCreated={() => { /* Could add a toast or notification here */ }}/>
-            </AuthWall>
+            <NewPostForm onPostCreated={handlePostCreated}/>
             <div className="my-6 flex items-center gap-4">
                 <span className="text-sm font-medium">Filtrar por continente:</span>
                 <Select value={continentFilter} onValueChange={setContinentFilter}>
@@ -264,9 +203,7 @@ export default function ForumPage() {
             {renderPosts()}
         </TabsContent>
         <TabsContent value="opiniones" className="mt-6">
-            <AuthWall>
-                <NewOpinionForm onOpinionCreated={() => { /* Notification */ }} />
-            </AuthWall>
+            <NewOpinionForm onOpinionCreated={handleOpinionCreated} />
             {renderOpinions()}
         </TabsContent>
       </Tabs>

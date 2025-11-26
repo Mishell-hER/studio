@@ -5,10 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import type { Post } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
-import { useUser } from '@/firebase/auth/use-user';
 
 export function PostCard({ post }: { post: Post }) {
-    const { user } = useUser();
     return (
         <Card>
             <CardHeader>
@@ -21,14 +19,12 @@ export function PostCard({ post }: { post: Post }) {
             <p className="line-clamp-3 text-muted-foreground">{post.content}</p>
             </CardContent>
             <CardFooter>
-                {user && (
-                    <Button asChild variant="outline" size="sm">
-                        <Link href={`/forum/post/${post.id}`}>
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            Responder
-                        </Link>
-                    </Button>
-                )}
+                <Button asChild variant="outline" size="sm">
+                    <Link href={`/forum/post/${post.id}`}>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Responder
+                    </Link>
+                </Button>
             </CardFooter>
         </Card>
     )

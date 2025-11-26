@@ -1,14 +1,28 @@
 'use client';
-import { useState, useMemo } from 'react';
-import { doc, collection, addDoc, query, orderBy, serverTimestamp, where } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
-import { useDoc, useCollection } from '@/firebase/firestore/use-collection';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Post, Reply } from '@/lib/types';
-import { useUser } from '@/firebase/auth/use-user';
+import { notFound } from 'next/navigation';
+
+// Datos de ejemplo para el post y sus respuestas
+const samplePost: Post = {
+    id: '1',
+    title: '¿Cómo afecta el Brexit al transporte terrestre desde España?',
+    content: 'Tengo un envío programado para la próxima semana y no estoy seguro de qué documentos adicionales necesito. He oído hablar del GVMS, pero no sé si se aplica a mi caso. ¿Alguien puede orientarme?',
+    authorId: 'user1',
+    authorName: 'Carlos M.',
+    continent: 'Europa',
+    timestamp: { seconds: 1678886400, nanoseconds: 0 }
+};
+
+const sampleReplies: Reply[] = [
+    { id: 'r1', postId: '1', content: 'Sí, necesitas registrarte en el GVMS (Goods Vehicle Movement Service). Es obligatorio para todas las mercancías que viajan del Reino Unido a la UE y viceversa. Te recomiendo que lo hagas cuanto antes.', authorId: 'user2', authorName: 'Ana P.', authorPhotoURL: 'https://i.pravatar.cc/150?u=user2', timestamp: { seconds: 1678890000, nanoseconds: 0 } },
+    { id: 'r2', postId: '1', content: 'Además del GVMS, asegúrate de que tu agente de aduanas ha presentado la declaración de exportación en España y la de importación en el Reino Unido. Necesitarás los números de referencia (MRN) para generar el GMR en el GVMS.', authorId: 'user3', authorName: 'Juan D.', authorPhotoURL: 'https://i.pravatar.cc/150?u=user3', timestamp: { seconds: 1678893600, nanoseconds: 0 } },
+];
+
 
 function ReplyCard({ reply }: { reply: Reply }) {
     return (
@@ -35,35 +49,17 @@ function ReplyCard({ reply }: { reply: Reply }) {
 }
 
 function ReplyForm({ postId }: { postId: string }) {
-    const firestore = useFirestore();
-    const { user, userProfile } = useUser();
     const [newReply, setNewReply] = useState('');
 
     const handleReplySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newReply.trim() || !firestore || !user) return;
+        if (!newReply.trim()) return;
         
-        await addDoc(collection(firestore, 'replies'), {
-            postId: postId,
-            authorId: user.uid,
-            authorName: userProfile?.nombre || user.displayName || 'Anónimo',
-            authorPhotoURL: userProfile?.photoURL || user.photoURL || '',
-            content: newReply,
-            timestamp: serverTimestamp(),
-        });
+        console.log(`Nueva respuesta para ${postId}: ${newReply}`);
         setNewReply('');
+        alert('Respuesta enviada (simulación)');
     };
     
-    if (!user) {
-         return (
-            <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">
-                    Debes iniciar sesión para poder responder.
-                </CardContent>
-            </Card>
-        )
-    }
-
     return (
         <Card>
             <CardHeader>
@@ -88,17 +84,12 @@ function ReplyForm({ postId }: { postId: string }) {
 
 
 export default function PostPage({ params }: { params: { id: string } }) {
-  const firestore = useFirestore();
+  // Simulación: encontrar el post por ID. En una app real, esto sería una llamada a la API/DB.
+  const post = params.id === samplePost.id ? samplePost : null;
   
-  const postRef = useMemo(() => firestore ? doc(firestore, 'posts', params.id) : null, [firestore, params.id]);
-  const { data: post, loading: postLoading } = useDoc<Post>(postRef);
-
-  const repliesQuery = useMemo(() => firestore ? query(collection(firestore, 'replies'), where('postId', '==', params.id), orderBy('timestamp', 'asc')) : null, [firestore, params.id]);
-  const { data: replies, loading: repliesLoading } = useCollection<Reply>(repliesQuery);
-  
-
-  if (postLoading) return <p>Cargando publicación...</p>;
-  if (!post) return <p>Publicación no encontrada.</p>;
+  if (!post) {
+    notFound();
+  }
 
   return (
     <div className="container mx-auto max-w-3xl space-y-8">
@@ -115,8 +106,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Respuestas ({replies?.length || 0})</h2>
-        {repliesLoading ? <p>Cargando respuestas...</p> : replies?.map(reply => (
+        <h2 className="text-2xl font-bold">Respuestas ({sampleReplies.length || 0})</h2>
+        {sampleReplies.map(reply => (
           <ReplyCard key={reply.id} reply={reply} />
         ))}
       </div>
