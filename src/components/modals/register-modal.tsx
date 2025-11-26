@@ -29,7 +29,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useAuth } from '@/firebase';
 
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
@@ -55,7 +55,7 @@ export function RegisterModal() {
   const loginModal = useLoginModal();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const auth = getAuth();
+  const auth = useAuth();
   const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -114,10 +114,9 @@ export function RegisterModal() {
       }
       
       // 4. Crear el documento de perfil en Firestore
-      // Esto funcionará gracias a la nueva regla de seguridad
       await setDoc(userDocRef, profileData);
 
-      // 5. Finalizar el proceso
+      // 5. Finalizar el proceso con una notificación de éxito
       toast({ 
         title: "¡Registro exitoso!",
         description: "Tu cuenta ha sido creada. Ahora puedes iniciar sesión.",
