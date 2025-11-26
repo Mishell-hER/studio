@@ -24,12 +24,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRegisterModal } from "@/hooks/use-register-modal";
 import { useLoginModal } from '@/hooks/use-login-modal';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { useFirestore } from '@/firebase';
-import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { registerUser } from '@/actions/authActions';
 
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
@@ -54,8 +52,6 @@ export function RegisterModal() {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const [isLoading, setIsLoading] = useState(false);
-  const auth = getAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -76,59 +72,25 @@ export function RegisterModal() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    if (!firestore) {
-      toast({ variant: 'destructive', title: "Error", description: "La base de datos no está disponible." });
-      setIsLoading(false);
-      return;
-    }
     
-    // Check if username already exists
-    const usersRef = collection(firestore, "users");
-    const q = query(usersRef, where("username", "==", values.username));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        form.setError("username", { message: "Este nombre de usuario ya está en uso." });
-        setIsLoading(false);
-        return;
-    }
+    const response = await registerUser(values);
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, values.correo, values.password);
-      const user = userCredential.user;
-
-      await updateProfile(user, { displayName: `${values.nombre} ${values.apellido}` });
-      
-      const userData: any = {
-        uid: user.uid,
-        nombre: values.nombre,
-        apellido: values.apellido,
-        username: values.username,
-        correo: values.correo,
-        esEmpresario: values.esEmpresario,
-      };
-
-      if (values.esEmpresario) {
-        userData.RUC = values.RUC;
-        userData.sector = values.sector;
-      }
-
-      const userRef = doc(firestore, "users", user.uid);
-      await setDoc(userRef, userData);
-
-      toast({ title: "¡Cuenta creada con éxito!" });
+    if (response.success) {
+      toast({ title: response.message });
       registerModal.onClose();
       loginModal.onOpen();
-
-    } catch (error: any) {
-      console.error("Error durante el registro:", error);
-       toast({
+    } else {
+      toast({
         variant: 'destructive',
         title: "Error en el registro",
-        description: error.code === 'auth/email-already-in-use' ? 'El correo ya está en uso.' : 'Ocurrió un error. Por favor, inténtalo de nuevo.'
+        description: response.error,
       });
-    } finally {
-      setIsLoading(false);
+       if(response.error?.includes('nombre de usuario')) {
+        form.setError("username", { message: response.error });
+      }
     }
+    
+    setIsLoading(false);
   };
 
   const onToggle = useCallback(() => {
