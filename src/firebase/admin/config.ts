@@ -13,6 +13,7 @@ interface ServiceAccount {
 const serviceAccount: Partial<ServiceAccount> = {
   projectId: process.env.FIREBASE_PROJECT_ID,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  // Reemplaza los '\\n' por '\n' para restaurar los saltos de línea originales.
   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
 };
 
@@ -24,17 +25,19 @@ if (!admin.apps.length) {
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount as ServiceAccount),
             });
+            console.log("🟢 Firebase Admin SDK inicializado exitosamente.");
         } catch (error: any) {
-            console.error('Firebase Admin Initialization Error:', error.message);
+            console.error('❌ Fallo al inicializar Firebase Admin SDK:', error.message);
+            throw new Error("Error al inicializar el Admin SDK.");
         }
     } else {
-        console.warn('Firebase Admin credentials not provided. Admin features will be disabled.');
+        console.warn('🔴 ERROR: Credenciales de Firebase Admin SDK faltantes. Verifica tus variables de entorno.');
     }
 }
 
 
 // Exporta las instancias de admin de forma segura, incluso si la inicialización falló.
-// Las funciones que las usen deberán manejar el caso de que no estén disponibles.
+// El código que las use debe estar preparado para que no estén disponibles si las credenciales no se proporcionaron.
 const adminAuth = admin.apps.length ? admin.auth() : null;
 const adminFirestore = admin.apps.length ? admin.firestore() : null;
 
