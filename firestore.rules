@@ -1,34 +1,35 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Permitir a cualquier usuario buscar por username, pero no listar la colección completa.
+    // Permitir a cualquier usuario leer un perfil si conoce el ID.
+    // Un usuario autenticado puede crear SU PROPIO perfil, pero no el de otros.
+    // Un usuario autenticado puede actualizar SU PROPIO perfil.
     match /users/{userId} {
-      // Allow querying the collection (e.g., for username lookup) but not reading all docs.
-      allow list: if true;
-      // Allow reading a single document if the ID is known.
-      allow get: if true;
-      // Allow users to create and update their own profile.
+      allow read, list;
       allow create, update: if request.auth != null && request.auth.uid == userId;
     }
     
     match /posts/{postId} {
       allow read: if true;
       allow create: if request.auth != null;
-      // Allow update/delete only by the author
+      // Permitir actualizar/borrar solo al autor original.
       allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
 
     match /opinions/{opinionId} {
       allow read: if true;
       allow create: if request.auth != null;
+      // Permitir actualizar/borrar solo al autor original.
       allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
 
     match /replies/{replyId} {
       allow read: if true;
       allow create: if request.auth != null;
+       // Permitir actualizar/borrar solo al autor original.
       allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
 

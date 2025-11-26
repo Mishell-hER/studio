@@ -27,12 +27,14 @@ import { useLoginModal } from '@/hooks/use-login-modal';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { registerUser } from '@/actions/authActions';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
   apellido: z.string().min(2, { message: "El apellido debe tener al menos 2 caracteres." }),
-  username: z.string().min(3, { message: "El nombre de usuario debe tener al menos 3 caracteres." }),
+  username: z.string().min(3, { message: "El nombre de usuario debe tener al menos 3 caracteres." }).regex(/^[a-zA-Z0-9_]+$/, "Solo letras, números y guiones bajos."),
   correo: z.string().email({ message: "Por favor, introduce un correo válido." }),
   password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
   esEmpresario: z.boolean().default(false),
@@ -53,6 +55,8 @@ export function RegisterModal() {
   const loginModal = useLoginModal();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const auth = getAuth();
+  const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,30 +76,82 @@ export function RegisterModal() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    
-    const response = await registerUser(values);
+    if (!firestore || !auth) {
+        toast({
+            variant: 'destructive',
+            title: "Error",
+            description: "El servicio de autenticación no está disponible.",
+        });
+        setIsLoading(false);
+        return;
+    }
 
-    if (response.success) {
+    try {
+      // 1. Verificar si el nombre de usuario ya existe
+      const usersRef = collection(firestore, 'users');
+      const q = query(usersRef, where('username', '==', values.username));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        form.setError("username", { message: "Este nombre de usuario ya está en uso." });
+        setIsLoading(false);
+        return;
+      }
+      
+      // 2. Crear el usuario en Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, values.correo, values.password);
+      const user = userCredential.user;
+
+      // 3. Actualizar el perfil de Auth (opcional, pero buena práctica)
+      await updateProfile(user, {
+        displayName: `${values.nombre} ${values.apellido}`,
+      });
+
+      // 4. Crear el documento de perfil en Firestore
+      const userDocRef = doc(firestore, 'users', user.uid);
+      
+      const profileData: any = {
+        uid: user.uid,
+        nombre: values.nombre,
+        apellido: values.apellido,
+        username: values.username,
+        correo: values.correo,
+        photoURL: user.photoURL || '',
+        esEmpresario: values.esEmpresario,
+      };
+
+      if (values.esEmpresario) {
+        profileData.RUC = values.RUC;
+        profileData.sector = values.sector;
+      }
+
+      await setDoc(userDocRef, profileData);
+
+      // 5. Finalizar el proceso
       toast({ 
         title: "¡Registro exitoso!",
         description: "Tu cuenta ha sido creada. Ahora puedes iniciar sesión.",
       });
       registerModal.onClose();
       loginModal.onOpen(); 
-    } else {
+      form.reset();
+
+    } catch (error: any) {
+      let errorMessage = "Ocurrió un error desconocido durante el registro.";
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'El correo electrónico ya está registrado.';
+        form.setError("correo", { message: errorMessage });
+      } else {
+        console.error("Error en el registro:", error);
+      }
       toast({
         variant: 'destructive',
         title: "Error en el registro",
-        description: response.error,
+        description: errorMessage,
       });
-       if(response.error?.includes('nombre de usuario')) {
-        form.setError("username", { message: response.error });
-       } else if (response.error?.includes('correo')) {
-        form.setError("correo", { message: response.error });
-       }
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const onToggle = useCallback(() => {
@@ -140,7 +196,7 @@ export function RegisterModal() {
 
             {isEmpresario && (
                 <>
-                    <FormField control={form.control} name="RUC" render={({ field }) => ( <FormItem><FormLabel>RUC</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="RUC" render={({ field }) => ( <FormItem><FormLabel>RUC</FormLabel><FormControl><Input {...field} value={field.value || ''} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField
                       control={form.control}
                       name="sector"
