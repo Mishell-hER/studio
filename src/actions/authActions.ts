@@ -30,6 +30,7 @@ type RegistrationData = z.infer<typeof formSchema>;
  * @param data Los datos del formulario de registro, incluyendo la contraseña.
  */
 export async function registerUser(data: RegistrationData) {
+    // Barrera de seguridad: Si el Admin SDK no se inicializó, no continuar.
     if (!adminAuth || !adminFirestore) {
         return { success: false, error: 'La configuración del servidor de Firebase no está completa. Revisa las credenciales del entorno.' };
     }
