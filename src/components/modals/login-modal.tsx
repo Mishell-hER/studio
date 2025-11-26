@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
-import { sendSignInLinkToEmail, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { sendSignInLinkToEmail, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Separator } from '../ui/separator';
 import { getFirebaseInstances } from '@/firebase/client';
@@ -31,7 +31,7 @@ export function LoginModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLinkSent, setIsLinkSent] = useState(false);
 
-  const call_login_google = async () => {
+  async function call_login_google() {
     const { googleProvider } = getFirebaseInstances();
     if (!auth || !firestore || !googleProvider) {
       toast({ variant: 'destructive', title: "Error", description: "Firebase no está disponible." });
@@ -44,12 +44,10 @@ export function LoginModal() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // Verificar si el usuario ya existe en Firestore
       const userDocRef = doc(firestore, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-        // Usuario nuevo, crear perfil en Firestore
         const username = user.email?.split('@')[0] || `user${Date.now()}`;
         const nameParts = user.displayName?.split(' ') || [username];
         
@@ -205,4 +203,3 @@ export function LoginModal() {
     </Dialog>
   );
 }
-
