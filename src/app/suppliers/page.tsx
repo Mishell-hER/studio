@@ -65,7 +65,7 @@ const levelTitles = [
 const levels: Level[] = Array.from({ length: 20 }, (_, i) => ({
   level: i + 1,
   title: levelTitles[i] || `Nivel ${i + 1}`,
-  questions: (i === 0) ? 20 : (i < 10) ? 5 : (i < 15) ? 10 : (i < 18) ? 15 : (i < 19) ? 20 : 25,
+  questions: (i === 0 || i === 2 || i === 3 || i === 4) ? 20 : (i < 10) ? 5 : (i < 15) ? 10 : (i < 18) ? 15 : (i < 19) ? 20 : 25,
   bgColor: 'bg-gray-100',
   textColor: 'text-gray-800'
 }));
@@ -193,13 +193,381 @@ const questions: { [key: number]: Question[] } = {
             explanation: "En FOB, el comprador toma el control y asume riesgos en el puerto de origen."
         },
     ],
-    ...Array.from({ length: 19 }, (_, i) => i + 2).reduce((acc, level) => {
-        acc[level] = Array.from({ length: levels[level-1].questions }, (_, qIndex) => ({
-            question: `Pregunta ${qIndex + 1} del Nivel ${level}`,
-            options: ["Opción A", "Opción B", "Opción C", "Opción D"],
-            correctAnswer: "Opción A",
-            explanation: `Explicación para la pregunta ${qIndex + 1} del Nivel ${level}.`
-        }));
+    3: [
+        {
+            question: "¿Qué es un arancel preferencial?",
+            options: ["Un impuesto estándar sin descuentos", "Un impuesto reducido por acuerdos comerciales", "Tarifa para productos especiales", "Una tasa fija para transporte"],
+            correctAnswer: "Un impuesto reducido por acuerdos comerciales",
+            explanation: "Se aplica dentro de los TLC para incentivar el comercio."
+        },
+        {
+            question: "¿Qué significa “exportación temporal”?",
+            options: ["Venta definitiva de mercancía", "Salida de mercancía con regreso previsto", "Exportación solo de muestras", "Envío de productos perecibles"],
+            correctAnswer: "Salida de mercancía con regreso previsto",
+            explanation: "Es para bienes que retornan después de un uso determinado."
+        },
+        {
+            question: "¿Qué es un INCOTERM FCA?",
+            options: ["Free Carrier, vendedor entrega mercancía al transportista en un punto acordado", "Feria Comercial Argentina", "Flete Costo Asegurado", "Un código de aduana"],
+            correctAnswer: "Free Carrier, vendedor entrega mercancía al transportista en un punto acordado",
+            explanation: "El vendedor cumple entregando la mercancía en el lugar convenido al transportista."
+        },
+        {
+            question: "¿Qué tipo de inspección son las preembarque?",
+            options: ["Revisión posventa", "Revisión antes de enviar la mercancía para garantizar calidad y cantidad", "Inspección en destino", "No existen inspecciones preembarque"],
+            correctAnswer: "Revisión antes de enviar la mercancía para garantizar calidad y cantidad",
+            explanation: "Permiten verificar cumplimiento antes de la exportación."
+        },
+        {
+            question: "¿Qué es la factura proforma?",
+            options: ["Documento comercial preliminar con detalles provisionales de la venta", "Recibo de pago", "Factura final para exportar", "Documento aduanero"],
+            correctAnswer: "Documento comercial preliminar con detalles provisionales de la venta",
+            explanation: "Sirve para informar al comprador antes del contrato formal."
+        },
+        {
+            question: "¿Qué es la zona franca?",
+            options: ["Área fuera del territorio nacional", "Zona con beneficios aduaneros y fiscales para almacenamiento o producción", "Área de baja seguridad", "Local comercial sin permiso"],
+            correctAnswer: "Zona con beneficios aduaneros y fiscales para almacenamiento o producción",
+            explanation: "Facilitan operaciones de comercio exterior con menos trámites."
+        },
+        {
+            question: "¿Qué significa “despacho aduanero”?",
+            options: ["Transporte terrestre", "Trámite para la entrada o salida de mercancías por la aduana", "Pago de seguro", "Trámite bancario"],
+            correctAnswer: "Trámite para la entrada o salida de mercancías por la aduana",
+            explanation: "Es la formalización ante la autoridad aduanera."
+        },
+        {
+            question: "¿Qué es la barrera técnica en comercio exterior?",
+            options: ["Requisito técnico o normativo para importar o exportar productos", "Barreras físicas en la frontera", "Casilla marítima", "Código postal"],
+            correctAnswer: "Requisito técnico o normativo para importar o exportar productos",
+            explanation: "Normas, certificaciones o características técnicas que deben cumplirse."
+        },
+        {
+            question: "¿Qué es el Incoterm DAP?",
+            options: ["Delivered At Place, el vendedor entrega la mercancía en un lugar indicado sin descargar", "Documento de autorización de pago", "Tipo de transporte aéreo", "No existe este término"],
+            correctAnswer: "Delivered At Place, el vendedor entrega la mercancía en un lugar indicado sin descargar",
+            explanation: "El vendedor asume costos hasta el lugar convenido, sin descargar."
+        },
+        {
+            question: "¿Qué servicio ofrece una naviera?",
+            options: ["Transporte marítimo de mercancías", "Servicio postal", "Aéreo de pasajeros", "Seguro bancario"],
+            correctAnswer: "Transporte marítimo de mercancías",
+            explanation: "Es la empresa que opera barcos para transporte internacional."
+        },
+        {
+            question: "¿Qué comprende el control fitosanitario?",
+            options: ["Control de documentos legales", "Control de calidad para productos agrícolas y evitar plagas", "Control de peso", "Revisión bancaria"],
+            correctAnswer: "Control de calidad para productos agrícolas y evitar plagas",
+            explanation: "Es vital para proteger ecosistemas y mercados de exportación."
+        },
+        {
+            question: "¿Cuál es la diferencia principal entre INCOTERM FOB y CFR?",
+            options: ["El seguro está incluido en CFR y no en FOB", "Ambos son iguales", "CFR es para transporte aéreo y FOB marítimo", "FOB incluye seguro, CFR no"],
+            correctAnswer: "El seguro está incluido en CFR y no en FOB",
+            explanation: "CFR cubre costo y flete hasta destino, pero seguro solo en CIF."
+        },
+        {
+            question: "¿Qué son los documentos de transporte multimodal?",
+            options: ["Documentos para transporte combinado (marítimo, terrestre, aéreo)", "Facturas comerciales", "Licencias de exportación", "Certificados de origen"],
+            correctAnswer: "Documentos para transporte combinado (marítimo, terrestre, aéreo)",
+            explanation: "Permiten gestión eficiente cuando se usan varias modalidades."
+        },
+        {
+            question: "¿Qué es el drawback?",
+            options: ["Devolución parcial de impuestos en exportación para insumos usados en producción", "Tipo de seguro", "Un impuesto adicional", "Contrato de flete"],
+            correctAnswer: "Devolución parcial de impuestos en exportación para insumos usados en producción",
+            explanation: "Incentiva las exportaciones reduciendo costos."
+        },
+        {
+            question: "¿Qué es la cobertura cambiaria?",
+            options: ["Seguro contra fluctuaciones del tipo de cambio en contratos internacionales", "Protección del seguro marítimo", "Documento aduanero", "Permiso de exportación"],
+            correctAnswer: "Seguro contra fluctuaciones del tipo de cambio en contratos internacionales",
+            explanation: "Mitiga riesgos cuando se pactan pagos en monedas extranjeras."
+        },
+        {
+            question: "¿Qué es un sistema de gestión aduanera?",
+            options: ["Herramientas tecnológicas para administrar trámites en aduanas", "Tipo de transporte", "Moneda local", "Licencia exportadora"],
+            correctAnswer: "Herramientas tecnológicas para administrar trámites en aduanas",
+            explanation: "Optimiza procesos, reduce errores y tiempos."
+        },
+        {
+            question: "¿Qué importancia tiene la logística inversa en la exportación?",
+            options: ["Ninguna", "Permite la devolución o gestión de productos defectuosos o embalajes", "Solo es para transporte interno", "Control de calidad"],
+            correctAnswer: "Permite la devolución o gestión de productos defectuosos o embalajes",
+            explanation: "Mantiene la satisfacción y reduce pérdidas."
+        },
+        {
+            question: "¿Qué es un certificado fitosanitario?",
+            options: ["Documento que acredita que un producto cumple normas sanitarias para exportación de plantas o productos agrícolas", "Documento de embarque", "Licencia industrial", "Factura comercial"],
+            correctAnswer: "Documento que acredita que un producto cumple normas sanitarias para exportación de plantas o productos agrícolas",
+            explanation: "Asegura que la mercancía cumple requisitos sanitarios del país destino."
+        },
+        {
+            question: "¿Qué es un acuerdo de cooperación aduanera?",
+            options: ["Un convenio entre países para facilitar el comercio y control conjunto", "Contrato privado de empresa", "Ley nacional", "Un tipo de seguro"],
+            correctAnswer: "Un convenio entre países para facilitar el comercio y control conjunto",
+            explanation: "Mejora la coordinación, reduce tiempos y costos."
+        },
+        {
+            question: "¿Qué es la exportación indirecta?",
+            options: ["Exportación sin intermediarios", "Exportación realizada a través de intermediarios como agentes o trading companies", "Exportación directa", "Venta local"],
+            correctAnswer: "Exportación realizada a través de intermediarios como agentes o trading companies",
+            explanation: "Permite llegar a mercados sin tener estructura propia."
+        },
+    ],
+    4: [
+        {
+            question: "¿Qué implica la valoración aduanera?",
+            options: ["Estimar el valor de la mercancía para calcular impuestos", "Revisión de embalaje", "Control de peso bruto", "Validación de seguro"],
+            correctAnswer: "Estimar el valor de la mercancía para calcular impuestos",
+            explanation: "Es la base para establecer los tributos a pagar."
+        },
+        {
+            question: "¿Qué es el Arancel Externo Común (AEC)?",
+            options: ["El impuesto único aplicable a mercancías importadas en un bloque económico o unión aduanera", "Un impuesto local", "Tarifas internas de la empresa", "Un seguro de carga"],
+            correctAnswer: "El impuesto único aplicable a mercancías importadas en un bloque económico o unión aduanera",
+            explanation: "Se aplica en bloques como el Mercosur para armonizar comercio."
+        },
+        {
+            question: "¿Qué es un manifiesto de carga?",
+            options: ["Documento con descripción detallada de la carga embarcada, presentado a la aduana", "Factura comercial", "Contrato de compra", "Inventario local"],
+            correctAnswer: "Documento con descripción detallada de la carga embarcada, presentado a la aduana",
+            explanation: "Es requisito para el control aduanero."
+        },
+        {
+            question: "¿Qué son las mercancías peligrosas?",
+            options: ["Bienes que requieren manejo especial por su naturaleza inflamable, tóxica o explosiva", "Productos baratos", "Productos perecibles", "Material promocional"],
+            correctAnswer: "Bienes que requieren manejo especial por su naturaleza inflamable, tóxica o explosiva",
+            explanation: "Su manipulación y transporte requiere protocolos específicos."
+        },
+        {
+            question: "¿Qué es una franquicia aduanera?",
+            options: ["Exoneración o reducción parcial de impuestos aduaneros para ciertos beneficios o sectores", "Una tienda internacional", "Tipo de transporte", "Seguro de carga"],
+            correctAnswer: "Exoneración o reducción parcial de impuestos aduaneros para ciertos beneficios o sectores",
+            explanation: "Apoya ciertos sectores o productos estratégicos."
+        },
+        {
+            question: "¿Qué es el control de origen?",
+            options: ["Verificar el país donde se produjo un bien para aplicar preferencias arancelarias", "Revisión de documentos bancarios", "Control del transporte interno", "Control de calidad final"],
+            correctAnswer: "Verificar el país donde se produjo un bien para aplicar preferencias arancelarias",
+            explanation: "Asegura que los beneficios arancelarios se otorguen solo a bienes que califican."
+        },
+        {
+            question: "¿Qué función cumple un certificado sanitario?",
+            options: ["Garantiza que productos alimenticios cumplen normas del país importador", "Documento bancario", "Licencia de exportación", "Documento de embarque"],
+            correctAnswer: "Garantiza que productos alimenticios cumplen normas del país importador",
+            explanation: "Es indispensable para productos como alimentos o farmacéuticos."
+        },
+        {
+            question: "¿Qué implica un depósito aduanero?",
+            options: ["Almacenamiento temporal de mercancías bajo control aduanero hasta su nacionalización o exportación", "Depósito bancario", "Contrato de transporte", "Pedido de compra"],
+            correctAnswer: "Almacenamiento temporal de mercancías bajo control aduanero hasta su nacionalización o exportación",
+            explanation: "Permite manejo flexible y seguro de mercancías."
+        },
+        {
+            question: "¿Qué es un seguro de caución en exportación?",
+            options: ["Garantía para cubrir obligaciones aduaneras o contractuales", "Seguro médico", "Seguro de vehiculos", "Seguro ambiental"],
+            correctAnswer: "Garantía para cubrir obligaciones aduaneras o contractuales",
+            explanation: "Ampara el pago de impuestos o cumplimiento de compromisos."
+        },
+        {
+            question: "¿Qué se entiende por consolidación de carga?",
+            options: ["Agrupar varias mercancías de diferentes exportadores en un solo envío", "Contrato de exportación directa", "Despacho aduanero único", "Contratación de flete aéreo"],
+            correctAnswer: "Agrupar varias mercancías de diferentes exportadores en un solo envío",
+            explanation: "Reduce costos y optimiza transporte."
+        },
+        {
+            question: "¿Qué son los impuestos antidumping?",
+            options: ["Tributos para proteger la industria nacional de importaciones a precios artificialmente bajos", "Tipo de seguro para cargas", "Permisos para exportar", "Tarifas portuarias"],
+            correctAnswer: "Tributos para proteger la industria nacional de importaciones a precios artificialmente bajos",
+            explanation: "Buscan evitar prácticas desleales en el comercio internacional."
+        },
+        {
+            question: "¿Qué significa “armonización aduanera”?",
+            options: ["Establecer normas y procesos comunes entre países para facilitar comercio y control", "Registro de embarques", "Certificado sanitario", "Registro de exportadores"],
+            correctAnswer: "Establecer normas y procesos comunes entre países para facilitar comercio y control",
+            explanation: "Facilita procesos y reduce barreras técnicas."
+        },
+        {
+            question: "¿Qué es la operación de despacho directo?",
+            options: ["Trámite simplificado de exportación donde la mercancía pasa directamente al contenedor sin almacenaje intermedio", "Almacenaje en depósito", "Solicitud de permiso", "Contrato de seguro"],
+            correctAnswer: "Trámite simplificado de exportación donde la mercancía pasa directamente al contenedor sin almacenaje intermedio",
+            explanation: "Agiliza tiempos y costos."
+        },
+        {
+            question: "¿Qué es la Ley de Reembolso?",
+            options: ["Política que devuelve total o parcialmente impuestos pagados en insumos usados para exportar", "Seguro contra daños", "Multa aduanera", "Contrato comercial"],
+            correctAnswer: "Política que devuelve total o parcialmente impuestos pagados en insumos usados para exportar",
+            explanation: "Mejora la competitividad y flujo de caja."
+        },
+        {
+            question: "¿Qué es el CPM (Código Postal de Mercancías)?",
+            options: ["Clasificación interna para facilitar localización y logística", "Nombre de documento financiero", "Número de exportador", "Certificado fitosanitario"],
+            correctAnswer: "Clasificación interna para facilitar localización y logística",
+            explanation: "Ayuda a organizar y controlar el inventario."
+        },
+        {
+            question: "¿Qué se entiende por crédito documentario irrevocable?",
+            options: ["Medio de pago que no puede ser modificado sin la aprobación de todas las partes", "Permiso de exportación", "Documento de transporte", "Factura comercial"],
+            correctAnswer: "Medio de pago que no puede ser modificado sin la aprobación de todas las partes",
+            explanation: "Ofrece seguridad y certeza en pagos internacionales."
+        },
+        {
+            question: "¿Qué es una carta de porte internacional?",
+            options: ["Documento de transporte terrestre o multimodal que prueba el contrato y entrega de mercancías", "Documento bancario", "Licencia de exportación", "Factura proforma"],
+            correctAnswer: "Documento de transporte terrestre o multimodal que prueba el contrato y entrega de mercancías",
+            explanation: "Representa el título de propiedad sobre la carga."
+        },
+        {
+            question: "¿Cuál es la función del OEA (Operador Económico Autorizado)?",
+            options: ["Facilitar y agilizar el comercio exterior mediante certificaciones que avalan confiabilidad", "Controlar aduanas", "Emitir certificados sanitarios", "Administrar puertos"],
+            correctAnswer: "Facilitar y agilizar el comercio exterior mediante certificaciones que avalan confiabilidad",
+            explanation: "Da beneficios en inspecciones y seguridad."
+        },
+        {
+            question: "¿Qué es el valor CIF?",
+            options: ["Precio del producto más costo de seguro y flete hasta el destino", "Precio neto en almacén", "Precio sin seguro ni flete", "Valor declarado solo para aduanas"],
+            correctAnswer: "Precio del producto más costo de seguro y flete hasta el destino",
+            explanation: "Se usa para cálculo de impuestos en importación."
+        },
+        {
+            question: "¿Qué significa despacho consolidado?",
+            options: ["Trámite aduanero para varios envíos agrupados y procesados simultáneamente", "Documento comercial", "Tipo de transporte", "Permiso de exportar"],
+            correctAnswer: "Trámite aduanero para varios envíos agrupados y procesados simultáneamente",
+            explanation: "Facilita y acelera operaciones de mercancías grupales."
+        },
+    ],
+    5: [
+        {
+            question: "¿Qué es un contrato de agencia en exportación?",
+            options: ["Contrato mediante el cual un agente representa al exportador en el extranjero para vender productos", "Contrato bancario", "Certificado de embarque", "Documento aduanero"],
+            correctAnswer: "Contrato mediante el cual un agente representa al exportador en el extranjero para vender productos",
+            explanation: "Facilita la comercialización en mercados internacionales sin presencia directa."
+        },
+        {
+            question: "¿Qué es un certificado de inspección?",
+            options: ["Documento que acredita que la mercancía cumple características y cantidad según contrato", "Permiso sanitario", "Contrato de transporte", "Licencia de exportación"],
+            correctAnswer: "Documento que acredita que la mercancía cumple características y cantidad según contrato",
+            explanation: "Seguridad para comprador y exportador."
+        },
+        {
+            question: "¿Qué funciones cumple el Agente de Carga?",
+            options: ["Coordina transporte, documentación y manejo logístico para exportar/importar", "Realiza inspecciones físicas", "Administra almacenes", "Emite certificados sanitarios"],
+            correctAnswer: "Coordina transporte, documentación y manejo logístico para exportar/importar",
+            explanation: "Es el intermediario logístico clave."
+        },
+        {
+            question: "¿Qué significa el término “peso bruto”?",
+            options: ["Peso total de mercancía incluyendo embalaje", "Peso neto sin embalaje", "Peso solo de la caja", "Peso máximo permitido"],
+            correctAnswer: "Peso total de mercancía incluyendo embalaje",
+            explanation: "Se usa para tarifas de transporte y despacho aduanero."
+        },
+        {
+            question: "¿Qué es un manifiesto de carga aérea?",
+            options: ["Documento que detalla las mercancías transportadas en un vuelo", "Contrato comercial", "Factura proforma", "Licencia exportadora"],
+            correctAnswer: "Documento que detalla las mercancías transportadas en un vuelo",
+            explanation: "Documento clave para control y despacho en aeropuertos."
+        },
+        {
+            question: "¿Qué diferencia hay entre despacho postal y despacho courier?",
+            options: ["El despacho courier es más rápido y especializado para paquetes pequeños", "Son iguales", "El despacho postal incluye transporte marítimo", "No existen diferencias"],
+            correctAnswer: "El despacho courier es más rápido y especializado para paquetes pequeños",
+            explanation: "Courier ofrece servicio puerta a puerta con seguimiento."
+        },
+        {
+            question: "¿Qué es la exportación de servicios?",
+            options: ["Venta de bienes físicos al extranjero", "Venta de servicios profesionales, tecnológicos o turísticos a clientes internacionales", "Importación temporal", "Venta local"],
+            correctAnswer: "Venta de servicios profesionales, tecnológicos o turísticos a clientes internacionales",
+            explanation: "Incluye consultorías, software, turismo, entre otros."
+        },
+        {
+            question: "¿Qué impacta más en los costos totales de exportación?",
+            options: ["Embalaje, transporte y aranceles", "Solo el precio del producto", "Costos administrativos", "Impuestos internos"],
+            correctAnswer: "Embalaje, transporte y aranceles",
+            explanation: "Muchas variables afectan el precio final para competir."
+        },
+        {
+            question: "¿Qué es un consolidado marítimo?",
+            options: ["Carga de varios exportadores agrupada para optimizar espacio en un contenedor", "Documentación oficial", "Tipo de seguro", "Permiso aduanero"],
+            correctAnswer: "Carga de varios exportadores agrupada para optimizar espacio en un contenedor",
+            explanation: "Reduce costos y mejora eficiencia."
+        },
+        {
+            question: "¿Qué implica el control estadístico de comercio exterior?",
+            options: ["Registro y análisis de datos sobre importación y exportación para decisiones políticas y comerciales", "Monitoreo del transporte", "Control de calidad", "Control de aduanas"],
+            correctAnswer: "Registro y análisis de datos sobre importación y exportación para decisiones políticas y comerciales",
+            explanation: "Es crucial para evaluar tendencias y oportunidades."
+        },
+        {
+            question: "¿Qué es el carnet ATA?",
+            options: ["Documento aduanero para la importación temporal de mercancías sin pago de impuestos", "Licencia de exportación", "Contrato de transporte", "Certificado sanitario"],
+            correctAnswer: "Documento aduanero para la importación temporal de mercancías sin pago de impuestos",
+            explanation: "Facilita el paso temporal de mercancías en ferias o muestras."
+        },
+        {
+            question: "¿Qué significa “exportación concurrente”?",
+            options: ["Exportar diferentes tipos de productos simultáneamente", "Exportar solo un producto", "Importar al mismo tiempo", "Exportar desde distintas agencias"],
+            correctAnswer: "Exportar diferentes tipos de productos simultáneamente",
+            explanation: "Gestiona múltiples envíos al mismo tiempo."
+        },
+        {
+            question: "¿Qué es un almacén general de depósito?",
+            options: ["Lugar autorizado para almacenar mercancías bajo control aduanero por tiempo limitado", "Depósito bancario", "Oficina de exportación", "Puerto marítimo"],
+            correctAnswer: "Lugar autorizado para almacenar mercancías bajo control aduanero por tiempo limitado",
+            explanation: "Permite controlar inventario para exportación o importación."
+        },
+        {
+            question: "¿Qué es la trazabilidad en exportación?",
+            options: ["Seguimiento y control de un producto desde producción hasta destino final", "Cambio de moneda", "Control de peso", "Control aduanero"],
+            correctAnswer: "Seguimiento y control de un producto desde producción hasta destino final",
+            explanation: "Garantiza confianza y calidad al comprador."
+        },
+        {
+            question: "¿Qué es un certificado fitosanitario internacional?",
+            options: ["Documento que garantiza la ausencia de plagas en productos vegetales exportados", "Factura comercial", "Certificado de calidad", "Carta de porte"],
+            correctAnswer: "Documento que garantiza la ausencia de plagas en productos vegetales exportados",
+            explanation: "Cumple normativas internacionales para acceso a mercados."
+        },
+        {
+            question: "¿Qué función cumple el SICEX?",
+            options: ["Sistema de información comercial exterior que facilita datos sobre exportaciones e importaciones", "Seguro de carga", "Sistema bancario", "Empresa exportadora"],
+            correctAnswer: "Sistema de información comercial exterior que facilita datos sobre exportaciones e importaciones",
+            explanation: "Apoya toma de decisiones y análisis de mercado."
+        },
+        {
+            question: "¿Qué es la exportación bajo permiso especial?",
+            options: ["Venta solo a países con relaciones diplomáticas", "Exportación de productos restringidos que requieren autorización previa", "Exportación temporal", "Venta al por menor"],
+            correctAnswer: "Exportación de productos restringidos que requieren autorización previa",
+            explanation: "Controla productos regulados para seguridad o tratado."
+        },
+        {
+            question: "¿Qué significa “libre práctica aduanera”?",
+            options: ["La autorización para que la mercancía salga o ingrese al país cumpliendo todos los requisitos", "Contrato comercial", "Licencia de exportación", "Documento bancario"],
+            correctAnswer: "La autorización para que la mercancía salga o ingrese al país cumpliendo todos los requisitos",
+            explanation: "Es la liberación final tras trámites y pago de tributos."
+        },
+        {
+            question: "¿Qué es un sistema ERP y su función en exportación?",
+            options: ["Software para gestión integral de procesos empresariales, incluyendo logística y bodegas", "Sistema de transporte", "Tipo de seguro", "Documento aduanero"],
+            correctAnswer: "Software para gestión integral de procesos empresariales, incluyendo logística y bodegas",
+            explanation: "Mejora la eficiencia y control en toda la cadena."
+        },
+        {
+            question: "¿Qué implica el régimen de perfeccionamiento activo?",
+            options: ["Permite exportar bienes transformados o elaborados a partir de insumos importados sin pagar aranceles inicialmente", "Exportación simple", "Importación definitiva", "Seguro de carga"],
+            correctAnswer: "Permite exportar bienes transformados o elaborados a partir de insumos importados sin pagar aranceles inicialmente",
+            explanation: "Incentiva la producción y exportación agregando valor."
+        },
+    ],
+    ...Array.from({ length: 17 }, (_, i) => i + 2).reduce((acc, level) => {
+        if (!acc[level]) { // Only create dummy questions if the level is not already filled
+            acc[level] = Array.from({ length: levels[level-1].questions }, (_, qIndex) => ({
+                question: `Pregunta ${qIndex + 1} del Nivel ${level}`,
+                options: ["Opción A", "Opción B", "Opción C", "Opción D"],
+                correctAnswer: "Opción A",
+                explanation: `Explicación para la pregunta ${qIndex + 1} del Nivel ${level}.`
+            }));
+        }
         return acc;
     }, {} as { [key: number]: Question[] })
 };
