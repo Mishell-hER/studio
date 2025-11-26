@@ -7,7 +7,9 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Loader2, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { Play, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { useUser } from '@/firebase/auth/use-user';
+import { useLoginModal } from '@/hooks/use-login-modal';
 
 // --- TIPOS DE DATOS ---
 interface Level {
@@ -341,6 +343,9 @@ const LevelIntro: React.FC<{ level: number, onStart: () => void }> = ({ level, o
 
 // --- PÁGINA PRINCIPAL ---
 export default function SuppliersPage() {
+    const { user, loading } = useUser();
+    const loginModal = useLoginModal();
+
     const [gameState, setGameState] = useState<'menu' | 'intro' | 'playing'>('menu');
     const [audioState, setAudioState] = useState<'background' | 'lose' | 'none'>('none');
     const [isMuted, setIsMuted] = useState(false);
@@ -362,6 +367,22 @@ export default function SuppliersPage() {
     }
 
     const renderContent = () => {
+        if(loading) return <p>Cargando...</p>
+
+        if (!user) {
+            return (
+                <div className="w-full max-w-4xl mx-auto text-center">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground mb-3">
+                        ¿Sabes o Estás Perdido?
+                    </h1>
+                    <p className="text-lg text-muted-foreground mb-6">
+                        Inicia sesión para jugar y guardar tu progreso.
+                    </p>
+                    <Button onClick={loginModal.onOpen}>Iniciar Sesión o Registrarse</Button>
+                </div>
+            )
+        }
+
         switch (gameState) {
             case 'intro':
                 return <LevelIntro level={currentLevel} onStart={() => setGameState('playing')} />;

@@ -1,20 +1,21 @@
 "use client";
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLoginModal } from "@/hooks/use-login-modal";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRegisterModal } from '@/hooks/use-register-modal';
-
+import { Input } from '../ui/input';
 
 export function LoginModal() {
   const loginModal = useLoginModal();
@@ -23,6 +24,11 @@ export function LoginModal() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
+  const [emailOrUsername, setEmailOrUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     if (!firestore) {
@@ -30,15 +36,19 @@ export function LoginModal() {
       return;
     }
     try {
+      setIsLoading(true);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
       const userRef = doc(firestore, 'users', user.uid);
       await setDoc(userRef, {
         uid: user.uid,
-        name: user.displayName,
-        email: user.email,
+        nombre: user.displayName?.split(' ')[0] || '',
+        apellido: user.displayName?.split(' ')[1] || '',
+        username: user.email?.split('@')[0], // Simple username generation
+        correo: user.email,
         photoURL: user.photoURL,
+        esEmpresario: false, // Default value
       }, { merge: true });
       
       toast({ title: "¡Sesión iniciada con éxito!" });
@@ -50,8 +60,55 @@ export function LoginModal() {
         title: "Error al iniciar sesión",
         description: "Hubo un problema al iniciar sesión con Google. Por favor, inténtalo de nuevo."
       });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    if (!firestore) {
+        setError("La base de datos no está disponible.");
+        setIsLoading(false);
+        return;
+    }
+
+    let emailToAuth = emailOrUsername;
+
+    try {
+        if (!emailOrUsername.includes('@')) {
+            const usersRef = collection(firestore, "users");
+            const q = query(usersRef, where("username", "==", emailOrUsername));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                setError('Nombre de usuario o contraseña incorrectos.');
+                setIsLoading(false);
+                return;
+            }
+            
+            const userData = querySnapshot.docs[0].data();
+            emailToAuth = userData.correo;
+        }
+
+        await signInWithEmailAndPassword(auth, emailToAuth, password);
+        toast({ title: "¡Sesión iniciada con éxito!" });
+        loginModal.onClose();
+
+    } catch (error: any) {
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            setError('Nombre de usuario o contraseña incorrectos.');
+        } else {
+            console.error("Firebase Login Error:", error.message);
+            setError(`Error al iniciar sesión: ${error.message}`);
+        }
+    } finally {
+        setIsLoading(false);
+    }
+  }
 
   const onToggle = useCallback(() => {
     loginModal.onClose();
@@ -63,23 +120,53 @@ export function LoginModal() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Iniciar Sesión</DialogTitle>
+          <DialogDescription>Accede a tu cuenta para continuar.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <Button onClick={handleGoogleSignIn} variant="outline" className="w-full">
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
-              <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
-              <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
-              <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A8 9 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
-              <path fill="#1976D2" d="M43.611 20.083H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.021 35.591 44 30.134 44 24c0-1.341-.138-2.65-.389-3.917z" />
-            </svg>
-            Continuar con Google
-          </Button>
-          <div className="text-center text-sm text-muted-foreground">
-            ¿No tienes una cuenta?{' '}
-            <Button variant="link" className="px-0" onClick={onToggle}>
-              Regístrate
+        <form onSubmit={handleEmailSignIn} className="space-y-4">
+            <Input 
+                placeholder="Correo o nombre de usuario"
+                value={emailOrUsername}
+                onChange={(e) => setEmailOrUsername(e.target.value)}
+                disabled={isLoading}
+            />
+            <Input 
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+            />
+            {error && <p className="text-destructive text-sm">{error}</p>}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
-          </div>
+        </form>
+
+        <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                O continuar con
+                </span>
+            </div>
+        </div>
+
+        <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isLoading}>
+          <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
+            <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+            <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+            <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A8 9 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+            <path fill="#1976D2" d="M43.611 20.083H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.021 35.591 44 30.134 44 24c0-1.341-.138-2.65-.389-3.917z" />
+          </svg>
+          Google
+        </Button>
+        <div className="text-center text-sm text-muted-foreground">
+          ¿No tienes una cuenta?{' '}
+          <Button variant="link" className="px-0" onClick={onToggle}>
+            Regístrate
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

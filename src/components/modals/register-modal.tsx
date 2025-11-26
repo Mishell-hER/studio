@@ -14,6 +14,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,13 +26,28 @@ import { useRegisterModal } from "@/hooks/use-register-modal";
 import { useLoginModal } from '@/hooks/use-login-modal';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '../ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
-  email: z.string().email({ message: "Por favor, introduce un correo válido." }),
+  nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
+  apellido: z.string().min(2, { message: "El apellido debe tener al menos 2 caracteres." }),
+  username: z.string().min(3, { message: "El nombre de usuario debe tener al menos 3 caracteres." }),
+  correo: z.string().email({ message: "Por favor, introduce un correo válido." }),
   password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+  esEmpresario: z.boolean().default(false),
+  RUC: z.string().optional(),
+  sector: z.string().optional(),
+}).refine(data => {
+    if (data.esEmpresario) {
+        return !!data.RUC && data.RUC.length > 0 && !!data.sector && data.sector.length > 0;
+    }
+    return true;
+}, {
+    message: "RUC y sector son obligatorios si eres empresario.",
+    path: ["esEmpresario"],
 });
 
 export function RegisterModal() {
@@ -44,8 +60,19 @@ export function RegisterModal() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: {
+        nombre: "",
+        apellido: "",
+        username: "",
+        correo: "",
+        password: "",
+        esEmpresario: false,
+        RUC: "",
+        sector: ""
+    },
   });
+
+  const isEmpresario = form.watch('esEmpresario');
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -55,19 +82,38 @@ export function RegisterModal() {
       return;
     }
     
+    // Check if username already exists
+    const usersRef = collection(firestore, "users");
+    const q = query(usersRef, where("username", "==", values.username));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        form.setError("username", { message: "Este nombre de usuario ya está en uso." });
+        setIsLoading(false);
+        return;
+    }
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.correo, values.password);
       const user = userCredential.user;
 
-      await updateProfile(user, { displayName: values.name });
+      await updateProfile(user, { displayName: `${values.nombre} ${values.apellido}` });
       
-      const userRef = doc(firestore, "users", user.uid);
-      await setDoc(userRef, {
+      const userData: any = {
         uid: user.uid,
-        name: values.name,
-        email: values.email,
-        photoURL: user.photoURL || "",
-      });
+        nombre: values.nombre,
+        apellido: values.apellido,
+        username: values.username,
+        correo: values.correo,
+        esEmpresario: values.esEmpresario,
+      };
+
+      if (values.esEmpresario) {
+        userData.RUC = values.RUC;
+        userData.sector = values.sector;
+      }
+
+      const userRef = doc(firestore, "users", user.uid);
+      await setDoc(userRef, userData);
 
       toast({ title: "¡Cuenta creada con éxito!" });
       registerModal.onClose();
@@ -78,7 +124,7 @@ export function RegisterModal() {
        toast({
         variant: 'destructive',
         title: "Error en el registro",
-        description: "Ocurrió un error durante el registro. Por favor, inténtalo de nuevo."
+        description: error.code === 'auth/email-already-in-use' ? 'El correo ya está en uso.' : 'Ocurrió un error. Por favor, inténtalo de nuevo.'
       });
     } finally {
       setIsLoading(false);
@@ -101,45 +147,60 @@ export function RegisterModal() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="nombre" render={({ field }) => ( <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="apellido" render={({ field }) => ( <FormItem><FormLabel>Apellido</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+            </div>
+            <FormField control={form.control} name="username" render={({ field }) => ( <FormItem><FormLabel>Nombre de Usuario</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="correo" render={({ field }) => ( <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="password" render={({ field }) => ( <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+
             <FormField
               control={form.control}
-              name="name"
+              name="esEmpresario"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Tu nombre" {...field} disabled={isLoading} />
-                  </FormControl>
-                  <FormMessage />
+                <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                        <FormLabel>Soy empresario</FormLabel>
+                        <FormDescription>Selecciona si eres empresario para añadir RUC y sector.</FormDescription>
+                    </div>
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Correo electrónico</FormLabel>
-                  <FormControl>
-                    <Input placeholder="tu@correo.com" {...field} disabled={isLoading} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••" {...field} disabled={isLoading} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            {isEmpresario && (
+                <>
+                    <FormField control={form.control} name="RUC" render={({ field }) => ( <FormItem><FormLabel>RUC</FormLabel><FormControl><Input {...field} disabled={isLoading} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField
+                      control={form.control}
+                      name="sector"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sector</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona tu sector" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="agricultura">Agricultura</SelectItem>
+                              <SelectItem value="tecnologia">Tecnología</SelectItem>
+                              <SelectItem value="retail">Retail</SelectItem>
+                              <SelectItem value="servicios">Servicios</SelectItem>
+                              <SelectItem value="otro">Otro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </>
+            )}
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creando cuenta..." : "Registrarse"}
             </Button>

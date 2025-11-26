@@ -1,5 +1,22 @@
 {
   "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores public profile information for a user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID from Firebase Auth." },
+        "nombre": { "type": "string", "description": "The user's first name." },
+        "apellido": { "type": "string", "description": "The user's last name." },
+        "username": { "type": "string", "description": "The user's unique username." },
+        "correo": { "type": "string", "format": "email", "description": "The user's email address." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture."},
+        "esEmpresario": { "type": "boolean", "description": "Whether the user is an entrepreneur." },
+        "RUC": { "type": "string", "description": "The user's RUC, if applicable." },
+        "sector": { "type": "string", "description": "The user's business sector, if applicable." }
+      },
+      "required": ["uid", "nombre", "apellido", "username", "correo", "esEmpresario"]
+    },
     "Post": {
       "title": "Forum Post",
       "description": "Represents a single post or question in the forum.",
@@ -28,22 +45,38 @@
     },
     "Reply": {
       "title": "Post Reply",
-      "description": "Represents a reply to a forum post.",
+      "description": "Represents a reply to a forum post or opinion.",
       "type": "object",
       "properties": {
-        "postId": { "type": "string", "description": "The ID of the post this reply belongs to." },
+        "postId": { "type": "string", "description": "The ID of the post/opinion this reply belongs to." },
         "content": { "type": "string", "description": "The content of the reply." },
         "authorId": { "type": "string", "description": "The ID of the user who wrote the reply." },
         "authorName": { "type": "string", "description": "The display name of the reply author." },
+        "authorPhotoURL": { "type": "string", "description": "URL of the author's profile picture."},
         "timestamp": { "type": "string", "format": "date-time", "description": "When the reply was created." }
       },
       "required": ["postId", "content", "authorId", "timestamp"]
+    },
+     "GameProgress": {
+      "title": "Game Progress",
+      "description": "Stores a user's progress in the logistics game.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "highestLevelCompleted": { "type": "number" },
+        "lastPlayed": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "highestLevelCompleted", "lastPlayed"]
     }
   },
   "auth": {
-    "providers": []
+    "providers": ["email", "google.com"]
   },
   "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores public user profile information."
+    },
     "/posts/{postId}": {
       "schema": { "$ref": "#/entities/Post" },
       "description": "Stores all the forum posts."
@@ -54,7 +87,11 @@
     },
     "/replies/{replyId}": {
       "schema": { "$ref": "#/entities/Reply" },
-      "description": "Stores all replies to posts."
+      "description": "Stores all replies to posts and opinions."
+    },
+    "/progress/{userId}": {
+        "schema": { "$ref": "#/entities/GameProgress" },
+        "description": "Stores game progress for each user."
     }
   }
 }

@@ -1,10 +1,8 @@
 'use client';
 
 // Barrel file for client-side Firebase utilities.
-// The actual initialization is handled in FirebaseClientProvider
-// to ensure it only runs on the client.
-
 export * from './provider';
+export * from './auth/use-user';
 export * from './firestore/use-collection';
 export * from './firestore/use-doc';
 

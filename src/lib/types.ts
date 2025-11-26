@@ -2,9 +2,14 @@ import type { Timestamp } from "firebase/firestore";
 
 export interface UserProfile {
     uid: string;
-    name: string | null;
-    email: string | null;
-    photoURL?: string | null;
+    nombre: string;
+    apellido: string;
+    username: string;
+    correo: string;
+    photoURL?: string;
+    esEmpresario: boolean;
+    RUC?: string;
+    sector?: string;
 }
 
 export interface Post {
@@ -31,6 +36,7 @@ export interface Reply {
     content: string;
     authorId: string;
     authorName?: string;
+    authorPhotoURL?: string;
     timestamp: Timestamp;
 }
 

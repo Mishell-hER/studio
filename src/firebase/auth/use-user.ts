@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useAuth, useFirestore } from '../provider';
-import { UserProfile } from '@/lib/types';
+import type { UserProfile } from '@/lib/types';
 
 export function useUser() {
   const auth = useAuth();
@@ -20,29 +20,42 @@ export function useUser() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      setLoading(false);
+      if (!firebaseUser) {
+        setLoading(false);
+      }
     });
 
     return () => unsubscribeAuth();
   }, [auth]);
 
+  const userDocRef = useMemo(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
   useEffect(() => {
-    if (!firestore || !user) {
+    if (!userDocRef) {
       setUserProfile(null);
+      if(!user) setLoading(false); // If there's no user, we are not loading profile
       return;
     }
-
-    const userRef = doc(firestore, 'users', user.uid);
-    const unsubscribeProfile = onSnapshot(userRef, (doc) => {
+    
+    setLoading(true);
+    const unsubscribeProfile = onSnapshot(userDocRef, (doc) => {
       if (doc.exists()) {
         setUserProfile(doc.data() as UserProfile);
       } else {
         setUserProfile(null);
       }
+      setLoading(false);
+    }, (error) => {
+        console.error("Error fetching user profile:", error);
+        setUserProfile(null);
+        setLoading(false);
     });
 
     return () => unsubscribeProfile();
-  }, [firestore, user]);
+  }, [userDocRef, user]);
 
   return { user, userProfile, loading };
 }

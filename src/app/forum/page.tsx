@@ -13,12 +13,12 @@ import { continents } from '@/lib/continents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from './_components/post-card';
 import { OpinionCard } from './_components/opinion-card';
-
-// Helper to generate a random user name
-const generateAnonymousUser = () => `Usuario (${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')})`;
+import { useUser } from '@/firebase/auth/use-user';
+import { useLoginModal } from '@/hooks/use-login-modal';
 
 function NewPostForm({ onPostCreated }: { onPostCreated: () => void }) {
     const firestore = useFirestore();
+    const { user, userProfile } = useUser();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [continent, setContinent] = useState('');
@@ -30,15 +30,15 @@ function NewPostForm({ onPostCreated }: { onPostCreated: () => void }) {
             setError('Todos los campos son obligatorios.');
             return;
         }
-        if (!firestore) return;
+        if (!firestore || !user) return;
 
         try {
             await addDoc(collection(firestore, 'posts'), {
                 title,
                 content,
                 continent,
-                authorId: `anonymous_${Date.now()}`,
-                authorName: generateAnonymousUser(),
+                authorId: user.uid,
+                authorName: userProfile?.nombre || user.displayName || 'Anónimo',
                 timestamp: serverTimestamp(),
             });
             setTitle('');
@@ -91,6 +91,7 @@ function NewPostForm({ onPostCreated }: { onPostCreated: () => void }) {
 
 function NewOpinionForm({ onOpinionCreated }: { onOpinionCreated: () => void }) {
     const firestore = useFirestore();
+    const { user, userProfile } = useUser();
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
 
@@ -100,13 +101,13 @@ function NewOpinionForm({ onOpinionCreated }: { onOpinionCreated: () => void }) 
             setError('La opinión no puede estar vacía.');
             return;
         }
-        if (!firestore) return;
+        if (!firestore || !user) return;
 
         try {
             await addDoc(collection(firestore, 'opinions'), {
                 content,
-                authorId: `anonymous_${Date.now()}`,
-                authorName: generateAnonymousUser(),
+                authorId: user.uid,
+                authorName: userProfile?.nombre || user.displayName || 'Anónimo',
                 timestamp: serverTimestamp(),
             });
             setContent('');
@@ -140,6 +141,37 @@ function NewOpinionForm({ onOpinionCreated }: { onOpinionCreated: () => void }) 
             </CardContent>
         </Card>
     );
+}
+
+const AuthWall = ({ children }: { children: React.ReactNode }) => {
+    const { user, loading } = useUser();
+    const loginModal = useLoginModal();
+
+    if (loading) {
+        return (
+             <Card className="mb-8">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                    Cargando...
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (!user) {
+        return (
+            <Card className="mb-8">
+                <CardHeader>
+                    <CardTitle>Únete a la Conversación</CardTitle>
+                    <CardDescription>Inicia sesión para crear publicaciones y compartir tu opinión con la comunidad.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                    <Button onClick={() => loginModal.onOpen()}>Iniciar Sesión o Registrarse</Button>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    return <>{children}</>;
 }
 
 
@@ -214,7 +246,9 @@ export default function ForumPage() {
           <TabsTrigger value="opiniones">Opiniones</TabsTrigger>
         </TabsList>
         <TabsContent value="preguntas" className="mt-6">
-            <NewPostForm onPostCreated={() => { /* Could add a toast or notification here */ }}/>
+            <AuthWall>
+                <NewPostForm onPostCreated={() => { /* Could add a toast or notification here */ }}/>
+            </AuthWall>
             <div className="my-6 flex items-center gap-4">
                 <span className="text-sm font-medium">Filtrar por continente:</span>
                 <Select value={continentFilter} onValueChange={setContinentFilter}>
@@ -230,7 +264,9 @@ export default function ForumPage() {
             {renderPosts()}
         </TabsContent>
         <TabsContent value="opiniones" className="mt-6">
-            <NewOpinionForm onOpinionCreated={() => { /* Notification */ }} />
+            <AuthWall>
+                <NewOpinionForm onOpinionCreated={() => { /* Notification */ }} />
+            </AuthWall>
             {renderOpinions()}
         </TabsContent>
       </Tabs>

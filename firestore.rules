@@ -4,17 +4,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Allow public read and write for posts, opinions and replies
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+    
     match /posts/{postId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create: if request.auth != null;
+      // Allow update/delete only by the author
+      allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
 
     match /opinions/{opinionId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
 
     match /replies/{replyId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+
+    match /progress/{progressId} {
+      allow read, write: if request.auth != null && request.auth.uid == progressId;
     }
   }
 }

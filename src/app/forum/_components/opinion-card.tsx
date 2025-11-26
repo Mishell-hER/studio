@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/co
 import type { Opinion } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
+import { useUser } from '@/firebase/auth/use-user';
 
 export function OpinionCard({ opinion }: { opinion: Opinion }) {
+    const { user } = useUser();
     const replyLink = `/forum/opinion/${opinion.id}`;
 
     return (
@@ -20,12 +22,14 @@ export function OpinionCard({ opinion }: { opinion: Opinion }) {
                 <p className="text-foreground">{opinion.content}</p>
             </CardContent>
              <CardFooter>
-                <Button asChild variant="outline" size="sm">
-                    <Link href={replyLink}>
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        Responder
-                    </Link>
-                </Button>
+                {user && (
+                    <Button asChild variant="outline" size="sm">
+                        <Link href={replyLink}>
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Responder
+                        </Link>
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     )
