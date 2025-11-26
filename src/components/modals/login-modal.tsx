@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRegisterModal } from '@/hooks/use-register-modal';
 import { Input } from '../ui/input';
@@ -40,26 +40,33 @@ export function LoginModal() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      const userRef = doc(firestore, 'users', user.uid);
-      await setDoc(userRef, {
-        uid: user.uid,
-        nombre: user.displayName?.split(' ')[0] || '',
-        apellido: user.displayName?.split(' ')[1] || '',
-        username: user.email?.split('@')[0], // Simple username generation
-        correo: user.email,
-        photoURL: user.photoURL,
-        esEmpresario: false, // Default value
-      }, { merge: true });
+      const userDocRef = doc(firestore, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // Si es un usuario nuevo, crea un perfil básico.
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          nombre: user.displayName?.split(' ')[0] || '',
+          apellido: user.displayName?.split(' ').slice(1).join(' ') || '',
+          username: user.email?.split('@')[0] || `user${Math.floor(Math.random() * 1000)}`,
+          correo: user.email,
+          photoURL: user.photoURL,
+          esEmpresario: false, // Default value
+        }, { merge: true });
+      }
       
       toast({ title: "¡Sesión iniciada con éxito!" });
       loginModal.onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error durante el inicio de sesión con Google:", error);
-      toast({
-        variant: 'destructive',
-        title: "Error al iniciar sesión",
-        description: "Hubo un problema al iniciar sesión con Google. Por favor, inténtalo de nuevo."
-      });
+      if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+          toast({
+            variant: 'destructive',
+            title: "Error al iniciar sesión",
+            description: "Hubo un problema al iniciar sesión con Google. Por favor, inténtalo de nuevo."
+          });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -154,7 +161,7 @@ export function LoginModal() {
         </div>
 
         <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isLoading}>
-          <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
+          <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48" role="img" aria-label="Logo de Google">
             <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
             <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
             <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A8 9 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
