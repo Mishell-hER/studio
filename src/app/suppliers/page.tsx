@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -51,11 +50,21 @@ const levelTitles = [
   "Comerciante Comedido",
   "Exportador Experimentado",
   "Tigre de Tráficas",
+  "Piloto de Puertos",
+  "Capitán de Carga",
+  "Estratega de Exportación",
+  "General de Aduanas",
+  "Magnate Marítimo",
+  "Maestro de Mercados",
+  "Rey del Comercio",
+  "Señor de la Logística",
+  "Emperador Exportador",
+  "Dios del Comercio Exterior",
 ];
 
 const levels: Level[] = Array.from({ length: 20 }, (_, i) => ({
   level: i + 1,
-  title: i < 10 ? levelTitles[i] : `Nivel ${i + 1}`,
+  title: levelTitles[i] || `Nivel ${i + 1}`,
   questions: (i < 10) ? 5 : (i < 15) ? 10 : (i < 18) ? 15 : (i < 19) ? 20 : 25,
   bgColor: 'bg-gray-100',
   textColor: 'text-gray-800'
@@ -684,3 +693,5 @@ export default function SuppliersPage() {
         </div>
     );
 }
+
+    
