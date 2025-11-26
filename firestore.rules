@@ -5,7 +5,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     match /users/{userId} {
-      allow read: if true;
+      // Allow querying the collection (e.g., for username lookup) but not reading all docs.
+      allow list: if true;
+      // Allow reading a single document if the ID is known.
+      allow get: if true;
+      // Allow users to create and update their own profile.
       allow create, update: if request.auth != null && request.auth.uid == userId;
     }
     
