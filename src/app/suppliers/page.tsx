@@ -65,7 +65,7 @@ const levelTitles = [
 const levels: Level[] = Array.from({ length: 20 }, (_, i) => ({
   level: i + 1,
   title: levelTitles[i] || `Nivel ${i + 1}`,
-  questions: (i < 10) ? 5 : (i < 15) ? 10 : (i < 18) ? 15 : (i < 19) ? 20 : 25,
+  questions: (i === 0) ? 20 : (i < 10) ? 5 : (i < 15) ? 10 : (i < 18) ? 15 : (i < 19) ? 20 : 25,
   bgColor: 'bg-gray-100',
   textColor: 'text-gray-800'
 }));
@@ -73,35 +73,125 @@ const levels: Level[] = Array.from({ length: 20 }, (_, i) => ({
 const questions: { [key: number]: Question[] } = {
     1: [
         {
-            question: "¿Qué significa la sigla 'FOB' en los Incoterms?",
-            options: ["Free On Board", "Fast Over Borders", "For Our Business", "Final Offer Bid"],
-            correctAnswer: "Free On Board",
-            explanation: "FOB (Free On Board) es un Incoterm que significa que el vendedor entrega la mercancía a bordo del buque designado por el comprador en el puerto de embarque."
+            question: "¿Qué es una exportación?",
+            options: ["Venta de productos dentro del mismo país", "Envío de mercancías a otro país", "Compra de productos extranjeros", "Transportar productos dentro de una ciudad"],
+            correctAnswer: "Envío de mercancías a otro país",
+            explanation: "Exportar es enviar bienes o servicios fuera del país de origen para su venta."
         },
         {
-            question: "¿Cuál es el documento principal que ampara el transporte marítimo de mercancías?",
-            options: ["Factura Comercial", "Bill of Lading (B/L)", "Packing List", "Certificado de Origen"],
-            correctAnswer: "Bill of Lading (B/L)",
-            explanation: "El Bill of Lading (Conocimiento de Embarque) es el contrato de transporte marítimo y el título de propiedad de la mercancía."
+            question: "¿Cuál es el documento más básico para exportar un producto?",
+            options: ["Factura comercial", "Recibo de entrega", "Carnet de identidad", "Recibo de agua"],
+            correctAnswer: "Factura comercial",
+            explanation: "La factura comercial respalda legalmente la operación y es requerida en aduanas."
         },
         {
-            question: "¿Qué es la 'Declaración Única de Aduanas' (DUA)?",
-            options: ["Un permiso de viaje", "Un documento para el seguro", "Un formulario para declarar la exportación/importación", "Una solicitud de crédito"],
-            correctAnswer: "Un formulario para declarar la exportación/importación",
-            explanation: "La DUA es el documento oficial que se presenta ante la aduana para declarar los detalles de una operación de comercio exterior."
+            question: "¿Qué actor NO suele participar directamente en una exportación?",
+            options: ["Exportador", "Importador", "Traductor jurado", "Transportista"],
+            correctAnswer: "Traductor jurado",
+            explanation: "El traductor no es parte esencial de la cadena, a menos que se requieran documentos en otro idioma."
         },
         {
-            question: "¿Qué función cumple el 'Packing List' o Lista de Empaque?",
-            options: ["Indicar el precio de los productos", "Detallar el contenido de cada bulto", "Servir como contrato de venta", "Calcular los impuestos"],
-            correctAnswer: "Detallar el contenido de cada bulto",
-            explanation: "La Lista de Empaque describe el contenido, peso y dimensiones de cada paquete, facilitando la inspección aduanera."
+            question: "¿Para qué sirve una cotización en el proceso de exportación?",
+            options: ["Para calcular el costo de importación", "Para ofrecer precio, condiciones y características al cliente", "Para calcular impuestos internos", "Para determinar la moneda nacional"],
+            correctAnswer: "Para ofrecer precio, condiciones y características al cliente",
+            explanation: "Una cotización ayuda a negociar antes de cerrar la venta."
         },
         {
-            question: "¿Cuál de estos NO es un modo de transporte principal en logística internacional?",
-            options: ["Marítimo", "Aéreo", "Terrestre", "Subterráneo"],
-            correctAnswer: "Subterráneo",
-            explanation: "Los modos de transporte principales son marítimo, aéreo, terrestre y ferroviario. El transporte subterráneo no es una categoría estándar en logística comercial."
-        }
+            question: "¿Cómo se llama al país que recibe la mercancía exportada?",
+            options: ["País de origen", "País de envío", "País de destino", "País vecino"],
+            correctAnswer: "País de destino",
+            explanation: "Es el país donde llega y se nacionaliza la mercancía."
+        },
+        {
+            question: "¿Qué mercancía está prohibido exportar sin permisos especiales?",
+            options: ["Textiles", "Armas y municiones", "Café", "Juguetes"],
+            correctAnswer: "Armas y municiones",
+            explanation: "Son bienes controlados por tratados y leyes, necesitan permisos especiales."
+        },
+        {
+            question: "El precio de venta internacional normalmente se acuerda en:",
+            options: ["Moneda nacional", "Dólares o divisa extranjera", "Billetes de lotería", "Puntos de descuento"],
+            correctAnswer: "Dólares o divisa extranjera",
+            explanation: "El dólar o el euro son monedas de referencia en el comercio exterior."
+        },
+        {
+            question: "¿Cuál es la vía más común para la exportación de productos frescos?",
+            options: ["Marítima", "Terrestre", "Aérea", "Subterránea"],
+            correctAnswer: "Aérea",
+            explanation: "La vía aérea permite entregar productos perecederos rápidamente."
+        },
+        {
+            question: "¿Cuál de los siguientes es un beneficio de exportar?",
+            options: ["Limitar el mercado", "Incrementar ventas y divisas", "Dificultar la producción", "Reducir productividad"],
+            correctAnswer: "Incrementar ventas y divisas",
+            explanation: "Exportar ayuda a acceder a mercados más amplios."
+        },
+        {
+            question: "¿Qué organismo promueve el comercio exterior en Perú?",
+            options: ["MINSA", "MINCETUR", "RENIEC", "BCRP"],
+            correctAnswer: "MINCETUR",
+            explanation: "El Ministerio de Comercio Exterior y Turismo lidera la promoción de exportaciones en Perú."
+        },
+        {
+            question: "¿Qué es un arancel de exportación?",
+            options: ["Un impuesto al salir mercancías del país", "Un servicio de paquetería urgente", "Un seguro de viaje", "Una carta formal"],
+            correctAnswer: "Un impuesto al salir mercancías del país",
+            explanation: "El arancel es el tributo aplicado por el Estado a bienes al exportarlos o importarlos."
+        },
+        {
+            question: "¿Qué es una cuota de exportación?",
+            options: ["Permiso para matrimonio", "Límite a la cantidad que se puede exportar de un producto", "Precio consultivo", "Comisión bancaria"],
+            correctAnswer: "Límite a la cantidad que se puede exportar de un producto",
+            explanation: "Las cuotas regulan la cantidad de un bien que sale de un país."
+        },
+        {
+            question: "¿Qué función cumple el agente de aduanas?",
+            options: ["Gestionar trámites y documentación de exportación", "Producir contenedores", "Cultivar tierras", "Realizar inspecciones de salud"],
+            correctAnswer: "Gestionar trámites y documentación de exportación",
+            explanation: "Facilitan la operación y cumplimiento de regulaciones."
+        },
+        {
+            question: "¿Qué es el BL (Bill of Lading)?",
+            options: ["Un recibo bancario", "El conocimiento de embarque, documento del transportista marítimo", "Un recibo de taxi", "Una póliza de seguro"],
+            correctAnswer: "El conocimiento de embarque, documento del transportista marítimo",
+            explanation: "Es esencial en embarques marítimos, avala y demuestra la carga."
+        },
+        {
+            question: "¿Para qué sirven los Tratados de Libre Comercio (TLC)?",
+            options: ["Establecen tarifas fijas de transporte", "Eliminar o reducir barreras arancelarias y potenciar comercio", "Regular matrimonios binacionales", "Controlar reservas de oro"],
+            correctAnswer: "Eliminar o reducir barreras arancelarias y potenciar comercio",
+            explanation: "Facilitan el acceso a nuevos mercados y reducen costos."
+        },
+        {
+            question: "¿Qué permite el régimen aduanero de exportación definitiva?",
+            options: ["Salida temporal con devolución", "Salida del producto para venta permanente fuera del país", "Renovación de licencias", "Prueba de embalaje"],
+            correctAnswer: "Salida del producto para venta permanente fuera del país",
+            explanation: "Es el régimen más común cuando la mercadería no va a regresar."
+        },
+        {
+            question: "¿Cómo se denomina el lugar habilitado por aduanas para el despacho de mercaderías?",
+            options: ["Playa de estacionamiento", "Depósito temporal", "Puesto de salud", "Oficina del alcalde"],
+            correctAnswer: "Depósito temporal",
+            explanation: "Es donde se almacenan y nacionalizan mercancías antes de despacho."
+        },
+        {
+            question: "¿Qué es el ‘packing list’?",
+            options: ["Lista de canciones", "Relación detallada de contenidos del embarque", "Programa de TV", "Inventario de computadoras"],
+            correctAnswer: "Relación detallada de contenidos del embarque",
+            explanation: "Informa a aduanas y clientes qué va exactamente en el envío."
+        },
+        {
+            question: "¿Qué significa la DUA?",
+            options: ["Declaración Única de Aduanas", "Documento Único de Avión", "Dictamen Unificado de Almacén", "Dólares Unificados de América"],
+            correctAnswer: "Declaración Única de Aduanas",
+            explanation: "Es el principal formulario para declarar mercadería ante Aduanas."
+        },
+        {
+            question: "¿Cuál es la función del Incoterm FOB?",
+            options: ["El vendedor paga flete y seguro hasta destino", "El comprador asume riesgos y costos desde el puerto de embarque", "El vendedor entrega en el almacén del cliente", "El vendedor sigue siendo responsable hasta la venta en el extranjero"],
+            correctAnswer: "El comprador asume riesgos y costos desde el puerto de embarque",
+            explanation: "En FOB, el comprador toma el control y asume riesgos en el puerto de origen."
+        },
     ],
     ...Array.from({ length: 19 }, (_, i) => i + 2).reduce((acc, level) => {
         acc[level] = Array.from({ length: levels[level-1].questions }, (_, qIndex) => ({
@@ -693,5 +783,7 @@ export default function SuppliersPage() {
         </div>
     );
 }
+
+    
 
     
