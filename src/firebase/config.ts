@@ -1,13 +1,11 @@
 // /src/firebase/config.ts
 
-// IMPORTANT: Replace the placeholder values with your actual Firebase project credentials.
-// You can find these in your Firebase project settings under "General".
-
+// IMPORTANT: These are the hardcoded credentials for debugging purposes.
 export const firebaseConfig = {
-  apiKey: "TU_VALOR_AQUI", // process.env.NEXT_PUBLIC_FIREBASE_API_KEY
-  authDomain: "TU_VALOR_AQUI", // process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-  projectId: "TU_VALOR_AQUI", // process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-  storageBucket: "TU_VALOR_AQUI", // process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-  messagingSenderId: "TU_VALOR_AQUI", // process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-  appId: "TU_VALOR_AQUI", // process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+  apiKey: "AIzaSyCCmb7V4gIUSLJgQzyM1OwsE8SC9g8c", 
+  authDomain: "studio-9478792464-25eb9.firebaseapp.com", 
+  projectId: "studio-9478792464-25eb9",
+  storageBucket: "studio-9478792464-25eb9.firebaseapp.com", 
+  messagingSenderId: "182565684029", 
+  appId: "1:182565684029:web:73e237b72e049f6b843b54",
 };
