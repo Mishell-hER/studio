@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,11 +13,9 @@ import { Input } from '../ui/input';
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { useRegisterModal } from '@/hooks/use-register-modal';
 import { useToast } from '@/hooks/use-toast';
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
-import { useAuth } from '@/firebase/provider';
-import React from 'react';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult, UserCredential } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useAuth } from '@/firebase';
 
 export function LoginModal() {
   const loginModal = useLoginModal();
@@ -30,46 +28,46 @@ export function LoginModal() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
-  React.useEffect(() => {
+  
+  // Efecto para manejar el resultado de la redirección de Google
+  useEffect(() => {
     if (!auth) return;
-
+    // Cuando la página se carga después de la redirección, getRedirectResult obtiene los datos del usuario.
     getRedirectResult(auth)
-      .then(async (result) => {
+      .then(async (result: UserCredential | null) => {
         if (result) {
           setIsLoading(true);
           const user = result.user;
-          if (!firestore) {
-              toast({ variant: 'destructive', title: "Error", description: "El servicio no está disponible." });
-              setIsLoading(false);
-              return;
-          }
-          
-          const userDocRef = doc(firestore, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
+          toast({ title: "¡Sesión iniciada con Google!" });
 
-          if (!userDoc.exists()) {
-            const username = user.email?.split('@')[0] || `user${Math.floor(Math.random() * 10000)}`;
-            const nameParts = user.displayName?.split(' ') || [];
-            await setDoc(userDocRef, {
-              uid: user.uid,
-              nombre: nameParts[0] || '',
-              apellido: nameParts.slice(1).join(' ') || '',
-              username: username,
-              correo: user.email,
-              photoURL: user.photoURL,
-              esEmpresario: false,
-            }, { merge: true });
+          // Si el usuario es nuevo, crea su perfil en Firestore
+          if (firestore) {
+            const userDocRef = doc(firestore, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (!userDoc.exists()) {
+                const username = user.email?.split('@')[0] || `user${Date.now()}`;
+                const nameParts = user.displayName?.split(' ') || [''];
+                await setDoc(userDocRef, {
+                    uid: user.uid,
+                    nombre: nameParts[0],
+                    apellido: nameParts.slice(1).join(' '),
+                    username: username,
+                    correo: user.email,
+                    photoURL: user.photoURL || '',
+                    esEmpresario: false,
+                    createdAt: serverTimestamp()
+                }, { merge: true });
+            }
           }
-          
-          toast({ title: "¡Sesión iniciada con éxito!" });
           loginModal.onClose();
           setIsLoading(false);
         }
       })
       .catch((error) => {
         console.error("Error durante el resultado de la redirección de Google:", error);
-        toast({ variant: 'destructive', title: "Error al iniciar sesión", description: "Hubo un problema con el inicio de sesión de Google." });
+        if(error.code !== 'auth/web-storage-unsupported') { // Ignorar este error común en algunos navegadores
+          toast({ variant: 'destructive', title: "Error de Google", description: "No se pudo completar el inicio de sesión." });
+        }
         setIsLoading(false);
       });
   }, [auth, firestore, toast, loginModal]);
@@ -108,21 +106,15 @@ export function LoginModal() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     if (!auth) {
-      toast({ variant: 'destructive', title: "Error", description: "El servicio no está disponible." });
+      toast({ variant: 'destructive', title: "Error", description: "El servicio de autenticación no está disponible." });
       return;
     }
     const provider = new GoogleAuthProvider();
     setIsLoading(true);
-    try {
-        await signInWithRedirect(auth, provider);
-        // La redirección se encargará del resto. El useEffect manejará el resultado.
-    } catch (error: any) {
-        console.error("Error durante el inicio de sesión con Google:", error);
-        toast({ variant: 'destructive', title: "Error al iniciar sesión", description: "No se pudo iniciar el proceso con Google." });
-        setIsLoading(false);
-    }
+    // Usamos signInWithRedirect para evitar problemas con pop-ups bloqueados
+    signInWithRedirect(auth, provider);
   };
 
   const onToggle = useCallback(() => {

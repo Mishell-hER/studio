@@ -27,9 +27,9 @@ import { useLoginModal } from '@/hooks/use-login-modal';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { useFirestore, useAuth } from '@/firebase';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuth, useFirestore } from '@/firebase';
 
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
@@ -76,11 +76,11 @@ export function RegisterModal() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    if (!firestore || !auth) {
+    if (!auth || !firestore) {
         toast({
             variant: 'destructive',
-            title: "Error",
-            description: "El servicio de autenticación no está disponible.",
+            title: "Error de configuración",
+            description: "El servicio de Firebase no está disponible. Por favor, revisa la configuración.",
         });
         setIsLoading(false);
         return;
@@ -91,7 +91,7 @@ export function RegisterModal() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.correo, values.password);
       const user = userCredential.user;
 
-      // 2. Actualizar el perfil de Auth (nombre y foto, si aplica)
+      // 2. Actualizar el perfil de Auth (nombre visible)
       await updateProfile(user, {
         displayName: `${values.nombre} ${values.apellido}`,
       });
@@ -106,6 +106,7 @@ export function RegisterModal() {
         correo: values.correo,
         photoURL: user.photoURL || '',
         esEmpresario: values.esEmpresario,
+        createdAt: serverTimestamp(),
       };
 
       if (values.esEmpresario) {
@@ -128,8 +129,8 @@ export function RegisterModal() {
     } catch (error: any) {
       let errorMessage = "Ocurrió un error desconocido durante el registro.";
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'El correo electrónico ya está registrado.';
-        form.setError("correo", { message: errorMessage });
+        errorMessage = 'El correo electrónico ya está registrado. Intenta iniciar sesión.';
+        form.setError("correo", { type: "manual", message: errorMessage });
       } else {
         console.error("Error en el registro:", error);
       }
