@@ -1,13 +1,14 @@
 'use client';
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { firebaseConfig } from './config'; // Import from the new config file
 
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let firestore: Firestore | undefined;
+let googleProvider: GoogleAuthProvider | undefined;
 
 function getFirebaseInstances() {
   // This function will only run on the client side, so `window` is safe to use.
@@ -29,11 +30,14 @@ function getFirebaseInstances() {
     if (app) {
       auth = getAuth(app);
       firestore = getFirestore(app);
+      googleProvider = new GoogleAuthProvider();
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
     }
   }
 
 
-  return { app, auth, firestore };
+  return { app, auth, firestore, googleProvider };
 }
 
 export { getFirebaseInstances };
