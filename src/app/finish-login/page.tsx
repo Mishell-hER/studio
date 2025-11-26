@@ -1,34 +1,86 @@
 
-// src/app/finish-login/page.tsx
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter }from 'next/navigation';
-import { useAuth } from '@/firebase';
-import { isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
+import { useEffect, useState, Suspense, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth, useFirestore } from '@/firebase';
+import { isSignInWithEmailLink, signInWithEmailLink, getRedirectResult } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useLoginModal } from '@/hooks/use-login-modal';
 
 function FinishLoginPageContent() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+  const loginModal = useLoginModal();
   const [status, setStatus] = useState('Verificando enlace...');
+
+  const processUser = useCallback(async (user: any) => {
+    if (!firestore || !user) return;
+    
+    const userDocRef = doc(firestore, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      const username = user.email?.split('@')[0] || `user${Date.now()}`;
+      const nameParts = user.displayName?.split(' ') || [username];
+      
+      await setDoc(userDocRef, {
+        uid: user.uid,
+        nombre: nameParts[0] || '',
+        apellido: nameParts.slice(1).join(' ') || '',
+        username: username,
+        correo: user.email,
+        photoURL: user.photoURL || `https://i.pravatar.cc/150?u=${user.uid}`,
+        esEmpresario: false,
+        createdAt: serverTimestamp()
+      });
+
+      toast({
+        title: '¡Bienvenido/a a LogisticX!',
+        description: 'Hemos creado un perfil para ti.',
+      });
+    } else {
+      toast({
+        title: `¡Bienvenido/a de nuevo!`,
+        description: 'Has iniciado sesión correctamente.',
+      });
+    }
+  }, [firestore, toast]);
+
 
   useEffect(() => {
     const completeSignIn = async () => {
-      if (!auth || !firestore || !window.location.href) {
-        // Espera a que Firebase se inicialice en el cliente.
-        // Si no se inicializa, las funciones de hook devolverán null.
-        if(!auth || !firestore){
-            setStatus("Esperando la inicialización de Firebase...");
-            return;
-        }
+      if (!auth || !firestore) {
+        setStatus("Esperando la inicialización de Firebase...");
         return;
       }
+      
+      // Manejar el resultado de la redirección de Google
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          loginModal.onClose();
+          setStatus('Procesando inicio de sesión con Google...');
+          await processUser(result.user);
+          setStatus('¡Inicio de sesión exitoso! Redirigiendo...');
+          router.push('/');
+          return; // Finaliza la ejecución si se procesó una redirección de Google
+        }
+      } catch (error: any) {
+         console.error("Error al obtener resultado de redirección:", error);
+         toast({
+           variant: 'destructive',
+           title: 'Error de inicio de sesión',
+           description: "No se pudo completar el inicio de sesión. Por favor, inténtalo de nuevo.",
+         });
+         router.push('/');
+         return;
+      }
 
+      // Manejar el resultado del enlace de correo electrónico
       if (isSignInWithEmailLink(auth, window.location.href)) {
         let email = window.localStorage.getItem('emailForSignIn');
         if (!email) {
@@ -37,69 +89,38 @@ function FinishLoginPageContent() {
 
         if (!email) {
           setStatus('No se proporcionó un correo. Proceso cancelado.');
-          toast({
-            variant: 'destructive',
-            title: 'Inicio de sesión cancelado',
-            description: 'No se pudo obtener el correo electrónico para la confirmación.',
-          });
+          toast({ variant: 'destructive', title: 'Inicio de sesión cancelado' });
           router.push('/');
           return;
         }
 
-        setStatus('Iniciando sesión...');
+        setStatus('Iniciando sesión con correo...');
         try {
           const result = await signInWithEmailLink(auth, email, window.location.href);
           window.localStorage.removeItem('emailForSignIn');
-
-          const user = result.user;
-          const userDocRef = doc(firestore, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-
-          if (!userDoc.exists()) {
-            const username = email.split('@')[0] || `user${Date.now()}`;
-            const nameParts = user.displayName?.split(' ') || [username];
-            await setDoc(userDocRef, {
-                uid: user.uid,
-                nombre: nameParts[0],
-                apellido: nameParts.slice(1).join(' ') || '',
-                username: username,
-                correo: email,
-                photoURL: user.photoURL || `https://i.pravatar.cc/150?u=${user.uid}`,
-                esEmpresario: false,
-                createdAt: serverTimestamp()
-            }, { merge: true });
-             toast({
-                title: '¡Bienvenido/a!',
-                description: 'Hemos creado un perfil básico para ti.',
-            });
-          } else {
-             toast({
-                title: '¡Bienvenido/a de nuevo!',
-                description: 'Has iniciado sesión correctamente.',
-            });
-          }
-
+          await processUser(result.user);
           setStatus('¡Inicio de sesión exitoso! Redirigiendo...');
           router.push('/');
-          
         } catch (error: any) {
           console.error('Error al iniciar sesión con el enlace:', error);
           setStatus(`Error: ${error.message}`);
           toast({
             variant: 'destructive',
             title: 'Error al iniciar sesión',
-            description: 'El enlace puede ser inválido o haber expirado. Por favor, inténtalo de nuevo.',
+            description: 'El enlace puede ser inválido o haber expirado.',
           });
           router.push('/');
         }
-      } else {
-        setStatus('Enlace no válido. Redirigiendo al inicio...');
-        router.push('/');
+      } else if (!auth.currentUser) {
+        // Si no hay redirección de Google ni enlace de correo, y no hay usuario, redirigir.
+        setStatus('No se encontró una acción de inicio de sesión. Redirigiendo al inicio...');
+        // Pequeña demora para que el usuario pueda leer el mensaje
+        setTimeout(() => router.push('/'), 2000);
       }
     };
 
     completeSignIn();
-  }, [auth, firestore, router, toast]);
+  }, [auth, firestore, router, toast, processUser, loginModal]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center text-center">

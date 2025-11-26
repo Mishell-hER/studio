@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { sendSignInLinkToEmail, signInWithRedirect } from 'firebase/auth';
 import { googleProvider } from '@/firebase/client';
 import { Separator } from '../ui/separator';
@@ -33,7 +33,7 @@ export function LoginModal() {
     }
     
     setIsLoading(true);
-    // Usamos signInWithRedirect en lugar de signInWithPopup
+    // Usamos signInWithRedirect en lugar de signInWithPopup para evitar bloqueos
     await signInWithRedirect(auth, googleProvider);
   }
 
