@@ -122,8 +122,6 @@ export function LoginModal() {
         let description = "Ocurrió un error. Por favor, inténtalo de nuevo.";
         if (error.code === 'auth/invalid-email') {
             description = "El correo electrónico no es válido.";
-        } else if (error.code === 'auth/api-key-not-valid') {
-          description = "Error de configuración. La clave de API de Firebase no es válida.";
         }
         toast({
             variant: 'destructive',
