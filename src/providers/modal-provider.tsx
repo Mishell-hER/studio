@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { LoginModal } from "@/components/modals/login-modal";
-import { RegisterModal } from "@/components/modals/register-modal";
 
 export function ModalProvider() {
   const [isMounted, setIsMounted] = useState(false);
@@ -18,7 +17,6 @@ export function ModalProvider() {
   return (
     <>
       <LoginModal />
-      <RegisterModal />
     </>
   );
 }

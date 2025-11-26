@@ -1,9 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { Globe, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { Globe, LogIn, LogOut } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useLoginModal } from '@/hooks/use-login-modal';
-import { useRegisterModal } from '@/hooks/use-register-modal';
 import { useUser } from '@/firebase/auth/use-user';
 import { useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
@@ -20,7 +19,6 @@ import { Skeleton } from '../ui/skeleton';
 
 export function Header() {
   const loginModal = useLoginModal();
-  const registerModal = useRegisterModal();
   const { user, userProfile, loading } = useUser();
   const auth = useAuth();
 
@@ -75,7 +73,6 @@ export function Header() {
     return (
       <nav className="flex items-center space-x-2">
         <Button variant="ghost" onClick={loginModal.onOpen}><LogIn className="mr-2 h-4 w-4" /> Iniciar Sesión</Button>
-        <Button onClick={registerModal.onOpen}><UserPlus className="mr-2 h-4 w-4" /> Registrarse</Button>
       </nav>
     );
   };
