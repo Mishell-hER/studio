@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -18,6 +19,7 @@ import { useAuth, useFirestore } from '@/firebase';
 import { sendSignInLinkToEmail, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Separator } from '../ui/separator';
+import { getFirebaseInstances } from '@/firebase/client';
 
 export function LoginModal() {
   const loginModal = useLoginModal();
@@ -29,17 +31,17 @@ export function LoginModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLinkSent, setIsLinkSent] = useState(false);
 
-  const handleGoogleSignIn = async () => {
-    if (!auth || !firestore) {
+  const call_login_google = async () => {
+    const { googleProvider } = getFirebaseInstances();
+    if (!auth || !firestore || !googleProvider) {
       toast({ variant: 'destructive', title: "Error", description: "Firebase no está disponible." });
       return;
     }
     
     setIsLoading(true);
-    const provider = new GoogleAuthProvider();
 
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
       // Verificar si el usuario ya existe en Firestore
@@ -160,7 +162,7 @@ export function LoginModal() {
             </div>
         ) : (
             <div className="space-y-4">
-                <Button onClick={handleGoogleSignIn} className="w-full" disabled={isLoading}>
+                <Button onClick={call_login_google} className="w-full" disabled={isLoading}>
                     <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 173.4 54.7l-73.2 67.7C309.6 99.8 280.7 84 248 84c-84.3 0-152.3 67.8-152.3 151.7S163.7 387.4 248 387.4c97.2 0 130.2-72.2 133.7-109.4H248v-85.3h236.1c2.3 12.7 3.9 26.9 3.9 41.4z"></path></svg>
                     Iniciar Sesión con Google
                 </Button>
@@ -203,3 +205,4 @@ export function LoginModal() {
     </Dialog>
   );
 }
+
