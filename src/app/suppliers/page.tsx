@@ -686,6 +686,26 @@ const GameOverScreen: React.FC<{ score: number, requiredScore: number, onRetry: 
     </Card>
 );
 
+const StarsRating: React.FC = () => (
+    <motion.div 
+        className="flex justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ staggerChildren: 0.1 }}
+    >
+        {[...Array(3)].map((_, i) => (
+            <motion.div
+                key={i}
+                initial={{ y: 20, opacity: 0, scale: 0.5 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15, delay: i * 0.1 }}
+            >
+                <Star className="w-10 h-10 text-yellow-400 fill-yellow-400" />
+            </motion.div>
+        ))}
+    </motion.div>
+);
+
 const GameComponent: React.FC<{ 
     user: { uid: string, nombre: string };
     onBackToMenu: () => void;
@@ -883,10 +903,11 @@ const GameComponent: React.FC<{
                     </div>
                     <AnimatePresence>
                         {isAnswered && isCorrect && (
-                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-md bg-green-100 dark:bg-green-900/30">
+                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-md bg-green-100 dark:bg-green-900/30 space-y-2">
                                 <h4 className="font-bold text-lg text-green-800 dark:text-green-200">
                                     ¡Correcto!
                                 </h4>
+                                <StarsRating />
                                 <p className="mt-1 text-card-foreground/80">{questionData.explanation}</p>
                             </motion.div>
                         )}
@@ -1155,3 +1176,4 @@ export default function SuppliersPage() {
     
 
     
+
