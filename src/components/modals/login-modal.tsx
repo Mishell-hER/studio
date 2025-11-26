@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from 'react';
@@ -13,14 +14,16 @@ import { Button } from "@/components/ui/button";
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
-import { sendSignInLinkToEmail, signInWithRedirect } from 'firebase/auth';
-import { googleProvider } from '@/firebase/client';
+import { sendSignInLinkToEmail, signInWithPopup, signInWithRedirect, GoogleAuthProvider } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Separator } from '../ui/separator';
 import { Input } from '../ui/input';
+import { googleProvider } from '@/firebase/client';
 
 export function LoginModal() {
   const loginModal = useLoginModal();
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -33,8 +36,61 @@ export function LoginModal() {
     }
     
     setIsLoading(true);
-    // Usamos signInWithRedirect en lugar de signInWithPopup para evitar bloqueos
-    await signInWithRedirect(auth, googleProvider);
+    
+    try {
+      // Intenta primero con signInWithPopup
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      const userDocRef = doc(firestore!, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        const username = user.email?.split('@')[0] || `user${Date.now()}`;
+        const nameParts = user.displayName?.split(' ') || [username];
+        
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          nombre: nameParts[0] || '',
+          apellido: nameParts.slice(1).join(' ') || '',
+          username: username,
+          correo: user.email,
+          photoURL: user.photoURL || `https://i.pravatar.cc/150?u=${user.uid}`,
+          esEmpresario: false,
+          createdAt: serverTimestamp()
+        });
+
+        toast({
+          title: '¡Bienvenido/a a LogisticX!',
+          description: 'Hemos creado un perfil para ti.',
+        });
+      } else {
+         toast({
+          title: `¡Bienvenido/a de nuevo!`,
+          description: 'Has iniciado sesión correctamente.',
+        });
+      }
+      loginModal.onClose();
+
+    } catch (error: any) {
+      // Si el popup es bloqueado, usa redirect como fallback
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+        toast({
+            title: "Redirigiendo para iniciar sesión...",
+            description: "El navegador bloqueó la ventana emergente. Te estamos redirigiendo."
+        });
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        console.error("Error en el inicio de sesión con Google:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error de inicio de sesión',
+          description: error.message || 'No se pudo completar el inicio de sesión.',
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleSendLink = async () => {

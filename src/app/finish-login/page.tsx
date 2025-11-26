@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useFirestore } from '@/firebase';
-import { isSignInWithEmailLink, signInWithEmailLink, getRedirectResult } from 'firebase/auth';
+import { isSignInWithEmailLink, signInWithEmailLink, getRedirectResult, User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useLoginModal } from '@/hooks/use-login-modal';
@@ -15,11 +16,12 @@ function FinishLoginPageContent() {
   const router = useRouter();
   const { toast } = useToast();
   const loginModal = useLoginModal();
-  const [status, setStatus] = useState('Verificando enlace...');
+  const [status, setStatus] = useState('Verificando inicio de sesión...');
 
-  const processUser = useCallback(async (user: any) => {
+  const processUser = useCallback(async (user: User | null) => {
     if (!firestore || !user) return;
     
+    setStatus('Procesando datos de usuario...');
     const userDocRef = doc(firestore, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -58,10 +60,10 @@ function FinishLoginPageContent() {
         return;
       }
       
-      // Manejar el resultado de la redirección de Google
+      // 1. Manejar el resultado de la redirección de Google
       try {
         const result = await getRedirectResult(auth);
-        if (result) {
+        if (result && result.user) {
           loginModal.onClose();
           setStatus('Procesando inicio de sesión con Google...');
           await processUser(result.user);
@@ -74,13 +76,13 @@ function FinishLoginPageContent() {
          toast({
            variant: 'destructive',
            title: 'Error de inicio de sesión',
-           description: "No se pudo completar el inicio de sesión. Por favor, inténtalo de nuevo.",
+           description: "No se pudo completar el inicio de sesión con Google. Por favor, inténtalo de nuevo.",
          });
          router.push('/');
          return;
       }
 
-      // Manejar el resultado del enlace de correo electrónico
+      // 2. Manejar el resultado del enlace de correo electrónico
       if (isSignInWithEmailLink(auth, window.location.href)) {
         let email = window.localStorage.getItem('emailForSignIn');
         if (!email) {
@@ -101,6 +103,7 @@ function FinishLoginPageContent() {
           await processUser(result.user);
           setStatus('¡Inicio de sesión exitoso! Redirigiendo...');
           router.push('/');
+          return;
         } catch (error: any) {
           console.error('Error al iniciar sesión con el enlace:', error);
           setStatus(`Error: ${error.message}`);
@@ -110,17 +113,25 @@ function FinishLoginPageContent() {
             description: 'El enlace puede ser inválido o haber expirado.',
           });
           router.push('/');
+          return;
         }
-      } else if (!auth.currentUser) {
-        // Si no hay redirección de Google ni enlace de correo, y no hay usuario, redirigir.
-        setStatus('No se encontró una acción de inicio de sesión. Redirigiendo al inicio...');
-        // Pequeña demora para que el usuario pueda leer el mensaje
-        setTimeout(() => router.push('/'), 2000);
+      } 
+      
+      // 3. Si no hay redirección ni enlace, pero ya hay usuario, redirigir
+      if(auth.currentUser) {
+        setStatus('Ya has iniciado sesión. Redirigiendo...');
+        setTimeout(() => router.push('/'), 1000);
+        return;
       }
+      
+      // 4. Si no hay ninguna acción pendiente
+      setStatus('No se encontró una acción de inicio de sesión. Redirigiendo al inicio...');
+      setTimeout(() => router.push('/'), 2000);
     };
 
     completeSignIn();
-  }, [auth, firestore, router, toast, processUser, loginModal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth, firestore]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center text-center">
