@@ -5,14 +5,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import type { Post } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
+import { UserLevelBadge } from './user-level-badge';
 
 export function PostCard({ post }: { post: Post }) {
     return (
         <Card>
             <CardHeader>
             <CardTitle>{post.title}</CardTitle>
-            <CardDescription>
-                <span className="font-semibold">{post.continent}</span> - Publicado por {post.authorName || 'Usuario Anónimo'} el {post.timestamp ? new Date(post.timestamp.seconds * 1000).toLocaleDateString() : 'hace un momento'}
+            <CardDescription className="flex items-center gap-2 flex-wrap">
+                <span className="font-semibold">{post.continent}</span>
+                <span>- Publicado por {post.authorName || 'Usuario Anónimo'}</span>
+                <UserLevelBadge userId={post.authorId} />
+                <span>el {post.timestamp ? new Date(post.timestamp.seconds * 1000).toLocaleDateString() : 'hace un momento'}</span>
             </CardDescription>
             </CardHeader>
             <CardContent>

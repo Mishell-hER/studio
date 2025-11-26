@@ -33,10 +33,27 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --role-expert-bg: 350 85% 60%; 
-    --role-expert-fg: 350 85% 98%;
-    --role-beginner-bg: 142 76% 36%;
-    --role-beginner-fg: 142 76% 96%;
+
+    /* Nivel 1 */ --level-1-bg: 213 100% 36%; --level-1-fg: 0 0% 98%;
+    /* Nivel 2 */ --level-2-bg: 45 100% 50%; --level-2-fg: 0 0% 10%;
+    /* Nivel 3 */ --level-3-bg: 30 100% 50%; --level-3-fg: 0 0% 10%;
+    /* Nivel 4 */ --level-4-bg: 277 55% 34%; --level-4-fg: 0 0% 98%;
+    /* Nivel 5 */ --level-5-bg: 269 49% 41%; --level-5-fg: 0 0% 98%;
+    /* Nivel 6 */ --level-6-bg: 322 100% 41%; --level-6-fg: 0 0% 98%;
+    /* Nivel 7 */ --level-7-bg: 0 0% 100%; --level-7-fg: 0 0% 10%;
+    /* Nivel 8 */ --level-8-bg: 0 0% 0%; --level-8-fg: 0 0% 98%;
+    /* Nivel 9 */ --level-9-bg: 220 2% 61%; --level-9-fg: 0 0% 10%;
+    /* Nivel 10 */ --level-10-bg: 20 40% 21%; --level-10-fg: 0 0% 98%;
+    /* Nivel 11 */ --level-11-bg: 180 100% 35%; --level-11-fg: 0 0% 10%;
+    /* Nivel 12 */ --level-12-bg: 206 82% 81%; --level-12-fg: 0 0% 10%;
+    /* Nivel 13 */ --level-13-bg: 267 22% 65%; --level-13-fg: 0 0% 10%;
+    /* Nivel 14 */ --level-14-bg: 40 37% 76%; --level-14-fg: 0 0% 10%;
+    /* Nivel 15 */ --level-15-bg: 40 100% 60%; --level-15-fg: 0 0% 10%; /* Dorado no metálico */
+    /* Nivel 16 */ --level-16-bg: 0 0% 75%; --level-16-fg: 0 0% 10%; /* Plateado no metálico */
+    /* Nivel 17 */ --level-17-bg: 4 100% 69%; --level-17-fg: 0 0% 10%;
+    /* Nivel 18 */ --level-18-bg: 323 100% 47%; --level-18-fg: 0 0% 98%;
+    /* Nivel 19 */ --level-19-bg: 11 100% 70%; --level-19-fg: 0 0% 10%;
+    /* Nivel 20 */ --level-20-bg: 254 48% 20%; --level-20-fg: 0 0% 98%;
   }
   .dark {
     --background: 0 0% 4%;

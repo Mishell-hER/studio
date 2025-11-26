@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/co
 import type { Opinion } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
+import { UserLevelBadge } from './user-level-badge';
 
 export function OpinionCard({ opinion }: { opinion: Opinion }) {
     const replyLink = `/forum/opinion/${opinion.id}`;
@@ -12,8 +13,10 @@ export function OpinionCard({ opinion }: { opinion: Opinion }) {
     return (
         <Card>
             <CardHeader>
-                <CardDescription>
-                    Opinión de {opinion.authorName || 'Anónimo'} - Publicado el {opinion.timestamp ? new Date(opinion.timestamp.seconds * 1000).toLocaleDateString() : 'hace un momento'}
+                <CardDescription className="flex items-center gap-2 flex-wrap">
+                    Opinión de {opinion.authorName || 'Anónimo'}
+                    <UserLevelBadge userId={opinion.authorId} />
+                    <span>- Publicado el {opinion.timestamp ? new Date(opinion.timestamp.seconds * 1000).toLocaleDateString() : 'hace un momento'}</span>
                 </CardDescription>
             </CardHeader>
             <CardContent>

@@ -1,9 +1,13 @@
 
 'use client';
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Opinion, Reply } from '@/lib/types';
 import { notFound } from 'next/navigation';
+import { UserLevelBadge } from '../../_components/user-level-badge';
+import { Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Datos de ejemplo para la opinión y sus respuestas
 const sampleOpinion: Opinion = {
@@ -19,6 +23,36 @@ const sampleReplies: Reply[] = [
     { id: 'r2', postId: 'o1', content: 'El principal problema es la falta de voluntad política y la resistencia al cambio en muchos países.', authorId: 'user5', authorName: 'Marco G.', authorPhotoURL: 'https://i.pravatar.cc/150?u=user5', timestamp: { seconds: 1678970400, nanoseconds: 0 } },
 ];
 
+function StarRating({ totalStars = 5 }) {
+    const [rating, setRating] = useState(0);
+    const [hover, setHover] = useState(0);
+    return (
+      <div className="flex items-center">
+        {[...Array(totalStars)].map((_, index) => {
+          const starValue = index + 1;
+          return (
+            <button
+              type="button"
+              key={starValue}
+              className="bg-transparent border-none cursor-pointer"
+              onClick={() => setRating(starValue)}
+              onMouseEnter={() => setHover(starValue)}
+              onMouseLeave={() => setHover(rating)}
+            >
+              <Star
+                className={cn(
+                  "h-5 w-5 transition-colors",
+                  starValue <= (hover || rating)
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-gray-400"
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
+    );
+}
 
 function ReplyCard({ reply }: { reply: Reply }) {
     return (
@@ -29,8 +63,9 @@ function ReplyCard({ reply }: { reply: Reply }) {
                     <AvatarFallback>{reply.authorName?.charAt(0).toUpperCase() || 'A'}</AvatarFallback>
                  </Avatar>
                 <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold">{reply.authorName || 'Anónimo'}</span>
+                        <UserLevelBadge userId={reply.authorId} />
                     </div>
                     <p className="text-xs text-muted-foreground">
                         {reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleString() : 'Justo ahora'}
@@ -40,6 +75,10 @@ function ReplyCard({ reply }: { reply: Reply }) {
             <CardContent>
                 <p className="whitespace-pre-wrap text-foreground/90">{reply.content}</p>
             </CardContent>
+            <CardFooter className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Calificar respuesta:</span>
+                <StarRating />
+            </CardFooter>
         </Card>
     );
 }
@@ -56,8 +95,10 @@ export default function OpinionResponsePage({ params }: { params: { id: string }
     <div className="container mx-auto max-w-3xl space-y-8">
       <Card>
         <CardHeader>
-          <CardDescription>
-            Opinión de {opinion.authorName || 'Anónimo'} el {opinion.timestamp ? new Date(opinion.timestamp?.seconds * 1000).toLocaleDateString() : ''}
+          <CardDescription className="flex items-center gap-2 flex-wrap">
+            Opinión de {opinion.authorName || 'Anónimo'}
+            <UserLevelBadge userId={opinion.authorId} />
+            <span>el {opinion.timestamp ? new Date(opinion.timestamp?.seconds * 1000).toLocaleDateString() : ''}</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
