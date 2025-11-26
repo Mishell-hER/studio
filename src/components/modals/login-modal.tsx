@@ -13,14 +13,16 @@ import { Input } from '../ui/input';
 import { useLoginModal } from "@/hooks/use-login-modal";
 import { useRegisterModal } from '@/hooks/use-register-modal';
 import { useToast } from '@/hooks/use-toast';
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
+import { useAuth } from '@/firebase/provider';
+import React from 'react';
 
 export function LoginModal() {
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
-  const auth = getAuth();
+  const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
 
@@ -28,6 +30,50 @@ export function LoginModal() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  React.useEffect(() => {
+    if (!auth) return;
+
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result) {
+          setIsLoading(true);
+          const user = result.user;
+          if (!firestore) {
+              toast({ variant: 'destructive', title: "Error", description: "El servicio no está disponible." });
+              setIsLoading(false);
+              return;
+          }
+          
+          const userDocRef = doc(firestore, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (!userDoc.exists()) {
+            const username = user.email?.split('@')[0] || `user${Math.floor(Math.random() * 10000)}`;
+            const nameParts = user.displayName?.split(' ') || [];
+            await setDoc(userDocRef, {
+              uid: user.uid,
+              nombre: nameParts[0] || '',
+              apellido: nameParts.slice(1).join(' ') || '',
+              username: username,
+              correo: user.email,
+              photoURL: user.photoURL,
+              esEmpresario: false,
+            }, { merge: true });
+          }
+          
+          toast({ title: "¡Sesión iniciada con éxito!" });
+          loginModal.onClose();
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error durante el resultado de la redirección de Google:", error);
+        toast({ variant: 'destructive', title: "Error al iniciar sesión", description: "Hubo un problema con el inicio de sesión de Google." });
+        setIsLoading(false);
+      });
+  }, [auth, firestore, toast, loginModal]);
+
 
   const handleEmailPasswordSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,40 +109,19 @@ export function LoginModal() {
   };
 
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    if (!firestore || !auth) {
+    if (!auth) {
       toast({ variant: 'destructive', title: "Error", description: "El servicio no está disponible." });
       return;
     }
+    const provider = new GoogleAuthProvider();
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      const userDocRef = doc(firestore, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          nombre: user.displayName?.split(' ')[0] || '',
-          apellido: user.displayName?.split(' ').slice(1).join(' ') || '',
-          username: user.email?.split('@')[0] || `user${Math.floor(Math.random() * 1000)}`,
-          correo: user.email,
-          photoURL: user.photoURL,
-          esEmpresario: false,
-        }, { merge: true });
-      }
-      
-      toast({ title: "¡Sesión iniciada con éxito!" });
-      loginModal.onClose();
+        await signInWithRedirect(auth, provider);
+        // La redirección se encargará del resto. El useEffect manejará el resultado.
     } catch (error: any) {
-      console.error("Error durante el inicio de sesión con Google:", error);
-      if (error.code !== 'auth/popup-closed-by-user') {
-          toast({ variant: 'destructive', title: "Error al iniciar sesión", description: "Hubo un problema al iniciar sesión con Google." });
-      }
-    } finally {
-      setIsLoading(false);
+        console.error("Error durante el inicio de sesión con Google:", error);
+        toast({ variant: 'destructive', title: "Error al iniciar sesión", description: "No se pudo iniciar el proceso con Google." });
+        setIsLoading(false);
     }
   };
 

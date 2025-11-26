@@ -3,38 +3,35 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
-
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+import { firebaseConfig } from './config'; // Import from the new config file
 
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let firestore: Firestore | undefined;
 
 function getFirebaseInstances() {
+  // This function will only run on the client side, so `window` is safe to use.
   if (typeof window !== 'undefined') {
-    if (!app) {
-      const apps = getApps();
-      if (apps.length > 0) {
-        app = apps[0];
-      } else if (firebaseConfig.apiKey) {
+    // Check if Firebase has already been initialized
+    if (getApps().length === 0) {
+      // Check if the config keys are valid before initializing
+      if (firebaseConfig && firebaseConfig.apiKey) {
         app = initializeApp(firebaseConfig);
+      } else {
+        console.error("FIREBASE CLIENT ERROR: Firebase config is missing or invalid. Check src/firebase/config.ts");
       }
+    } else {
+      // If already initialized, get the existing app instance
+      app = getApps()[0];
     }
-
-    if (app && !auth) {
+  
+    // Get Auth and Firestore instances from the app
+    if (app) {
       auth = getAuth(app);
-    }
-    if (app && !firestore) {
       firestore = getFirestore(app);
     }
   }
+
 
   return { app, auth, firestore };
 }

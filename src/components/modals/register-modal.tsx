@@ -98,16 +98,16 @@ export function RegisterModal() {
         return;
       }
       
-      // 2. Crear el usuario en Firebase Authentication
+      // 2. Crear el usuario en Firebase Authentication (CLIENT-SIDE)
       const userCredential = await createUserWithEmailAndPassword(auth, values.correo, values.password);
       const user = userCredential.user;
 
-      // 3. Actualizar el perfil de Auth (opcional, pero buena práctica)
+      // 3. Actualizar el perfil de Auth
       await updateProfile(user, {
         displayName: `${values.nombre} ${values.apellido}`,
       });
 
-      // 4. Crear el documento de perfil en Firestore
+      // 4. Crear el documento de perfil en Firestore (CLIENT-SIDE)
       const userDocRef = doc(firestore, 'users', user.uid);
       
       const profileData: any = {

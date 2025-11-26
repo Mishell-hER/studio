@@ -8,8 +8,14 @@ service cloud.firestore {
     // Un usuario autenticado puede crear SU PROPIO perfil, pero no el de otros.
     // Un usuario autenticado puede actualizar SU PROPIO perfil.
     match /users/{userId} {
-      allow read, list;
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      // Cualquier persona puede buscar en la lista (para verificar usernames)
+      allow list; 
+      // Cualquier persona puede leer un perfil
+      allow get;
+      // Solo un usuario autenticado puede crear su PROPIO perfil
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Solo un usuario autenticado puede actualizar SU PROPIO perfil
+      allow update: if request.auth != null && request.auth.uid == userId;
     }
     
     match /posts/{postId} {
