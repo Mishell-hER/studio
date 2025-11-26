@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation';
 import { UserLevelBadge } from '../../_components/user-level-badge';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NewReplyForm } from '../../_components/new-reply-form';
 
 // Datos de ejemplo para la opinión y sus respuestas
 const sampleOpinion: Opinion = {
@@ -113,11 +114,7 @@ export default function OpinionResponsePage({ params }: { params: { id: string }
         ))}
       </div>
       
-       <Card className="mt-8 p-4 bg-muted/20 border-dashed">
-            <CardDescription className="text-center">
-                La creación de nuevas respuestas se ha desactivado temporalmente.
-            </CardDescription>
-       </Card>
+       <NewReplyForm postId={opinion.id} />
 
     </div>
   );

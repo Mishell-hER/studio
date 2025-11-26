@@ -1,13 +1,13 @@
 
 'use client';
 import { useState } from 'react';
-import { Card, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Post, Opinion } from '@/lib/types';
 import { continents } from '@/lib/continents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from './_components/post-card';
 import { OpinionCard } from './_components/opinion-card';
+import { NewPostForm } from './_components/new-post-form';
 
 // Datos de ejemplo para el foro
 const samplePosts: Post[] = [
@@ -54,18 +54,14 @@ export default function ForumPage() {
         <h1 className="text-4xl font-bold tracking-tighter">Foro Comunitario</h1>
         <p className="text-lg text-muted-foreground mt-2">Pregunta, opina y comparte tus conocimientos con la comunidad.</p>
       </div>
-       <Card className="mb-8 p-4 bg-muted/20 border-dashed">
-            <CardDescription className="text-center">
-                La creación de nuevas preguntas y opiniones se ha desactivado temporalmente.
-            </CardDescription>
-       </Card>
 
        <Tabs defaultValue="preguntas" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
           <TabsTrigger value="preguntas">Preguntas y Respuestas</TabsTrigger>
           <TabsTrigger value="opiniones">Opiniones</TabsTrigger>
         </TabsList>
         <TabsContent value="preguntas" className="mt-6">
+            <NewPostForm type="question" />
             <div className="my-6 flex items-center gap-4">
                 <span className="text-sm font-medium">Filtrar por continente:</span>
                 <Select value={continentFilter} onValueChange={setContinentFilter}>
@@ -74,13 +70,14 @@ export default function ForumPage() {
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    {continents.map(c => <SelectItem key={c.slug} value={c.name}>{c.name}</SelectItem>)}
+                    {continents.filter(c => c.slug !== 'otros').map(c => <SelectItem key={c.slug} value={c.name}>{c.name}</SelectItem>)}
                 </SelectContent>
                 </Select>
             </div>
             {renderPosts()}
         </TabsContent>
         <TabsContent value="opiniones" className="mt-6">
+            <NewPostForm type="opinion" />
             {renderOpinions()}
         </TabsContent>
       </Tabs>
