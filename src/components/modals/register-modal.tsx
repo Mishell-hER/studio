@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 
 const formSchema = z.object({
@@ -87,29 +87,17 @@ export function RegisterModal() {
     }
 
     try {
-      // 1. Verificar si el nombre de usuario ya existe
-      const usersRef = collection(firestore, 'users');
-      const q = query(usersRef, where('username', '==', values.username));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        form.setError("username", { message: "Este nombre de usuario ya está en uso." });
-        setIsLoading(false);
-        return;
-      }
-      
-      // 2. Crear el usuario en Firebase Authentication (CLIENT-SIDE)
+      // 1. Crear el usuario en Firebase Authentication (CLIENT-SIDE)
       const userCredential = await createUserWithEmailAndPassword(auth, values.correo, values.password);
       const user = userCredential.user;
 
-      // 3. Actualizar el perfil de Auth
+      // 2. Actualizar el perfil de Auth (nombre y foto, si aplica)
       await updateProfile(user, {
         displayName: `${values.nombre} ${values.apellido}`,
       });
 
-      // 4. Crear el documento de perfil en Firestore (CLIENT-SIDE)
+      // 3. Preparar el documento de perfil para Firestore
       const userDocRef = doc(firestore, 'users', user.uid);
-      
       const profileData: any = {
         uid: user.uid,
         nombre: values.nombre,
@@ -124,7 +112,9 @@ export function RegisterModal() {
         profileData.RUC = values.RUC;
         profileData.sector = values.sector;
       }
-
+      
+      // 4. Crear el documento de perfil en Firestore
+      // Esto funcionará gracias a la nueva regla de seguridad
       await setDoc(userDocRef, profileData);
 
       // 5. Finalizar el proceso
