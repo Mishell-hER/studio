@@ -1,4 +1,7 @@
+"use client";
 
+import { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -8,17 +11,65 @@ import { Header } from '@/components/layout/header';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { Sidebar } from '@/components/ui/sidebar';
 import { ModalProvider } from '@/providers/modal-provider';
-import { LocalUserProvider } from '@/hooks/use-local-auth';
+import { LocalAuthContext, type LocalUserProfile, type LocalAuthContextType } from '@/hooks/use-local-auth';
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
 });
 
-export const metadata: Metadata = {
-  title: 'LogisticX',
-  description: 'Tu centro de información para la logística de exportación.',
-};
+const LOCAL_STORAGE_KEY = 'localUserAuth';
+
+function LocalUserProvider({ children }: { children: React.ReactNode }) {
+    const [user, setUser] = useState<LocalUserProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+        setIsLoading(false);
+    }, []);
+
+    const loginLocal = (nombreElegido: string) => {
+        const storedUser = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storedUser) {
+            const existingUser = JSON.parse(storedUser);
+            setUser(existingUser);
+            return existingUser;
+        }
+
+        const newUid = uuidv4();
+        const newUser: LocalUserProfile = {
+            uid: newUid,
+            nombre: nombreElegido,
+        };
+        
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUser));
+        setUser(newUser);
+        return newUser;
+    };
+
+    const logoutLocal = () => {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        setUser(null);
+    };
+
+    const value: LocalAuthContextType = { user, isLoading, loginLocal, logoutLocal };
+
+    return (
+        <LocalAuthContext.Provider value={value}>
+            {children}
+        </LocalAuthContext.Provider>
+    );
+}
+
+
+// export const metadata: Metadata = {
+//   title: 'LogisticX',
+//   description: 'Tu centro de información para la logística de exportación.',
+// };
 
 export default function RootLayout({
   children,
