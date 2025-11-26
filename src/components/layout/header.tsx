@@ -72,7 +72,7 @@ export function Header() {
 
     return (
       <nav className="flex items-center space-x-2">
-        <Button variant="ghost" onClick={loginModal.onOpen}><LogIn className="mr-2 h-4 w-4" /> Iniciar Sesión</Button>
+        <Button variant="outline" onClick={loginModal.onOpen}><LogIn className="mr-2 h-4 w-4" /> Iniciar Sesión</Button>
       </nav>
     );
   };
