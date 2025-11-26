@@ -44,10 +44,12 @@ export function LoginModal() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
+      // Verificar si el usuario ya existe en Firestore
       const userDocRef = doc(firestore, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
+        // Usuario nuevo, crear perfil en Firestore
         const username = user.email?.split('@')[0] || `user${Date.now()}`;
         const nameParts = user.displayName?.split(' ') || [username];
         
