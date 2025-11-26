@@ -2,59 +2,56 @@
 'use client';
 import { createContext, useContext, ReactNode } from 'react';
 import type { FirebaseApp } from 'firebase/app';
-import type { Auth } from 'firebase/auth';
+import type { Auth, GoogleAuthProvider } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 
 interface FirebaseContextValue {
   app: FirebaseApp | null;
   auth: Auth | null;
   firestore: Firestore | null;
+  googleProvider: GoogleAuthProvider | null;
 }
 
 const FirebaseContext = createContext<FirebaseContextValue>({
   app: null,
   auth: null,
   firestore: null,
+  googleProvider: null,
 });
 
 export function FirebaseProvider({
   children,
-  app,
-  auth,
-  firestore,
+  ...value
 }: {
   children: ReactNode;
-  app: FirebaseApp | null;
-  auth: Auth | null;
-  firestore: Firestore | null;
-}) {
+} & FirebaseContextValue) {
   return (
-    <FirebaseContext.Provider value={{ app, auth, firestore }}>
+    <FirebaseContext.Provider value={value}>
       {children}
     </FirebaseContext.Provider>
   );
 }
 
-export const useFirebaseApp = () => {
+export const useFirebase = () => {
     const context = useContext(FirebaseContext);
     if (context === undefined) {
-        throw new Error('useFirebaseApp must be used within a FirebaseProvider');
+        throw new Error('useFirebase must be used within a FirebaseProvider');
     }
-    return context.app;
+    return context;
+}
+
+export const useFirebaseApp = () => {
+    return useFirebase().app;
 }
 
 export const useAuth = () => {
-    const context = useContext(FirebaseContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within a FirebaseProvider');
-    }
-    return context.auth;
+    return useFirebase().auth;
 }
 
 export const useFirestore = () => {
-    const context = useContext(FirebaseContext);
-    if (context === undefined) {
-        throw new Error('useFirestore must be used within a FirebaseProvider');
-    }
-    return context.firestore;
+    return useFirebase().firestore;
+}
+
+export const useGoogleProvider = () => {
+    return useFirebase().googleProvider;
 }

@@ -15,21 +15,24 @@ import { useToast } from '@/hooks/use-toast';
 import { sendSignInLinkToEmail, signInWithPopup, signInWithRedirect } from 'firebase/auth';
 import { Separator } from '../ui/separator';
 import { Input } from '../ui/input';
-// Importar instancias directamente del cliente centralizado
-import { auth, googleProvider, firestore } from '@/firebase/client';
+import { useAuth, useFirestore, useGoogleProvider } from '@/firebase/provider';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 
 export function LoginModal() {
   const loginModal = useLoginModal();
   const { toast } = useToast();
+  
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const googleProvider = useGoogleProvider();
 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   
   async function call_login_google() {
-    if (!auth || !googleProvider) {
-      toast({ variant: 'destructive', title: "Error de configuración", description: "La autenticación no está disponible." });
+    if (!auth || !googleProvider || !firestore) {
+      toast({ variant: 'destructive', title: "Error de configuración", description: "La autenticación no está disponible en este momento." });
       return;
     }
     
@@ -39,7 +42,7 @@ export function LoginModal() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       
-      const userDocRef = doc(firestore!, 'users', user.uid);
+      const userDocRef = doc(firestore, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
