@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Globe, MessageSquare, ListChecks, BookOpen } from "lucide-react"
+import { Globe, MessageSquare, ListChecks, BookOpen, Gamepad2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -42,6 +42,11 @@ const menuItems = [
         href: "/incoterms",
         label: "¿Hay un Incoterm perfecto?",
         icon: IncotermsIcon,
+    },
+    {
+        href: "/game",
+        label: "¿Sabes o Estás Perdido?",
+        icon: Gamepad2,
     }
 ]
 
