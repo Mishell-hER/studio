@@ -4,7 +4,7 @@ import { OtrosPaisesGrid } from '@/app/continent/[slug]/_components/otros-paises
 import { logisticData } from '@/lib/data';
 import { continents } from '@/lib/continents';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, FileText, Calculator, Lightbulb, ListChecks, Route } from 'lucide-react';
+import { ArrowLeft, MapPin, FileText, Calculator, Lightbulb, ListChecks, Route, Gamepad2 } from 'lucide-react';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
@@ -112,4 +112,3 @@ export default function ContinentPage({
     </div>
   );
 }
-

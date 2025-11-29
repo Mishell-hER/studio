@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle, XCircle, Trophy, Zap, Clock, Star, TrendingUp } from 'lucide-react';
+import { CheckCircle, XCircle, Trophy, Clock, Star } from 'lucide-react';
 import { levels } from './levels';
 import { useLocalAuth } from '@/hooks/use-local-auth';
 import { Progress } from '@/components/ui/progress';
@@ -247,4 +247,3 @@ export function GameClient() {
     </div>
   );
 }
-

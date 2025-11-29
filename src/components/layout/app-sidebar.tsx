@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Globe, MessageSquare, ListChecks, BookOpen } from "lucide-react"
+import { Globe, MessageSquare, Gamepad2, BookOpen } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -33,9 +33,9 @@ const menuItems = [
         icon: MessageSquare,
     },
     {
-        href: "/suppliers",
+        href: "/game",
         label: "¿Sabes o Estás Perdido?",
-        icon: ListChecks,
+        icon: Gamepad2,
     },
     {
         href: "/docs-placeholder",
