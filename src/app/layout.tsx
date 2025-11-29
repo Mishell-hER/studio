@@ -12,6 +12,7 @@ import { AppSidebar } from '@/components/layout/app-sidebar';
 import { Sidebar } from '@/components/ui/sidebar';
 import { ModalProvider } from '@/providers/modal-provider';
 import { LocalAuthContext, type LocalUserProfile, type LocalAuthContextType } from '@/hooks/use-local-auth';
+import { FloatingAssistant } from '@/components/layout/floating-assistant';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -101,6 +102,7 @@ export default function RootLayout({
             </div>
           </div>
           <Toaster />
+          <FloatingAssistant />
         </LocalUserProvider>
       </body>
     </html>

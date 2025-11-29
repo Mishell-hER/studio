@@ -9,8 +9,9 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Factory, Home, Ship, Truck, User, Warehouse, XCircle } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const incotermsData = [
   { incoterm: 'EXW', responsabilidadVendedor: 'Poner mercancía a disposición en sus instalaciones.', transferenciaRiesgo: 'En las instalaciones del vendedor.', seguro: false, transporte: false, comentarios: 'Máxima responsabilidad para el comprador. Ideal si el comprador tiene logística propia.' },
@@ -21,6 +22,26 @@ const incotermsData = [
   { incoterm: 'DPU', responsabilidadVendedor: 'Entregar la mercancía y descargarla en el lugar de destino acordado.', transferenciaRiesgo: 'Una vez la mercancía es descargada en destino.', seguro: false, transporte: true, comentarios: 'Único Incoterm donde el vendedor es responsable de la descarga.' },
   { incoterm: 'DDP', responsabilidadVendedor: 'Asumir todos los costos y riesgos, incluyendo trámites y pago de impuestos de importación.', transferenciaRiesgo: 'En el lugar de destino, lista para la entrega.', seguro: false, transporte: true, comentarios: 'Máxima responsabilidad para el vendedor. Riesgoso si no se conocen bien las aduanas del país de destino.' },
 ];
+
+const processSteps = [
+    { name: 'Fábrica del Vendedor', icon: Factory },
+    { name: 'Transporte en Origen', icon: Truck },
+    { name: 'Puerto/Terminal de Origen', icon: Ship },
+    { name: 'Transporte Principal', icon: Truck },
+    { name: 'Puerto/Terminal de Destino', icon: Warehouse },
+    { name: 'Destino Final', icon: User },
+];
+
+const incotermResponsibilities: Record<string, number> = {
+    'EXW': 0, // Vendedor solo en su fábrica
+    'FCA': 1, // Vendedor hasta transporte en origen
+    'CPT': 3, // Vendedor paga transporte principal, riesgo transfiere antes
+    'CIP': 3, // Vendedor paga transporte principal + seguro, riesgo transfiere antes
+    'DAP': 4, // Vendedor hasta destino, sin descargar
+    'DPU': 5, // Vendedor hasta destino, descargado
+    'DDP': 5, // Vendedor todo hasta destino
+};
+
 
 export default function IncotermsPage() {
   return (
@@ -59,6 +80,44 @@ export default function IncotermsPage() {
               <li><strong className="text-primary">DDP (Delivered Duty Paid):</strong> El vendedor asume todos los costos y riesgos, incluyendo impuestos y derechos de importación, hasta entregar la mercancía lista para recibir.</li>
             </ul>
           </div>
+            
+        <div>
+            <h3 className="text-2xl font-semibold mb-6 text-center mt-8">Gráfico de Responsabilidades (Vendedor vs Comprador)</h3>
+            <div className="space-y-4">
+            {Object.entries(incotermResponsibilities).map(([incoterm, sellerResponsibilityEnd]) => (
+                <div key={incoterm} className="p-4 rounded-lg border bg-background/50">
+                    <h4 className="font-bold text-lg text-primary mb-3">{incoterm}</h4>
+                    <div className="relative w-full h-1 bg-muted rounded-full">
+                        <div className="flex justify-between absolute w-full -top-3">
+                            {processSteps.map((step, index) => (
+                                <div key={index} className="relative flex flex-col items-center">
+                                    <div className={cn("w-6 h-6 rounded-full flex items-center justify-center", index <= sellerResponsibilityEnd ? "bg-primary" : "bg-secondary")}>
+                                        <step.icon className="w-4 h-4 text-primary-foreground" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex justify-between mt-8 text-xs text-center">
+                        {processSteps.map((step, index) => (
+                            <span key={index} className="w-1/6">{step.name}</span>
+                        ))}
+                    </div>
+                     <div className="flex mt-4 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full bg-primary"></div>
+                            <span>Responsabilidad del Vendedor</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full bg-secondary"></div>
+                            <span>Responsabilidad del Comprador</span>
+                        </div>
+                    </div>
+                </div>
+            ))}
+            </div>
+        </div>
+
 
           <div>
             <h3 className="text-2xl font-semibold mb-4 text-center mt-8">Tabla Comparativa de Incoterms Terrestres</h3>
