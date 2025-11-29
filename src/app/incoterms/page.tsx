@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, XCircle, Package, Truck, Ship, Warehouse, User } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const incotermsData = [
@@ -21,26 +21,6 @@ const incotermsData = [
   { incoterm: 'DPU', responsabilidadVendedor: 'Entregar la mercancía y descargarla en el lugar de destino acordado.', transferenciaRiesgo: 'Una vez la mercancía es descargada en destino.', seguro: false, transporte: true, comentarios: 'Único Incoterm donde el vendedor es responsable de la descarga.' },
   { incoterm: 'DDP', responsabilidadVendedor: 'Asumir todos los costos y riesgos, incluyendo trámites y pago de impuestos de importación.', transferenciaRiesgo: 'En el lugar de destino, lista para la entrega.', seguro: false, transporte: true, comentarios: 'Máxima responsabilidad para el vendedor. Riesgoso si no se conocen bien las aduanas del país de destino.' },
 ];
-
-const incotermsResponsibility = [
-    { name: 'EXW', seller: 1, buyer: 4, riskTransfer: 1 },
-    { name: 'FCA', seller: 2, buyer: 3, riskTransfer: 2 },
-    { name: 'CPT', seller: 3, buyer: 2, riskTransfer: 2 },
-    { name: 'CIP', seller: 3, buyer: 2, riskTransfer: 2 },
-    { name: 'DAP', seller: 4, buyer: 1, riskTransfer: 4 },
-    { name: 'DPU', seller: 4, buyer: 1, riskTransfer: 4 },
-    { name: 'DDP', seller: 5, buyer: 0, riskTransfer: 5 },
-]
-
-const processSteps = [
-    { name: 'Fábrica', icon: Package },
-    { name: 'Transporte en Origen', icon: Truck },
-    { name: 'Puerto/Terminal de Origen', icon: Ship },
-    { name: 'Transporte Principal', icon: Truck },
-    { name: 'Puerto/Terminal de Destino', icon: Warehouse },
-    { name: 'Destino Final', icon: User },
-];
-
 
 export default function IncotermsPage() {
   return (
@@ -79,48 +59,6 @@ export default function IncotermsPage() {
               <li><strong className="text-primary">DDP (Delivered Duty Paid):</strong> El vendedor asume todos los costos y riesgos, incluyendo impuestos y derechos de importación, hasta entregar la mercancía lista para recibir.</li>
             </ul>
           </div>
-          
-           <div>
-                <h3 className="text-2xl font-semibold mb-4 text-center mt-8">Gráfica de Responsabilidades</h3>
-                <div className="space-y-6">
-                    {incotermsResponsibility.map((incoterm) => (
-                        <div key={incoterm.name}>
-                            <h4 className="text-lg font-bold text-primary mb-2">{incoterm.name}</h4>
-                            <div className="flex rounded-lg overflow-hidden border">
-                                <div className="p-2 bg-blue-600 text-white flex-shrink-0 flex items-center justify-center">
-                                    <span className="font-bold">Vendedor</span>
-                                </div>
-                                <div className="flex-grow grid grid-cols-5 bg-muted/20">
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <div key={i} className={`h-8 border-r border-background/50 relative
-                                            ${i < incoterm.seller ? 'bg-blue-500/80' : ''}
-                                            ${i < incoterm.seller && i + 1 === incoterm.riskTransfer ? 'bg-gradient-to-r from-blue-500/80 to-red-500/80' : ''}
-                                            ${i >= incoterm.seller && i === incoterm.riskTransfer-1 ? 'bg-gradient-to-r from-blue-500/80 to-red-500/80' : ''}
-                                            ${i >= incoterm.seller ? 'bg-red-500/80' : ''}
-                                        `}>
-                                            {i + 1 === incoterm.riskTransfer && (
-                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-center">
-                                                    <div className="font-bold text-xs text-yellow-400">▲</div>
-                                                    <div className="text-xs font-semibold text-yellow-400 -mt-1">Riesgo</div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="p-2 bg-red-600 text-white flex-shrink-0 flex items-center justify-center">
-                                    <span className="font-bold">Comprador</span>
-                                 </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                 <div className="mt-4 text-sm text-muted-foreground">
-                    <p><span className="inline-block w-4 h-4 bg-blue-500/80 rounded-sm mr-2"></span>Responsabilidad del Vendedor</p>
-                    <p><span className="inline-block w-4 h-4 bg-red-500/80 rounded-sm mr-2"></span>Responsabilidad del Comprador</p>
-                    <p><span className="font-bold text-yellow-400 mr-1">▲</span>Punto de transferencia de riesgo</p>
-                </div>
-            </div>
-
 
           <div>
             <h3 className="text-2xl font-semibold mb-4 text-center mt-8">Tabla Comparativa de Incoterms Terrestres</h3>

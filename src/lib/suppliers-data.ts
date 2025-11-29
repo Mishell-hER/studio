@@ -784,7 +784,7 @@ export const suppliersData: SupplierData[] = [
     strengths: '✓ Estabilidad financiera\n✓ Calidad premium\n✓ Hub financiero',
     weaknesses: '✗ Producción mínima\n✗ Costos altísimos\n✗ Mercado micro',
     suppliers: 'Luxlait y Biogros son prominentes en productos orgánicos.',
-    contractType: 'DDP contratos especializados',
+    contractType: 'DDP contratos especializados premium',
     quality: 'ISO 22000Lëtzebuerger ProduitEU Organic',
     arbitration:
       'Luxembourg Chamber of Commerce Arbitration - Enfoque financiero internacional',
