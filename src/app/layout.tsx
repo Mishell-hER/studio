@@ -13,6 +13,7 @@ import { Sidebar } from '@/components/ui/sidebar';
 import { ModalProvider } from '@/providers/modal-provider';
 import { LocalAuthContext, type LocalUserProfile, type LocalAuthContextType } from '@/hooks/use-local-auth';
 import { FloatingAssistant } from '@/components/layout/floating-assistant';
+import { useWelcomeModal } from '@/hooks/use-welcome-modal';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,25 +21,32 @@ const inter = Inter({
 });
 
 const LOCAL_STORAGE_KEY = 'localUserAuth';
+const HAS_VISITED_KEY = 'hasVisitedLogisticX';
 
 function LocalUserProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<LocalUserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const welcomeModal = useWelcomeModal();
 
     useEffect(() => {
         const storedUser = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         }
+
+        const hasVisited = localStorage.getItem(HAS_VISITED_KEY);
+        if (!hasVisited) {
+            welcomeModal.onOpen();
+            localStorage.setItem(HAS_VISITED_KEY, 'true');
+        }
+
         setIsLoading(false);
-    }, []);
+    }, [welcomeModal]);
 
     const loginLocal = (nombreElegido: string) => {
-        // Primero, verifica si ya existe un usuario para evitar crear uno nuevo
         const storedUser = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedUser) {
             const existingUser = JSON.parse(storedUser);
-            // Si el nombre es diferente, actualízalo
             if (existingUser.nombre !== nombreElegido) {
                 existingUser.nombre = nombreElegido;
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingUser));
@@ -60,7 +68,6 @@ function LocalUserProvider({ children }: { children: React.ReactNode }) {
 
     const logoutLocal = () => {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
-        // También borramos el progreso del juego al cerrar sesión
         Object.keys(localStorage).forEach(key => {
             if (key.startsWith('localGameProgress_')) {
                 localStorage.removeItem(key);

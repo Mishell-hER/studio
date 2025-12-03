@@ -3,11 +3,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Globe, MessageSquare, Gamepad2 } from "lucide-react"
+import { Globe, MessageSquare, Gamepad2, Info } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
-  Sidebar,
   SidebarBody,
   SidebarClose,
   SidebarContent,
@@ -21,6 +20,7 @@ import {
 import { Button } from "../ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { IncotermsIcon } from "../icons/IncotermsIcon"
+import { Separator } from "../ui/separator"
 
 const menuItems = [
     {
@@ -85,6 +85,19 @@ export function AppSidebar() {
             ))}
             </SidebarMenu>
         </SidebarBody>
+        <div className={cn("px-2 py-4", state === 'collapsed' && 'px-3')}>
+            <Separator className="mb-4" />
+             <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="w-full">
+                <SidebarMenuButton
+                    icon={<Info className="text-yellow-400" />}
+                    tooltip={{
+                        children: "Instructivo",
+                    }}
+                >
+                    <span className="text-yellow-400 font-semibold">Instructivo</span>
+                </SidebarMenuButton>
+            </a>
+        </div>
       </SidebarContent>
        {!isMobile && (
         <SidebarTrigger asChild>
