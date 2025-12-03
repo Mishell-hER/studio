@@ -103,7 +103,7 @@ export default function CountryPage({
               </Link>
             </Button>
             <Button asChild variant="outline">
-               <a href="https://docs.google.com/spreadsheets/d/1i3TokgiBS5yohfnpDl5w229np4c7QxKVyYxGr3l2z8k/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+               <a href="https://docs.google.com/spreadsheets/d/1eeo7flzH7kRvFfwnLXQ-6eBB-yCf8S1j/edit?gid=1383111196#gid=1383111196" target="_blank" rel="noopener noreferrer">
                 <Calculator className="mr-2" />
                 Calculadora de Costos
               </a>
