@@ -21,6 +21,7 @@ import { Button } from "../ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { IncotermsIcon } from "../icons/IncotermsIcon"
 import { Separator } from "../ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 
 const menuItems = [
     {
@@ -87,16 +88,21 @@ export function AppSidebar() {
         </SidebarBody>
         <div className={cn("px-2 py-4", state === 'collapsed' && 'px-3')}>
             <Separator className="mb-4" />
-             <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="w-full">
-                <SidebarMenuButton
-                    icon={<Info className="text-yellow-400" />}
-                    tooltip={{
-                        children: "Instructivo",
-                    }}
-                >
-                    <span className="text-yellow-400 font-semibold">Instructivo</span>
-                </SidebarMenuButton>
-            </a>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button asChild variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer">
+                            <Info className="mr-2 h-4 w-4" />
+                            {state === 'expanded' && <span>Instructivo</span>}
+                        </a>
+                    </Button>
+                </TooltipTrigger>
+                {state === 'collapsed' && (
+                    <TooltipContent>
+                        Instructivo
+                    </TooltipContent>
+                )}
+            </Tooltip>
         </div>
       </SidebarContent>
        {!isMobile && (
