@@ -34,12 +34,10 @@ function LocalUserProvider({ children }: { children: React.ReactNode }) {
             setUser(JSON.parse(storedUser));
         }
 
-        const hasVisited = localStorage.getItem(HAS_VISITED_KEY);
-        if (!hasVisited) {
-            welcomeModal.onOpen();
-            localStorage.setItem(HAS_VISITED_KEY, 'true');
-        }
-
+        // Forzamos la apertura del modal para simular la primera visita
+        welcomeModal.onOpen();
+        localStorage.setItem(HAS_VISITED_KEY, 'true');
+        
         setIsLoading(false);
     }, [welcomeModal]);
 
