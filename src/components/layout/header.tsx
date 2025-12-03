@@ -51,7 +51,7 @@ export function Header() {
        
         <div className="flex flex-1 items-center justify-end space-x-4">
            <Button asChild variant="outline">
-              <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer">
+              <a href="https://drive.google.com/uc?export=download&id=1girmk0333W3jiWaYrIFteJYwKKYHOzRt" target="_blank" rel="noopener noreferrer">
                 <Info className="mr-2 h-4 w-4" />
                 Instructivo
               </a>

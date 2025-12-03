@@ -22,8 +22,8 @@ export function WelcomeModal() {
   };
 
   const handleViewInstructions = () => {
-    // Redirigir a la URL del instructivo. Por ahora, un placeholder.
-    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+    // Redirigir a la URL del instructivo.
+    window.open('https://drive.google.com/uc?export=download&id=1girmk0333W3jiWaYrIFteJYwKKYHOzRt', '_blank');
     onClose();
   };
 
