@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Globe, LogOut, Star } from 'lucide-react';
+import { Globe, LogOut, Star, Info } from 'lucide-react';
 import { useLocalAuth } from '@/hooks/use-local-auth';
 import { useLoginModal } from '@/hooks/use-login-modal';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,12 @@ export function Header() {
         </div>
        
         <div className="flex flex-1 items-center justify-end space-x-4">
+           <Button asChild variant="outline">
+              <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer">
+                <Info className="mr-2 h-4 w-4" />
+                Instructivo
+              </a>
+            </Button>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
